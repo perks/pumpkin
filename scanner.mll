@@ -10,7 +10,7 @@ rule token = parse
     [' ' '\r'] { token lexbuf }
     | "//" { single_comment lexbuf }
     | "/*" { block_comment lexbuf }
-    | ['\r' '\n']+ { incr_linenum lexbuf; indent lexbuf }
+    | ['\r' '\n']+ { indent lexbuf } (* check line numbers eventually *)
     | [' ' 't'] { token lexbuf }
     | '(' { LPAREN }
     | ')' { RPAREN }
