@@ -6,7 +6,7 @@ A patchwork functional programming language
 
 Getting Started
 ======
-1) Make sure you are using git pull --rebase to pull changes, fixing merge
+1) Make sure you are using `git pull --rebase` to pull changes, fixing merge
 conflicts before you push. To set this up automatically, do ```git config
 branch.autosetuprebase always```
 

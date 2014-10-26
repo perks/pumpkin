@@ -33,6 +33,7 @@ rule token = parse
     | '-' { MINUS }
     | '*' { TIMES }
     | '/' { DIVIDE }
+    | '%' { MODULO }
     
     | "is" | "=="  { EQ }
     | "and" | "&&" { AND }
