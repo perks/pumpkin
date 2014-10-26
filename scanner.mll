@@ -3,7 +3,6 @@
     open Utils
 
     let indent_stack = Stack.create()
-
 }
 
 rule token = parse
@@ -23,12 +22,12 @@ rule token = parse
     | "$"(['0'-'9']+ as lxm) { TUPALACC(lxm) }
     | "=>"                   { DEFARROW }
     | "->"                   { TYPEARROW }
+    | '|'                    { MATCHOR }
+
     | "|>"                   { FPIPE }
     | "<|"                   { BPIPE }
     | ">>"                   { COMPOSE }
     | "::"                   { CONS }
-    | '|'                    { MATCHOR }
-
     | '+' { PLUS }
     | '-' { MINUS }
     | '*' { TIMES }
@@ -36,6 +35,7 @@ rule token = parse
     | '%' { MODULO }
     
     | "is" | "=="  { EQ }
+    | "!=" { NEQ }
     | "and" | "&&" { AND }
     | "or" | "||"  { OR }
     | "not" |'!'   { NOT }
@@ -61,6 +61,7 @@ rule token = parse
     | "if"      { IF }
     | "else"    { ELSE }
     | "match"   { MATCH }
+    | "as" { AS }
 
     | "asInt" { ASINT }
     | "asFloat" { ASFLOAT }
@@ -69,10 +70,10 @@ rule token = parse
     | ['0'-'9']+'.'['0'-'9']+ as lxm       { FLOAT_LIT(float_of_string lxm) }
     | ['e' 'E']['+' '-']?['0'-'9']+ as lxm { EXP_LIT(int_of_string lxm) }
     | "\""([^'"']* as lxm)"\""             { STR_LIT(lxm) }
+    | ['a'-'z' 'A'-'Z']['_' 'a'-'z' 'A'-'Z' '0'-'9']+ as lxm { ID(lxm) }
     
     | eof { EOF }
     | _ as char { raise (Failure("illegal character " ^ Char.escaped char)) }
-
 
 and single_comment = parse
     '\n' { token lexbuf }
