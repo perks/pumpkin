@@ -7,11 +7,11 @@
 }
 
 rule token = parse
-    [' ' '\r'] { token lexbuf }
-    | "//" { single_comment lexbuf }
-    | "/*" { block_comment lexbuf }
+    [' ' '\r']     { token lexbuf }
+    | "//"         { single_comment lexbuf }
+    | "/*"         { block_comment lexbuf }
     | ['\r' '\n']+ { indent lexbuf } (* check line numbers eventually *)
-    | [' ' 't'] { token lexbuf }
+    | [' ' 't']    { token lexbuf }
 
     | '(' { LPAREN }
     | ')' { RPAREN }
@@ -20,54 +20,54 @@ rule token = parse
     | ',' { COMMA }
     | ':' { COLON }
 
-    | "$"(['0'-'9']+ as lxm) { TUPALACC(lxm) } 
-    | "=>" { DEFARROW }
-    | "->" { TYPEARROW }
-    | "|>" { FPIPE }
-    | "<|" { BPIPE }
-    | ">>" { COMPOSE }
-    | "::" { CONS }
-    | '|' { MATCHOR }
+    | "$"(['0'-'9']+ as lxm) { TUPALACC(lxm) }
+    | "=>"                   { DEFARROW }
+    | "->"                   { TYPEARROW }
+    | "|>"                   { FPIPE }
+    | "<|"                   { BPIPE }
+    | ">>"                   { COMPOSE }
+    | "::"                   { CONS }
+    | '|'                    { MATCHOR }
 
     | '+' { PLUS }
     | '-' { MINUS }
     | '*' { TIMES }
     | '/' { DIVIDE }
     
-    | "is" | "==" { EQ }
+    | "is" | "=="  { EQ }
     | "and" | "&&" { AND }
-    | "or" | "||" { OR }
-    | "not" |'!' { NOT }
-    | '>' { GT }
-    | '<' { LT }
-    | ">=" { GTE }
-    | "<=" { LTE }
+    | "or" | "||"  { OR }
+    | "not" |'!'   { NOT }
+    | '>'          { GT }
+    | '<'          { LT }
+    | ">="         { GTE }
+    | "<="         { LTE }
     
-    | "Int" { INT }
-    | "Float" { FLOAT }
-    | "String" { STRING }
+    | "Int"     { INT }
+    | "Float"   { FLOAT }
+    | "String"  { STRING }
     | "Boolean" { BOOLEAN }
-    | "Unit" { UNIT }
-    | "Tupal" { TUPAL }
-    | "List" { LIST }
-    | "Map" { MAP }
+    | "Unit"    { UNIT }
+    | "Tupal"   { TUPAL }
+    | "List"    { LIST }
+    | "Map"     { MAP }
     
-    | "val" { VAL }
-    | "var" { VAR }
-    | "def" { DEF }
-    | "type" { TYPE }
+    | "val"     { VAL }
+    | "var"     { VAR }
+    | "def"     { DEF }
+    | "type"    { TYPE }
     | "extends" { EXTENDS }
-    | "if" { IF }
-    | "else" { ELSE }
-    | "match" { MATCH }
+    | "if"      { IF }
+    | "else"    { ELSE }
+    | "match"   { MATCH }
 
     | "asInt" { ASINT }
     | "asFloat" { ASFLOAT }
     
-    | ['0'-'9']+ as lxm { INT_LIT(int_of_string lxm) }
-    | ['0'-'9']+'.'['0'-'9']+ as lxm { FLOAT_LIT(float_of_string lxm) }
+    | ['0'-'9']+ as lxm                    { INT_LIT(int_of_string lxm) }
+    | ['0'-'9']+'.'['0'-'9']+ as lxm       { FLOAT_LIT(float_of_string lxm) }
     | ['e' 'E']['+' '-']?['0'-'9']+ as lxm { EXP_LIT(int_of_string lxm) }
-    | "\""([^'"']* as lxm)"\"" { STR_LIT(lxm) }
+    | "\""([^'"']* as lxm)"\""             { STR_LIT(lxm) }
     
     | eof { EOF }
     | _ as char { raise (Failure("illegal character " ^ Char.escaped char)) }
