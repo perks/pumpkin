@@ -60,6 +60,7 @@ rule token = parse
     | ['0'-'9']+'.'['0'-'9']+ as lxm { FLOAT_LIT(float_of_string lxm) }
     | ['e' 'E']['+' '-']?['0'-'9']+ as lxm { EXP_LIT(int_of_string lxm) }
     | "\""([^'"']* as lxm)"\"" { STR_LIT(lxm) }
+    | eof { EOF }
     | _ as char { raise (Failure("illegal character " ^ Char.escaped char)) }
 
 
