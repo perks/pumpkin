@@ -71,7 +71,6 @@ rule token = parse
     | ['e' 'E']['+' '-']?['0'-'9']+ as lxm { EXP_LIT(int_of_string lxm) }
     | "\""([^'"']* as lxm)"\""             { STR_LIT(lxm) }
     | ['a'-'z' 'A'-'Z']['_' 'a'-'z' 'A'-'Z' '0'-'9']+ as lxm { ID(lxm) }
-    
     | eof { EOF }
     | _ as char { raise (Failure("illegal character " ^ Char.escaped char)) }
 
