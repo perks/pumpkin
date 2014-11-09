@@ -92,5 +92,6 @@ and indent = parse
                         else inc
                     in helper 0
                 in 
-                DEINDENT(decrement)
+                if decrement == -1 then raise (Failure("indent level error"))
+                else DEINDENT(decrement)
         }
