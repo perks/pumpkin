@@ -52,17 +52,24 @@ rule token = parse
     | "!="         { NEQ }
     | '>'          { GT }
     | '<'          { LT }
-    | ">="         { GEQ }
-    | "<="         { LEQ }
+    | ">="         { GTE }
+    | "<="         { LTE }
 
-    | "if"   { IF}
-    | "else" { ELSE}
+    | "if"    { IF }
+    | "else"  { ELSE }
+    | "match" { MATCH }
+    | "as"    { AS }
 
-    | "val "id as lxm { ID(lxm) }
-    | num             { NUM(num) }
-    | string          { STRING(lxm)}
-    | eof             { EOF }
-    | _ as char       { raise (Failure("illegal character " ^ Char.escaped char)) }
+    | "False" as lxm { BOOL(lxm) }
+    | "True" as lxm  { BOOL(lxm) }
+
+    | "val"         { VAL }
+    | "def"         { DEF }
+    | id as lxm     { ID(lxm) }
+    | num as lxm    { NUM(lxm) }
+    | string as lxm { STRING(lxm)}
+    | eof           { EOF }
+    | _ as char     { raise (Failure("illegal character " ^ Char.escaped char)) }
 
 and single_comment = parse
     '\n' { token lexbuf }

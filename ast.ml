@@ -1,4 +1,4 @@
-type op = 
-    Add | Sub | Mult | Div 
-    | Eq | Neq | Lt | Lte | Gt | Gte | And | Or | Not 
-    | FPipe | BPipe | Compose | Cons 
+type op = Plus | Minus | Times | Divide | Modulo
+          | And | Or | Not | Lt | Lte | Gt | Gte
+          | FPipe | BPipe | RCompose | LCompose | Cons
+
