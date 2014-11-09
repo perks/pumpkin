@@ -31,31 +31,64 @@
 %%
 program: 
 	UNIT
-   | body
-   | block TERMINATOR
-
-body:
-	 line
-	|body TERMINATOR line
-	|body TERMINATOR
+   | block
+   | block block
 
 block:
-	INDENT body DEDENT
-	|body TERMINATOR line
-	|body
+	INDENT body return DEDENT
+	| INDENT func_def body return DEDENT
+	| IF LPAREN boolexpr RPAREN COLON INDENT line DEDENT
+	| IF LPAREN boolexpr RPAREN COLON INDENT body DEDENT ELSE COLON INDENT body DEDENT
+	| body
+
+body:
+	line
+	| line line
 
 line:
-	|expr
-	|statement
+	expr
+	| statement
 
 statement:
-	return
-	|comment
-	|terminal_statement
+	comment
+	| terminal_statement
+	| VAL ID ASSIGN expr 
 
 expr:
-	func
+	LBRACE expr RBRACE
+	| LPAREN expr RBRACE
+	| expr PLUS   expr 
+	| expr MINUS  expr
+	| expr TIMES  expr 
+	| expr DIVIDE expr 
+	| expr MODULO expr 
+	| expr EQ     expr
+	| expr NEQ    expr
+	| expr GT     expr
+	| expr LT     expr
+	| expr LTE    expr
+	| expr GTE    expr
+	| boolexpr
+	| lit
+	
+boolexpr:
+	boolexpr AND  boolexpr
+	| boolexpr OR boolexpr
+	| NOT boolexpr
+	| BOOL
 
-return:
+lit: 
+	NUM
+	| STRING
 
+return: 
+	expr
+	| UNIT
 
+func_def: 
+	DEF ID COLON TYPE DEFARROW
+	| DEF ID LPAREN params RPAREN COLON TYPE DEFARROW 
+
+params:
+	ID COLON TYPE
+	| params COMMA params
