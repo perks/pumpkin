@@ -36,7 +36,7 @@ rule token = parse
     | "|>"                   { FPIPE }
     | "<|"                   { BPIPE }
     | ">>"                   { RCOMPOSE }
-    | "<<"                   { FCOMPOSE }
+    | "<<"                   { LCOMPOSE }
     | "::"                   { CONS }
 
     | '+' { PLUS }
