@@ -21,65 +21,48 @@ rule token = parse
 
     | '(' { LPAREN }
     | ')' { RPAREN }
-    | '[' { LBRACE }
-    | ']' { RBRACE }
+    | '[' { LBRACK }
+    | ']' { RBRACK }
     | ',' { COMMA }
     | ':' { COLON }
+    | '=' { ASSIGN }
+    
 
     | "$"(['0'-'9']+ as lxm) { TUPALACC(lxm) }
     | "=>"                   { DEFARROW }
     | "->"                   { TYPEARROW }
-    | '|'                    { MATCHOR }
+    | '|'                    { GUARD }
 
     | "|>"                   { FPIPE }
     | "<|"                   { BPIPE }
-    | ">>"                   { COMPOSE }
+    | ">>"                   { RCOMPOSE }
+    | "<<"                   { FCOMPOSE }
     | "::"                   { CONS }
+
     | '+' { PLUS }
     | '-' { MINUS }
     | '*' { TIMES }
     | '/' { DIVIDE }
     | '%' { MODULO }
     
-    | "is" | "=="  { EQ }
-    | "!=" { NEQ }
+    | "is"  | "==" { EQ }
     | "and" | "&&" { AND }
-    | "or" | "||"  { OR }
-    | "not" |'!'   { NOT }
+    | "or"  | "||" { OR }
+    | "not" | '!'  { NOT }
+    | "!="         { NEQ }
     | '>'          { GT }
     | '<'          { LT }
-    | ">="         { GTE }
-    | "<="         { LTE }
-    
-    | "Int"     { INT }
-    | "Float"   { FLOAT }
-    | "String"  { STRING }
-    | "Boolean" { BOOLEAN }
-    | "Unit"    { UNIT }
-    | "Tupal"   { TUPAL }
-    | "List"    { LIST }
-    | "Map"     { MAP }
-    
-    | "val"     { VAL }
-    | "var"     { VAR }
-    | "def"     { DEF }
-    | "type"    { TYPE }
-    | "extends" { EXTENDS }
-    | "if"      { IF }
-    | "else"    { ELSE }
-    | "match"   { MATCH }
-    | "as" { AS }
+    | ">="         { GEQ }
+    | "<="         { LEQ }
 
-    | "asInt" { ASINT }
-    | "asFloat" { ASFLOAT }
-    
-    | ['0'-'9']+ as lxm                    { INT_LIT(int_of_string lxm) }
-    | ['0'-'9']+'.'['0'-'9']+ as lxm       { FLOAT_LIT(float_of_string lxm) }
-    | ['e' 'E']['+' '-']?['0'-'9']+ as lxm { EXP_LIT(int_of_string lxm) }
-    | "\""([^'"']* as lxm)"\""             { STR_LIT(lxm) }
-    | ['a'-'z' 'A'-'Z']['_' 'a'-'z' 'A'-'Z' '0'-'9']+ as lxm { ID(lxm) }
-    | eof { EOF }
-    | _ as char { raise (Failure("illegal character " ^ Char.escaped char)) }
+    | "if"   { IF}
+    | "else" { ELSE}
+
+    | "val "id as lxm { ID(lxm) }
+    | num             { NUM(num) }
+    | string          { STRING(lxm)}
+    | eof             { EOF }
+    | _ as char       { raise (Failure("illegal character " ^ Char.escaped char)) }
 
 and single_comment = parse
     '\n' { token lexbuf }
