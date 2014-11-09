@@ -9,7 +9,7 @@ let alpha = ['a'-'z' 'A'-'Z']
 let digit = ['0'-'9']
 let id  = alpha (alpha | digit | '_')*
 let num = ['-' '+']? digit* ['.']? digit+ (['e' 'E']['-' '+']? digit+)?
-let string = '"' [^ '"' '\']*('\' '.' [^ '"' '\']*)* '"'
+let string = '"' [^ '"' '\\']*('\\' '.' [^ '"' '\\']*)* '"'
 let whitespace = [' ' '\t']*
 
 rule token = parse
