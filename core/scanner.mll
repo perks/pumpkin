@@ -8,37 +8,20 @@
 let alpha = ['a'-'z' 'A'-'Z']
 let digit = ['0'-'9']
 let id  = alpha (alpha | digit | '_')*
-let num = ['-' '+']? digit* ['.']? digit+ (['e' 'E']['-' '+']? digit+)?
-let string = '"' [^ '"' '\\']*('\\' '.' [^ '"' '\\']*)* '"'
-let whitespace = [' ' '\t']*
+let num = ['-' '+']? digit* (['.'] digit+)?
 
 rule token = parse
-    [' ' '\r']     { token lexbuf }
-    | "//"         { single_comment lexbuf }
+    "//"         { single_comment lexbuf }
     | "/*"         { block_comment lexbuf }
     | ['\r' '\n']+ { indent lexbuf } (* check line numbers eventually *)
-    | [' ' 't']    { token lexbuf }
-
+    | [' ' '\t']    { token lexbuf }
+    
     | '(' { LPAREN }
     | ')' { RPAREN }
-    | '[' { LBRACK }
-    | ']' { RBRACK }
-    | ',' { COMMA }
+    
     | ':' { COLON }
     | '=' { ASSIGN }
     
-
-    | "$"(['0'-'9']+ as lxm) { TUPALACC(lxm) }
-    | "=>"                   { DEFARROW }
-    | "->"                   { TYPEARROW }
-    | '|'                    { GUARD }
-
-    | "|>"                   { FPIPE }
-    | "<|"                   { BPIPE }
-    | ">>"                   { RCOMPOSE }
-    | "<<"                   { LCOMPOSE }
-    | "::"                   { CONS }
-
     | '+' { PLUS }
     | '-' { MINUS }
     | '*' { TIMES }
@@ -54,20 +37,15 @@ rule token = parse
     | '<'          { LT }
     | ">="         { GTE }
     | "<="         { LTE }
-
-    | "if"    { IF }
-    | "else"  { ELSE }
-    | "match" { MATCH }
-    | "as"    { AS }
-
-    | "False" as lxm { BOOL(lxm) }
-    | "True" as lxm  { BOOL(lxm) }
-
+    
     | "val"         { VAL }
-    | "def"         { DEF }
+    
+    | "Num"     { NUM }
+    
     | id as lxm     { ID(lxm) }
-    | num as lxm    { NUM(lxm) }
-    | string as lxm { STRING(lxm)}
+    
+    | num as lxm    { NUM_LITERAL(lxm) }
+    
     | eof           { EOF }
     | _ as char     { raise (Failure("illegal character " ^ Char.escaped char)) }
 
@@ -101,4 +79,4 @@ and indent = parse
                 in 
                 if decrement == -1 then raise (Failure("indent level error"))
                 else DEINDENT(decrement)
-        }
+            }
