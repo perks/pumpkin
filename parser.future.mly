@@ -52,11 +52,10 @@ line:
 statement:
 	comment
 	| terminal_statement
-	| VAL ID ASSIGN expr
+	| VAL ID COLON TYPE ASSIGN expr
 
 expr:
 	LBRACE expr RBRACE
-	| LPAREN expr RBRACE
 	| expr PLUS   expr
 	| expr MINUS  expr
 	| expr TIMES  expr
@@ -68,6 +67,7 @@ expr:
 	| expr LT     expr
 	| expr LTE    expr
 	| expr GTE    expr
+	| TUPALACC
 	| boolexpr
 	| lit
 
