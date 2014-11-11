@@ -1,4 +1,4 @@
-{ 
+{
     open Parser
     open Utils
 
@@ -15,19 +15,19 @@ rule token = parse
     | "/*"         { block_comment lexbuf }
     | ['\r' '\n']+ { indent lexbuf } (* check line numbers eventually *)
     | [' ' '\t']    { token lexbuf }
-    
+
     | '(' { LPAREN }
     | ')' { RPAREN }
-    
+
     | ':' { COLON }
     | '=' { ASSIGN }
-    
+
     | '+' { PLUS }
     | '-' { MINUS }
     | '*' { TIMES }
     | '/' { DIVIDE }
     | '%' { MODULO }
-    
+
     | "is"  | "==" { EQ }
     | "and" | "&&" { AND }
     | "or"  | "||" { OR }
@@ -37,15 +37,15 @@ rule token = parse
     | '<'          { LT }
     | ">="         { GTE }
     | "<="         { LTE }
-    
+
     | "val"         { VAL }
-    
+
     | "Num"     { NUM }
-    
+
     | id as lxm     { ID(lxm) }
-    
+
     | num as lxm    { NUM_LITERAL(lxm) }
-    
+
     | eof           { EOF }
     | _ as char     { raise (Failure("illegal character " ^ Char.escaped char)) }
 
@@ -70,13 +70,13 @@ and indent = parse
             else
                 let decrement =
                     let rec helper inc =
-                        if (Stack.top indent_stack) > len then 
+                        if (Stack.top indent_stack) > len then
                             Stack.pop indent_stack;
                             helper (inc + 1)
                         else if (Stack.top indent_stack) < len then -1
                         else inc
                     in helper 0
-                in 
+                in
                 if decrement == -1 then raise (Failure("indent level error"))
                 else DEINDENT(decrement)
             }
