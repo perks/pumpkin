@@ -3,12 +3,24 @@ pumpkin
 
 A patchwork functional programming language
 
-
-Getting Started
+Git Flow
 ======
 1) Make sure you are using `git pull --rebase` to pull changes, fixing merge
 conflicts before you push. To set this up automatically, do ```git config
 branch.autosetuprebase always```
 
 2) No branch/pull requests, since we are doing rebase on master, master should
-always be up to date and free of merge conflits 
+always be up to date and free of merge conflits
+
+Tasks
+======
+
+1. Numerical expression/Unit []
+2. Scope []
+3. Booleans []
+4. Strings/Char []
+5. Lists/Maps/Tupals []
+6. Algebraic Data Types []
+7. Simple Functions: declaration, calling, simple arguments []
+8. Advanced Functions: composition, piping, first class functions, recursion []
+9. Error Handeling []
