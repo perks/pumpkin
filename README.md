@@ -16,11 +16,13 @@ Tasks
 ======
 
 1. Numerical expression/Unit []
-2. Scope []
+2. Scope/Line Breaks []
 3. Booleans []
 4. Strings/Char []
 5. Lists/Maps/Tupals []
 6. Algebraic Data Types []
-7. Simple Functions: declaration, calling, simple arguments []
-8. Advanced Functions: composition, piping, first class functions, recursion []
-9. Error Handeling []
+7. Type Checking/Inference
+8. Simple Functions: declaration, calling, simple arguments []
+9. Advanced Functions: composition, piping, first class functions, recursion []
+10. Error Handeling []
+11. Importation []
