@@ -5,9 +5,8 @@ type operator =
   
 
 type expression = 
-    Numliteral of string
+    Num_Literal of string
   | Id of string
   | Assign of string * expression
   | Binop of expression * operator * expression
 
-  
