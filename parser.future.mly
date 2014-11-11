@@ -8,7 +8,7 @@
 %token IF ELSE MATCH AS BOOL
 %token VAL DEF
 %token <float>  NUM
-%token <string> STRING 
+%token <string> STRING
 %token <string> ID
 %token EOF
 
@@ -29,7 +29,7 @@
 %type < Ast.program> program
 
 %%
-program: 
+program:
 	UNIT
    | block
    | block block
@@ -52,16 +52,16 @@ line:
 statement:
 	comment
 	| terminal_statement
-	| VAL ID ASSIGN expr 
+	| VAL ID ASSIGN expr
 
 expr:
 	LBRACE expr RBRACE
 	| LPAREN expr RBRACE
-	| expr PLUS   expr 
+	| expr PLUS   expr
 	| expr MINUS  expr
-	| expr TIMES  expr 
-	| expr DIVIDE expr 
-	| expr MODULO expr 
+	| expr TIMES  expr
+	| expr DIVIDE expr
+	| expr MODULO expr
 	| expr EQ     expr
 	| expr NEQ    expr
 	| expr GT     expr
@@ -70,24 +70,24 @@ expr:
 	| expr GTE    expr
 	| boolexpr
 	| lit
-	
+
 boolexpr:
 	boolexpr AND  boolexpr
 	| boolexpr OR boolexpr
 	| NOT boolexpr
 	| BOOL
 
-lit: 
+lit:
 	NUM
 	| STRING
 
-return: 
+return:
 	expr
 	| UNIT
 
-func_def: 
+func_def:
 	DEF ID COLON TYPE DEFARROW
-	| DEF ID LPAREN params RPAREN COLON TYPE DEFARROW 
+	| DEF ID LPAREN params RPAREN COLON TYPE DEFARROW
 
 params:
 	ID COLON TYPE
