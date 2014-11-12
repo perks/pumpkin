@@ -4,9 +4,9 @@
 %token COLON ASSIGN
 %token PLUS MINUS TIMES DIVIDE MODULO
 %token VAL
-%token NUM UNIT
+%token TNUM TUNIT
 %token <string> ID
-%token <string> NUM_LITERAL
+%token <string> NUM
 %token EOF
 
 %right ASSIGN
@@ -19,14 +19,23 @@
 
 %%
 program:
-    /* nothing */ { }
-  | expression { }
+    /* nothing */ { {expression=[]; statement=[];} }
+  | expression    { {expression=$1::[]; statement=[];} }
+  | statement     { {expression=[]; statement=$1::[];} }
   
 expression:
-    LPAREN expr RBRACE  { $2 }
-  | expr PLUS   expr    { Binop($1, Plus, $3) }
-  | expr MINUS  expr    { Binop($1, Minus, $3) }
-  | expr TIMES  expr    { Binop($1, Times, $3) }
-  | expr DIVIDE expr    { Binop($1, Divide, $3) }
-  | expr MODULO expr    { Binop($1, Modulo, $3) }
+    LPAREN expression RPAREN  { $2 }
+  | expression PLUS   expression   { Binop($1, Plus, $3) }
+  | expression MINUS  expression   { Binop($1, Minus, $3) }
+  | expression TIMES  expression   { Binop($1, Times, $3) }
+  | expression DIVIDE expression   { Binop($1, Divide, $3) }
+  | expression MODULO expression   { Binop($1, Modulo, $3) }
+  
+statement:
+    VAL ID COLON types ASSIGN expression { TAssign($2, $4, $6) }
+  | VAL ID ASSIGN expression             { Assign($2, $4) }
+
+types:
+    TUNIT { TUnit }
+  | TNUM  { TNum }
 
