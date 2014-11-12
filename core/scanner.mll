@@ -1,8 +1,5 @@
 {
     open Parser
-    open Utils
-
-    let indent_stack = Stack.create()
 }
 
 let alpha = ['a'-'z' 'A'-'Z']
@@ -30,23 +27,23 @@ rule token = parse
     
     | "val"         { VAL }
 
-    | "Num"     { NUM }
-    | "Unit"    { UNIT }
+    | "Num"     { TNUM }
+    | "Unit"    { TUNIT }
     
     | id as lxm     { ID(lxm) }
 
-    | num as lxm    { NUM_LITERAL(lxm) }
+    | num as lxm    { NUM(lxm) }
 
     | eof           { EOF }
     | _ as illegal     { raise (Failure("illegal character " ^ Char.escaped illegal)) }
 
 and single_comment = parse
     '\n' { token lexbuf }
-    | _ { comment lexbuf }
+    | _ { single_comment lexbuf }
 
 and block_comment = parse
     "*/" { token lexbuf }
-    | _ { comment lexbuf }
+    | _ { block_comment lexbuf }
 
 and indent = parse
-    [' ' '\t']* as indt { token lexbuf }
+    [' ' '\t']* { token lexbuf }
