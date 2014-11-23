@@ -12,13 +12,10 @@ rule token = parse
     | "/*"         { block_comment lexbuf }
     | ['\r' '\n']+ { indent lexbuf }
     | [' ' '\t']    { token lexbuf }
-
+    
     | '(' { LPAREN }
     | ')' { RPAREN }
-
-    | ':' { COLON }
-    | '=' { ASSIGN }
-
+    
     | '+' { PLUS }
     | '-' { MINUS }
     | '*' { TIMES }
@@ -31,12 +28,11 @@ rule token = parse
     | "Unit"    { TUNIT }
     | "Bool"    { TBOOL }
     
-    | id as lxm     { ID(lxm) }
-
     | num as lxm    { NUM(lxm) }
     | "False" as lxm { BOOL(lxm) }
     | "True" as lxm  { BOOL(lxm) }
 
+    
     | eof           { EOF }
     | _ as illegal     { raise (Failure("illegal character " ^ Char.escaped illegal)) }
 
