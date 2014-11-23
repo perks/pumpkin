@@ -4,7 +4,7 @@ open Ast
 let run (prog : Sast.aProgram) : unit =
   let rec eval_expr (expr : Sast.aExpression) : unit =
     match expr with
-      ANumLiteral(n, _) -> print_string(n)
+      AnIntLiteral(n, _) -> print_string(n)
     | AUnit (_) -> print_string("Unit")
     | ABinop(e1, op, e2, _) ->
       print_char('(');
