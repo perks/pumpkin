@@ -1,6 +1,5 @@
 {
     open Parser
-    open Utils
 
     let indent_stack = Stack.create()
 }
@@ -20,18 +19,29 @@ rule token = parse
     | '(' { LPAREN }
     | ')' { RPAREN }
 
+    | '=' { ASSIGN }
     | '+' { PLUS }
     | '-' { MINUS }
     | '*' { TIMES }
     | '/' { DIVIDE }
     | '%' { MODULO }
+    | ':' { COLON }
 
+    
+    | "is"  | "==" { EQ }
+    | "!="         { NEQ }
+    | '>'          { GT }
+    | '<'          { LT }
+    | ">="         { GTE }
+    | "<="         { LTE }    
     | "val"         { VAL }
-
     | "Num"     { TNUM }
     | "Unit"    { TUNIT }
 
-    | num as lxm    { NUM(lxm) }
+    | num as lxm    { NUM(int_of_string lxm) }
+    | "False"       { BOOL(false) }
+    | "True"        { BOOL(true) }
+    | id as lxm     { ID(lxm) }
 
 
     | eof           { EOF }
@@ -57,17 +67,21 @@ and indent = parse
           end
         else if indt_len = top_len then TERMINATOR
         else
-          let decrement =
-            let rec helper inc =
-              if (Stack.top indent_stack) > indt_len then
-                Stack.pop indent_stack
-                helper (inc + 1)
-              else if (Stack.top indent_stack) < indt_len then -1
-              else inc
-            in helper 0
-          in
-          if decrement = - 1 then raise (Failure "Indent mismatch")
-          else DEDENT(decrement)
+          let count = 
+            let decrement_count = fun len stack ->
+                let rec helper inc =
+                    if (Stack.top stack) > len then
+                        begin
+                        Stack.pop stack
+                        helper (inc + 1)
+                        end
+                    else if (Stack.top stack) < len then -1
+                    else inc
+                in helper 0
+          in decrement_count indt_len indent_stack
+          in 
+          if count = - 1 then raise (Failure "Indent mismatch")
+          else DEDENT(count)
       }
 
 {
