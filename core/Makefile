@@ -72,6 +72,10 @@
 SOURCES = scanner.mll \
 					parser.mly \
 					ast.mli \
+					sast.ml \
+					analyzer.ml \
+					pumpkin.ml \
+					interpret.ml \
 
 # The executable file to generate
 

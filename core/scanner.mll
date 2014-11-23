@@ -29,10 +29,13 @@ rule token = parse
 
     | "Num"     { TNUM }
     | "Unit"    { TUNIT }
+    | "Bool"    { TBOOL }
     
     | id as lxm     { ID(lxm) }
 
     | num as lxm    { NUM(lxm) }
+    | "False" as lxm { BOOL(lxm) }
+    | "True" as lxm  { BOOL(lxm) }
 
     | eof           { EOF }
     | _ as illegal     { raise (Failure("illegal character " ^ Char.escaped illegal)) }
