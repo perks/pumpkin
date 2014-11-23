@@ -7,7 +7,7 @@
 %token TNUM TUNIT
 %token <string> ID
 
-%token <string> NUM
+%token <int> NUM
 %token <int> DEDENT_COUNT
 %token UNIT
 %token EOF
@@ -33,7 +33,6 @@ body:
 
 block:
   | INDENT body DEDENT { $2 }
-  | expression    { [$1] }
 
 expression:
     LPAREN expression RPAREN  { $2 }
