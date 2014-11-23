@@ -16,24 +16,24 @@ rule token = parse
     | "/*"         { block_comment lexbuf }
     | ['\r' '\n']+ { indent lexbuf }
     | [' ' '\t']    { token lexbuf }
-    
+
     | '(' { LPAREN }
     | ')' { RPAREN }
-    
+
     | '+' { PLUS }
     | '-' { MINUS }
     | '*' { TIMES }
     | '/' { DIVIDE }
     | '%' { MODULO }
-    
+
     | "val"         { VAL }
 
     | "Num"     { TNUM }
     | "Unit"    { TUNIT }
-    
+
     | num as lxm    { NUM(lxm) }
 
-    
+
     | eof           { EOF }
     | _ as illegal     { raise (Failure("illegal character " ^ Char.escaped illegal)) }
 

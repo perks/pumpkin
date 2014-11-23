@@ -1,8 +1,8 @@
-type operator = 
+type operator =
   Plus | Minus | Times | Divide | Modulo
 
 type expression =
-    NumLiteral of string
+    IntLiteral of int
   | Binop of expression * operator * expression
   | Unit
 

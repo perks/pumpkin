@@ -33,7 +33,8 @@ body:
 
 block:
   | INDENT body DEDENT { $2 }
-  
+  | expression    { [$1] }
+
 expression:
     LPAREN expression RPAREN  { $2 }
   | expression PLUS   expression   { Binop($1, Plus, $3) }

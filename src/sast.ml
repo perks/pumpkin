@@ -2,8 +2,8 @@ open Ast
 
 type sTypes = Num | Unit
 
-type aExpression = 
-    ANumLiteral of string * sTypes
+type aExpression =
+    AnIntLiteral of string * sTypes
   | ABinop of aExpression * operator * aExpression * sTypes
   | AUnit of sTypes
 
