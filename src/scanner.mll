@@ -12,28 +12,20 @@ rule token = parse
     | "/*"         { block_comment lexbuf }
     | ['\r' '\n']+ { indent lexbuf }
     | [' ' '\t']    { token lexbuf }
-
+    
     | '(' { LPAREN }
     | ')' { RPAREN }
-
-    | ':' { COLON }
-    | '=' { ASSIGN }
-
+    
     | '+' { PLUS }
     | '-' { MINUS }
     | '*' { TIMES }
     | '/' { DIVIDE }
     | '%' { MODULO }
     
-    | "val"         { VAL }
-
-    | "Num"     { TNUM }
-    | "Unit"    { TUNIT }
+    | "Unit" { UNIT }
     
-    | id as lxm     { ID(lxm) }
-
     | num as lxm    { NUM(lxm) }
-
+    
     | eof           { EOF }
     | _ as illegal     { raise (Failure("illegal character " ^ Char.escaped illegal)) }
 
