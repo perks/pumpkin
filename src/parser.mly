@@ -1,15 +1,15 @@
 %{ open Ast %}
 
 %token LPAREN RPAREN
-%token COLON ASSIGN
 %token PLUS MINUS TIMES DIVIDE MODULO
 %token VAL
 %token TNUM TUNIT TBOOL
 %token <string> ID
+
 %token <string> NUM
+%token UNIT
 %token EOF
 
-%right ASSIGN
 %left PLUS MINUS
 %left TIMES DIVIDE MODULO
 %left LPAREN RPAREN
@@ -19,9 +19,8 @@
 
 %%
 program:
-    /* nothing */ { {expression=[]; statement=[];} }
-  | expression    { {expression=$1::[]; statement=[];} }
-  | statement     { {expression=[]; statement=$1::[];} }
+    /* nothing */ { [] }
+  | expression    { [$1] }
   
 expression:
     LPAREN expression RPAREN  { $2 }
