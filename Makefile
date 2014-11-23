@@ -1,21 +1,13 @@
-TMP_DIR=tmp
-SRC_DIR=src
-
-MKDIR_P=mkdir -p
-
-$(TEMP_DIR)/%.cmo : $(SRC_DIR)/%.ml
+tmp/%.cmo : src/%.ml
 	ocamlc -c $<
 
-$(TEMP_DIR)/%.cmi : $(SRC_DIR)%.mli
+tmp/%.cmi : src/%.mli
 	ocamlc -c $<
 
 .PHONY : all clean
 
-all : $(TEMP_DIR)
-
-$(TEMP_DIR): 
-	echo "THIS"
-	$(MKDIR_P) $@
+all : tmp
+	mkdir -p tmp
 
 .PHONY : clean
 clean :
