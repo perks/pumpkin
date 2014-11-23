@@ -1,26 +1,38 @@
 %{ open Ast %}
 
+%token TERMINATOR INDENT DEDENT
 %token LPAREN RPAREN
 %token PLUS MINUS TIMES DIVIDE MODULO
 %token VAL
-%token TNUM TUNIT TBOOL
+%token TNUM TUNIT
 %token <string> ID
 
 %token <string> NUM
+%token <int> DEDENT_COUNT
 %token UNIT
 %token EOF
+
 
 %left PLUS MINUS
 %left TIMES DIVIDE MODULO
 %left LPAREN RPAREN
 
-%start program
-%type < Ast.program > program
+%start root
+%type < Ast.root > root
 
 %%
-program:
+root:
     /* nothing */ { [] }
-  | expression    { [$1] }
+  | body { $1 }
+  | block TERMINATOR { $1 }
+
+body:
+  | expression { [$1] }
+  | body TERMINATOR expression { List.append $1 [$3] }
+  | body TERMINATOR { $1 }
+
+block:
+  | INDENT body DEDENT { $2 }
   
 expression:
     LPAREN expression RPAREN  { $2 }
@@ -29,18 +41,3 @@ expression:
   | expression TIMES  expression   { Binop($1, Times, $3) }
   | expression DIVIDE expression   { Binop($1, Divide, $3) }
   | expression MODULO expression   { Binop($1, Modulo, $3) }
-  | expression EQ     expression   { Binop($1, Eq, $3) }
-  | expression NEQ    expression   { Binop($1, Neq, $3) }
-  | expression GT     expression   { Binop($1, Gt, $3) }
-  | expression LT     expression   { Binop($1, Lt, $3) }
-  | expression LTE    expression   { Binop($1, Lte, $3) }
-  | expression GTE    expression   { Binop($1, Gte, $3) }
-statement:
-    VAL ID COLON types ASSIGN expression { TAssign($2, $4, $6) }
-  | VAL ID ASSIGN expression             { Assign($2, $4) }
-
-types:
-    TUNIT { TUnit }
-  | TNUM  { TNum }
-  | TBOOL { TBool }
-

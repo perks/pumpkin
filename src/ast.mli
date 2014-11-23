@@ -6,4 +6,7 @@ type expression =
   | Binop of expression * operator * expression
   | Unit
 
-type program = expression list
+type 'a body = ('a expression) list
+type 'a block = 'a body
+
+type root = expression body
