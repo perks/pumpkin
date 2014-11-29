@@ -7,9 +7,9 @@ type tType =
 type expression =
     IntLiteral of int
   | BoolLiteral of bool
-  | Unit
+  | UnitLiteral
   | Binop of expression * operator * expression
-  | TypeAssign of string * tType * expression
+  | TypeAssing of string * expression * tType
 
 type 'a body = expression list
 type 'a block = 'a body

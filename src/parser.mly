@@ -50,10 +50,10 @@ expression:
   | expression LT     expression   { Binop($1, Lt, $3) }
   | expression LTE    expression   { Binop($1, Lte, $3) }
   | expression GTE    expression   { Binop($1, Gte, $3) }
-  | VAL ID COLON types ASSIGN expression { TypeAssign($2, $4, $6) }
+  | VAL ID COLON types ASSIGN expression { TypeAssing($2, $6, $4) }
   | NUM                            { IntLiteral($1) }
   | BOOL                           { BoolLiteral($1) }
-  | UNIT                           { Unit }
+  | UNIT                           { UnitLiteral }
 /*  | VAL ID ASSIGN expression             { Assign($2, $4) }*/
 
 types:
