@@ -68,20 +68,18 @@ and indent = parse
         else if indt_len = top_len then TERMINATOR
         else
           let count = 
-            let decrement_count = fun len stack ->
-                let rec helper inc =
-                    if (Stack.top stack) > len then
-                        begin
-                        Stack.pop stack
-                        helper (inc + 1)
-                        end
-                    else if (Stack.top stack) < len then -1
-                    else inc
-                in helper 0
-          in decrement_count indt_len indent_stack
+            let rec helper inc =
+                if (Stack.top indent_stack) > indt_len then
+                    begin
+                    ignore(Stack.pop indent_stack);
+                    helper (inc + 1)
+                    end
+                else if (Stack.top indent_stack) < indt_len then -1
+                else inc
+            in helper 0
           in 
           if count = - 1 then raise (Failure "Indent mismatch")
-          else DEDENT(count)
+          else DEDENT_COUNT(count)
       }
 
 {
