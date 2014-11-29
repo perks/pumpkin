@@ -18,7 +18,7 @@ Tasks
 1. Numerical expression/Unit [] X
 2. Scope/Line Breaks []
 3. Booleans [] X
-4. Strings/Char []
+4. Strings/Char [] X
 5. Lists/Maps/Tupals []
 6. Algebraic Data Types []
 7. Type Checking/Inference

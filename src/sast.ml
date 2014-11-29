@@ -1,12 +1,13 @@
 open Ast
 
-type sTypes = Num | Unit | Bool | String
+type sTypes = Num | Unit | Bool | String | Char
 
 type aExpression =
     AnIntLiteral of int * sTypes
   | ABinop of aExpression * operator * aExpression * sTypes
   | ABoolLiteral of bool * sTypes
   | AStringLiteral of string * sTypes
+  | ACharLiteral of string * sTypes
   | AUnit of sTypes
   | ATypeAssign of string * aExpression * sTypes
 

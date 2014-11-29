@@ -7,7 +7,8 @@
 let alpha = ['a'-'z' 'A'-'Z']
 let digit = ['0'-'9']
 let id  = alpha (alpha | digit | '_')*
-let string = '"'(id)'"'
+let string = '"' [^ '"' '\\']*('\\' '.' [^ '"' '\\']*)* '"'
+let char = ''' ( alpha | digit ) '''
 let num = ['-' '+']? digit* (['.'] digit+)?
 let whitespace = [' ' '\t']*
 
@@ -39,13 +40,14 @@ rule token = parse
     | "Num"        { TNUM }
     | "String"     { TSTRING }
     | "Unit"       { TUNIT }
-
+    | "Char"       { TCHAR }
 
     | num as lxm    { NUM(int_of_string lxm) }
     | "False"       { BOOL(false) }
     | "True"        { BOOL(true) }
     | string as lxm { STRING(lxm)}
     | id as lxm     { ID(lxm) }
+    | char as lxm   { CHAR(lxm)}
 
 
     | eof           { EOF }
