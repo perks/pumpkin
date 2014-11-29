@@ -20,7 +20,8 @@ rule token = parse
 
     | '(' { LPAREN }
     | ')' { RPAREN }
-
+    | '[' { LBRACK }
+    | ']' { RBRACK }
     | '=' { ASSIGN }
     | '+' { PLUS }
     | '-' { MINUS }
@@ -28,6 +29,7 @@ rule token = parse
     | '/' { DIVIDE }
     | '%' { MODULO }
     | ':' { COLON }
+    | ',' { COMMA }
 
     
     | "is"  | "==" { EQ }
@@ -41,6 +43,9 @@ rule token = parse
     | "String"     { TSTRING }
     | "Unit"       { TUNIT }
     | "Char"       { TCHAR }
+    | "Tuple"      { TTUPLE }
+    | "List"       { TLIST }
+
 
     | num as lxm    { NUM(int_of_string lxm) }
     | "False"       { BOOL(false) }

@@ -15,10 +15,10 @@ always be up to date and free of merge conflits
 Tasks
 ======
 
-1. Numerical expression/Unit [] X
+1. X Numerical expression/Unit []
 2. Scope/Line Breaks []
-3. Booleans [] X
-4. Strings/Char [] X
+3. X Booleans []
+4. X Strings/Char []
 5. Lists/Maps/Tupals []
 6. Algebraic Data Types []
 7. Type Checking/Inference
@@ -26,3 +26,4 @@ Tasks
 9. Advanced Functions: composition, piping, first class functions, recursion []
 10. Error Handeling []
 11. Importation []
+12. If while for

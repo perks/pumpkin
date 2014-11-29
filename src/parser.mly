@@ -1,10 +1,10 @@
 %{ open Ast %}
 
 %token TERMINATOR INDENT DEDENT
-%token LPAREN RPAREN COLON
+%token LPAREN RPAREN COLON COMMA LBRACK RBRACK
 %token PLUS MINUS TIMES DIVIDE MODULO EQ NEQ GT LT GTE LTE
 %token VAL ASSIGN
-%token TNUM TUNIT TBOOL TSTRING TCHAR
+%token TNUM TUNIT TBOOL TSTRING TCHAR TTUPLE TLIST
 %token <string> ID
 %token <int> NUM
 %token <int> DEDENT_COUNT
@@ -14,7 +14,7 @@
 %token UNIT
 %token EOF
 
-%nonassoc TNUM TUNIT TBOOL
+%nonassoc TNUM TUNIT TBOOL TSTRING TCHAR TTUPLE TLIST
 %right ASSIGN
 %left EQ NEQ
 %left LT GT LTE GTE
@@ -40,7 +40,7 @@ block:
   | INDENT body DEDENT { $2 }
 
 expression:
-    LPAREN expression RPAREN  { $2 }
+    LPAREN expression RPAREN       { $2 }
   | expression PLUS   expression   { Binop($1, Plus, $3) }
   | expression MINUS  expression   { Binop($1, Minus, $3) }
   | expression TIMES  expression   { Binop($1, Times, $3) }
@@ -58,7 +58,14 @@ expression:
   | STRING                         { StringLiteral($1) }
   | CHAR                           { CharLiteral($1) }
   | UNIT                           { UnitLiteral }
+  | LPAREN exp_listing RPAREN      { TupleLiteral($2) }
+  | LBRACK exp_listing RBRACK      { ListLiteral($2) }
 /*  | VAL ID ASSIGN expression             { Assign($2, $4) }*/
+
+
+exp_listing:
+  expression COMMA      { [$1] }
+  | exp_listing expression  { $2 :: $1}
 
 types:
     TNUM       { TNum }
@@ -66,3 +73,5 @@ types:
   | TSTRING    { TString }
   | TCHAR      { TChar }
   | TUNIT      { TUnit }
+  | TTUPLE     { TTuple }
+  | TLIST      { TList }
