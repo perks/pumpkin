@@ -5,6 +5,7 @@ let type_of = function
     AnIntLiteral(_, t) -> t
   | ABoolLiteral(_, t) -> t
   | AStringLiteral(_, t) -> t
+  | ACharLiteral(_, t) -> t
   | AUnit(t) -> t
   | ABinop(_, _, _, t) -> t
   | ATypeAssign(_, _, t) -> t
@@ -13,6 +14,7 @@ let aType_to_saType = function
     TNum -> Num
   | TBool -> Bool
   | TString -> String
+  | TChar -> Char
   | TUnit -> Unit
 
 let rec annotate_expression (expr : Ast.expression) : Sast.aExpression =
@@ -20,6 +22,7 @@ let rec annotate_expression (expr : Ast.expression) : Sast.aExpression =
     IntLiteral(n) -> AnIntLiteral(n, Sast.Num)
   | BoolLiteral(b) -> ABoolLiteral(b, Sast.Bool)
   | StringLiteral(s) -> AStringLiteral(s, Sast.String)
+  | CharLiteral(c) -> ACharLiteral(c, Sast.Char)
   | UnitLiteral -> AUnit(Sast.Unit)
   | Binop(e1, op, e2) ->
     let ae1 = annotate_expression e1 and
