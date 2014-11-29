@@ -4,11 +4,12 @@
 %token LPAREN RPAREN COLON
 %token PLUS MINUS TIMES DIVIDE MODULO EQ NEQ GT LT GTE LTE
 %token VAL ASSIGN
-%token TNUM TUNIT TBOOL
+%token TNUM TUNIT TBOOL TSTRING
 %token <string> ID
 %token <int> NUM
 %token <int> DEDENT_COUNT
 %token <bool> BOOL
+%token <string> STRING
 %token UNIT
 %token EOF
 
@@ -53,10 +54,12 @@ expression:
   | VAL ID COLON types ASSIGN expression { TypeAssing($2, $6, $4) }
   | NUM                            { IntLiteral($1) }
   | BOOL                           { BoolLiteral($1) }
+  | STRING                         { StringLiteral($1) }
   | UNIT                           { UnitLiteral }
 /*  | VAL ID ASSIGN expression             { Assign($2, $4) }*/
 
 types:
-    TNUM  { TNum }
-  | TBOOL { TBool }
-  | TUNIT { TUnit }
+    TNUM       { TNum }
+  | TBOOL      { TBool }
+  | TSTRING    { TString}
+  | TUNIT      { TUnit }

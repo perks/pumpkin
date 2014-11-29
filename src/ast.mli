@@ -2,11 +2,12 @@ type operator =
   Plus | Minus | Times | Divide | Modulo | Eq | Neq | Gt | Lt | Gte | Lte
 
 type tType = 
-	TNum | TUnit | TBool 
+	TNum | TUnit | TBool | TString
 
 type expression =
     IntLiteral of int
   | BoolLiteral of bool
+  | StringLiteral of string
   | UnitLiteral
   | Binop of expression * operator * expression
   | TypeAssing of string * expression * tType
