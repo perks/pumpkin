@@ -15,9 +15,9 @@ always be up to date and free of merge conflits
 Tasks
 ======
 
-1. Numerical expression/Unit []
+1. Numerical expression/Unit [] X
 2. Scope/Line Breaks []
-3. Booleans []
+3. Booleans [] X
 4. Strings/Char []
 5. Lists/Maps/Tupals []
 6. Algebraic Data Types []

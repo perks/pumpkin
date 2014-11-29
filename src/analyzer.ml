@@ -4,19 +4,22 @@ open Sast
 let type_of = function
     AnIntLiteral(_, t) -> t
   | ABoolLiteral(_, t) -> t
+  | AStringLiteral(_, t) -> t
   | AUnit(t) -> t
   | ABinop(_, _, _, t) -> t
   | ATypeAssign(_, _, t) -> t
 
 let aType_to_saType = function
     TNum -> Num
-  | TUnit -> Unit
   | TBool -> Bool
+  | TString -> String
+  | TUnit -> Unit
 
 let rec annotate_expression (expr : Ast.expression) : Sast.aExpression =
   match expr with
     IntLiteral(n) -> AnIntLiteral(n, Sast.Num)
   | BoolLiteral(b) -> ABoolLiteral(b, Sast.Bool)
+  | StringLiteral(s) -> AStringLiteral(s, Sast.String)
   | UnitLiteral -> AUnit(Sast.Unit)
   | Binop(e1, op, e2) ->
     let ae1 = annotate_expression e1 and
