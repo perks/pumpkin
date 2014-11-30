@@ -74,7 +74,6 @@ expression:
   | LPAREN exp_listing RPAREN            { TupleLiteral($2) }
   | LBRACK exp_listing RBRACK            { ListLiteral($2) }
   | TLIST LPAREN exp_listing RPAREN      { ListLiteral($3) }
-  | STRINGCHARS                          { StringChars($1) }
   | QUOTE string_expression QUOTE        { StringInterpolation($2) }
 
 string_expression:
