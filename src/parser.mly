@@ -1,16 +1,17 @@
 %{ open Ast %}
 
 %token TERMINATOR INDENT DEDENT
-%token LPAREN RPAREN COLON COMMA LBRACK RBRACK TYPEARROW
+%token LPAREN RPAREN COLON COMMA LBRACK RBRACK TYPEARROW POUND LCBRACK RCBRACK QUOTE
 %token PLUS MINUS TIMES DIVIDE MODULO EQ NEQ GT LT GTE LTE AND OR NOT
 %token VAL ASSIGN
 %token IF ELSE
-%token TINT TUNIT TBOOL TSTRING TCHAR TTUPLE TLIST
+%token TINT TUNIT TBOOL TSTRING TCHAR TTUPLE TLIST OPENSTRING CLOSESTRING STRINGCHARS
 %token <string> ID
 %token <int> INT
 %token <int> DEDENT_COUNT
 %token <bool> BOOL
 %token <string> STRING
+%token <string> STRINGCHARS
 %token <char> CHAR
 %token UNIT
 %token EOF
@@ -42,9 +43,9 @@ body:
 
 block:
     INDENT body DEDENT { $2 }
-  
+ 
 expression:
-    LPAREN expression RPAREN             { $2 }
+    LPAREN expression RPAREN                                 { $2 }
   | IF LPAREN expression RPAREN COLON block                  { IfBlock($3, $6) }
   | IF LPAREN expression RPAREN COLON block ELSE COLON block { IfElseBlock($3, $6, $9) }
   | VAL ID COLON types ASSIGN expression { TypeAssing($2, $6, $4) }
@@ -73,6 +74,14 @@ expression:
   | LPAREN exp_listing RPAREN            { TupleLiteral($2) }
   | LBRACK exp_listing RBRACK            { ListLiteral($2) }
   | TLIST LPAREN exp_listing RPAREN      { ListLiteral($3) }
+  | STRINGCHARS                          { StringChars($1) }
+  | QUOTE string_expression QUOTE        { StringInterpolation($2) }
+
+string_expression:
+    expression                                         { [$1] }
+  | POUND LCBRACK expression RCBRACK                   { [$3] }
+  | string_expression POUND LCBRACK expression RCBRACK { $4::$1 }
+  | string_expression expression                       { $2::$1 }
 
 exp_listing:
     expression COMMA { [$1] }

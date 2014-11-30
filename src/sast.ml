@@ -15,5 +15,7 @@ type aExpression =
   | AListLiteral of aExpression list * sTypes
   | AIfBlock of aExpression * aExpression list * sTypes
   | AIfElseBlock of aExpression * aExpression list * aExpression list * sTypes
+  | AStringChars of string * sTypes
+  | AStringInterpolation of aExpression list * sTypes
 
 type aRoot = aExpression list
