@@ -64,6 +64,7 @@ expression:
   | expression OR     expression         { Binop($1, Or, $3) }
   | MINUS expression                     { Uniop(Minus, $2) }
   | PLUS expression                      { Uniop(Plus, $2) }
+  | NOT expression                       { Uniop(Not, $2) }
   | INT                                  { IntLiteral($1) }
   | BOOL                                 { BoolLiteral($1) }
   | STRING                               { StringLiteral($1) }
@@ -85,7 +86,7 @@ listing_multi:
   | exp_listing COMMA expression  { $3 :: $1}
 
 types:
-    TNUM       { TNum }
+    TNUM       { TInt }
   | TBOOL      { TBool }
   | TSTRING    { TString }
   | TCHAR      { TChar }
