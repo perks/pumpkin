@@ -19,11 +19,13 @@ Tasks
 2. Scope/Line Breaks []
 3. X Booleans []
 4. X Strings/Char []
-5. Lists/Maps/Tupals []
+5. X Lists/Tupals []
 6. Algebraic Data Types []
 7. Type Checking/Inference
 8. Simple Functions: declaration, calling, simple arguments []
 9. Advanced Functions: composition, piping, first class functions, recursion []
 10. Error Handeling []
 11. Importation []
-12. If while for
+12. If else
+13. String interpolation
+14. Maps
