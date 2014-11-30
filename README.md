@@ -26,6 +26,6 @@ Tasks
 9. Advanced Functions: composition, piping, first class functions, recursion []
 10. Error Handeling []
 11. Importation []
-12. If else
+12. X If else
 13. String interpolation
 14. Maps

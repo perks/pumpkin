@@ -63,7 +63,7 @@ expression:
   | UNIT                                 { UnitLiteral }
   | LPAREN exp_listing RPAREN            { TupleLiteral($2) }
   | LBRACK exp_listing RBRACK            { ListLiteral($2) }
-
+  | TLIST LPAREN exp_listing RPAREN      { ListLiteral($3) }
 /*  | VAL ID ASSIGN expression                  { Assign($2, $4) }*/
 
 exp_listing:
