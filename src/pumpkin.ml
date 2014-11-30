@@ -34,4 +34,3 @@ let _ =
           )
       | Utils.IndentationError(ln) -> 
         print_string("IndentationError, line\n" ^ string_of_int ln ^ "\n")
-      | _ -> print_string("Error\n")
