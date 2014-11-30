@@ -14,8 +14,7 @@ type expression =
   | TypeAssing of string * expression * tType
   | TupleLiteral of expression list
   | ListLiteral of expression list
+  | IfBlock of expression * expression list
+  | IfElseBlock of expression * expression list * expression list
 
-type 'a body = expression list
-type 'a block = 'a body
-
-type root = expression body
+type root = expression list

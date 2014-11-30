@@ -11,6 +11,8 @@ let type_of = function
   | ATypeAssign(_, _, t) -> t
   | ATupleLiteral(_, t) -> t
   | AListLiteral(_, t) -> t
+  | AIfBlock(_, _, t) -> t
+  | AIfElseBlock(_, _, _, t) -> t
 
 let aType_to_saType = function
     TNum -> Num
@@ -61,7 +63,29 @@ let rec annotate_expression (expr : Ast.expression) : Sast.aExpression =
     if ae_s_type != t_s_type then
       raise (Failure ("Type Mismatch"))
     else ATypeAssign(i, ae, t_s_type)
-
+  | IfBlock(e1, l) -> 
+    let a_list = List.map annotate_expression l in
+    let ae = annotate_expression e1 and
+    le = annotate_expression (List.hd (List.rev l)) in
+    let ae_s_type = type_of ae and
+    le_s_type = type_of le in
+    if ae_s_type != Sast.Bool then
+      raise (Failure ("If requires a boolean expression"))
+    else AIfBlock(ae, a_list, le_s_type)
+  | IfElseBlock(e1, l1, l2) ->
+    let ae = annotate_expression e1 in
+    let a_list1 = List.map annotate_expression l1 and
+    a_list2 = List.map annotate_expression l2 in
+    let le1 = annotate_expression (List.hd (List.rev l1)) and
+    le2 = annotate_expression (List.hd (List.rev l2)) in
+    let ae_s_type = type_of ae in
+    let le1_s_type = type_of le1 and
+    le2_s_type = type_of le2 in
+    if ae_s_type != Sast.Bool then
+      raise (Failure ("If requires a boolean expression"))
+    else if le1_s_type != le2_s_type then
+      raise (Failure ("Return type of if and else must match"))
+    else AIfElseBlock(ae, a_list1, a_list2, le1_s_type)
 
 and annotate_expression_list (expr_list : Ast.expression list) : Sast.aExpression list =
   List.map (fun expr -> annotate_expression expr) expr_list

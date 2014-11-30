@@ -12,8 +12,7 @@ type aExpression =
   | ATypeAssign of string * aExpression * sTypes
   | ATupleLiteral of aExpression list * sTypes
   | AListLiteral of aExpression list * sTypes
+  | AIfBlock of aExpression * aExpression list * sTypes
+  | AIfElseBlock of aExpression * aExpression list * aExpression list * sTypes
 
-type 'a aBody = aExpression list
-type 'a aBlock = 'a aBody
-
-type aRoot = aExpression aBody
+type aRoot = aExpression list

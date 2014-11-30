@@ -31,6 +31,9 @@ rule token = parse
     | ':' { COLON }
     | ',' { COMMA }
 
+    | "->"         { TYPEARROW }
+    | "if"         { IF }
+    | "else"       { ELSE }
     
     | "is"  | "==" { EQ }
     | "!="         { NEQ }
