@@ -80,8 +80,8 @@ expression:
 string_expression:
     expression                                         { [$1] }
   | POUND LCBRACK expression RCBRACK                   { [$3] }
-  | string_expression POUND LCBRACK expression RCBRACK { $4::$1 }
-  | string_expression expression                       { $2::$1 }
+  | STRINGCHARS POUND LCBRACK expression RCBRACK       { $4::[StringChars($1)] }
+  | string_expression STRINGCHARS                      { StringChars($2)::$1 }
 
 exp_listing:
     expression COMMA { [$1] }

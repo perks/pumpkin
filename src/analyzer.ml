@@ -126,8 +126,7 @@ let rec annotate_expression (expr : Ast.expression) : Sast.aExpression =
   | StringChars(s) -> AStringChars(s, Sast.String)
   | StringInterpolation(l) ->
     let a_list = annotate_expression_list l in
-(*     MAKE IT ONE STRING
- *)    AStringInterpolation(s. Sast.String)
+    AStringInterpolation(a_list, Sast.String)
 
 and annotate_expression_list (expr_list : Ast.expression list) : Sast.aExpression list =
   List.map (fun expr -> annotate_expression expr) expr_list
