@@ -8,6 +8,7 @@ let type_of = function
   | ACharLiteral(_, t) -> t
   | AUnit(t) -> t
   | ABinop(_, _, _, t) -> t
+  | AUniop(_, _, t) -> t
   | ATypeAssign(_, _, t) -> t
   | ATupleLiteral(_, t) -> t
   | AListLiteral(_, t) -> t
@@ -53,9 +54,11 @@ let rec annotate_expression (expr : Ast.expression) : Sast.aExpression =
         ae2 = annotate_expression e2 in
     if (match_all_types [ae1; ae2]) != 1 then
       raise (Failure ("Type Mismatch"))
-    else
-      let et = type_of ae1 in 
-      ABinop(ae1, op, ae2, et)
+    else ABinop(ae1, op, ae2, ae1_s_type)
+  | Uniop(op, e) -> 
+    let ae = annotate_expression e in
+    let ae_s_type = type_of ae in
+    AUniop(op, ae, ae_s_type)
   | TypeAssing(i, e, t) ->
     let ae = annotate_expression e in
     let ae_s_type = type_of ae and 

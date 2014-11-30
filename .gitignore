@@ -8,6 +8,8 @@
 *.cmxs
 *.cmxa
 
+*.orig
+
 scanner.ml
 parser.ml
 parser.mli

@@ -1,6 +1,9 @@
 {
     open Parser
-    let indent_stack = Stack.create()
+    open Utils
+    
+    let lineno = ref 1
+    let indent_stack = Stack.create ()
 }
 
 let alpha = ['a'-'z' 'A'-'Z']
@@ -8,14 +11,19 @@ let digit = ['0'-'9']
 let id  = alpha (alpha | digit | '_')*
 let string = '"' [^ '"' '\\']*('\\' '.' [^ '"' '\\']*)* '"'
 let char = ''' ( alpha | digit ) '''
-let num = ['-' '+']? digit* (['.'] digit+)?
+let double = digit+ ['.'] digit+
+let int = digit+
 let whitespace = [' ' '\t']*
 
 rule token = parse
     "//"           { single_comment lexbuf }
     | "/*"         { block_comment lexbuf }
-    | ['\r' '\n']+ { indent lexbuf }
-    | [' ' '\t']   { token lexbuf }
+    | ['\r' '\n']+ 
+      { 
+        incr lineno;
+        indent lexbuf;
+      }
+    | [' ' '\t']    { token lexbuf }
 
     | '(' { LPAREN }
     | ')' { RPAREN }
@@ -52,15 +60,20 @@ rule token = parse
     | "Tuple"      { TTUPLE }
     | "List"       { TLIST }
 
-    | num as lxm    { NUM(int_of_string lxm) }
+    | int as lxm    { INT(int_of_string lxm) }
     | "False"       { BOOL(false) }
     | "True"        { BOOL(true) }
     | string as lxm { STRING(lxm)}
     | id as lxm     { ID(lxm) }
-    | char as lxm   { CHAR(lxm)}
+    | char as lxm   { CHAR(String.get lxm 1)}
+    | "^"           { UNIT }
 
-    | eof              { EOF }
-    | _ as illegal     { raise (Failure("illegal character " ^ Char.escaped illegal)) }
+
+    | eof           { EOF }
+    | _ as illegal  
+      { 
+        raise (Utils.IllegalCharacter(illegal, !lineno))
+      }
 
 and single_comment = parse
     '\n' { token lexbuf }
@@ -80,7 +93,8 @@ and indent = parse
           Stack.push indt_len indent_stack;
           INDENT
           end
-        else if indt_len = top_len then TERMINATOR
+        else if indt_len = top_len then 
+          TERMINATOR
         else
           let count = 
             let rec helper inc =
@@ -93,7 +107,7 @@ and indent = parse
                 else inc
             in helper 0
           in 
-          if count = - 1 then raise (Failure "Indent mismatch")
+          if count = - 1 then raise (Utils.IndentationError !lineno)
           else DEDENT_COUNT(count)
       }
 

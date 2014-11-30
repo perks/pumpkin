@@ -7,11 +7,11 @@
 %token IF ELSE
 %token TNUM TUNIT TBOOL TSTRING TCHAR TTUPLE TLIST
 %token <string> ID
-%token <int> NUM
+%token <int> INT
 %token <int> DEDENT_COUNT
 %token <bool> BOOL
 %token <string> STRING
-%token <string> CHAR
+%token <char> CHAR
 %token UNIT
 %token EOF
 
@@ -62,7 +62,7 @@ expression:
   | expression GTE    expression         { Binop($1, Gte, $3) }
   | expression AND    expression         { Binop($1, And, $3) }
   | expression OR     expression         { Binop($1, Or, $3) }
-  | NUM                                  { IntLiteral($1) }
+  | INT                                  { IntLiteral($1) }
   | BOOL                                 { BoolLiteral($1) }
   | STRING                               { StringLiteral($1) }
   | CHAR                                 { CharLiteral($1) }
