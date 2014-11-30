@@ -1,5 +1,5 @@
 type operator = 
-  Plus | Minus | Times | Divide | Modulo | Eq | Neq | Gt | Lt | Gte | Lte
+  Plus | Minus | Times | Divide | Modulo | Eq | Neq | Gt | Lt | Gte | Lte | And | Or | Not
 
 type tType = 
 	TNum | TUnit | TBool | TString | TChar | TTuple | TList
@@ -12,6 +12,7 @@ type expression =
   | UnitLiteral
   | Binop of expression * operator * expression
   | TypeAssing of string * expression * tType
+  | Assing of string * expression
   | TupleLiteral of expression list
   | ListLiteral of expression list
   | IfBlock of expression * expression list
