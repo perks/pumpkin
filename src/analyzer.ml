@@ -41,10 +41,10 @@ let rec annotate_expression (expr : Ast.expression) : Sast.aExpression =
   | CharLiteral(c) -> ACharLiteral(c, Sast.Char)
   | UnitLiteral -> AUnit(Sast.Unit)
   | TupleLiteral(l) -> 
-    let at_list = List.map annotate_expression l in
+    let at_list = annotate_expression_list l in
     ATupleLiteral(at_list, Sast.Tuple)
   | ListLiteral(l) ->
-    let a_list = List.map annotate_expression l in
+    let a_list = annotate_expression_list l in
     if (match_all_types a_list) != 1 then
       raise(Failure("List elemets' types must all be the same"))
     else AListLiteral(a_list, Sast.List);
@@ -63,8 +63,12 @@ let rec annotate_expression (expr : Ast.expression) : Sast.aExpression =
     if ae_s_type != t_s_type then
       raise (Failure ("Type Mismatch"))
     else ATypeAssign(i, ae, t_s_type)
+  | Assing(i, e) ->
+    let ae = annotate_expression e in
+    let ae_s_type = type_of ae in
+    ATypeAssign(i, ae, ae_s_type)
   | IfBlock(e1, l) -> 
-    let a_list = List.map annotate_expression l in
+    let a_list = annotate_expression_list l in
     let ae = annotate_expression e1 and
     le = annotate_expression (List.hd (List.rev l)) in
     let ae_s_type = type_of ae and
@@ -74,8 +78,8 @@ let rec annotate_expression (expr : Ast.expression) : Sast.aExpression =
     else AIfBlock(ae, a_list, le_s_type)
   | IfElseBlock(e1, l1, l2) ->
     let ae = annotate_expression e1 in
-    let a_list1 = List.map annotate_expression l1 and
-    a_list2 = List.map annotate_expression l2 in
+    let a_list1 = annotate_expression_list l1 and
+    a_list2 = annotate_expression_list l2 in
     let le1 = annotate_expression (List.hd (List.rev l1)) and
     le2 = annotate_expression (List.hd (List.rev l2)) in
     let ae_s_type = type_of ae in

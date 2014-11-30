@@ -1,6 +1,5 @@
 {
     open Parser
-
     let indent_stack = Stack.create()
 }
 
@@ -13,10 +12,10 @@ let num = ['-' '+']? digit* (['.'] digit+)?
 let whitespace = [' ' '\t']*
 
 rule token = parse
-    "//"         { single_comment lexbuf }
+    "//"           { single_comment lexbuf }
     | "/*"         { block_comment lexbuf }
     | ['\r' '\n']+ { indent lexbuf }
-    | [' ' '\t']    { token lexbuf }
+    | [' ' '\t']   { token lexbuf }
 
     | '(' { LPAREN }
     | ')' { RPAREN }
@@ -36,11 +35,15 @@ rule token = parse
     | "else"       { ELSE }
     
     | "is"  | "==" { EQ }
+    | "and" | "&&" { AND }
+    | "or"  | "||" { OR }
+    | "not" | '!'  { NOT }
     | "!="         { NEQ }
     | '>'          { GT }
     | '<'          { LT }
     | ">="         { GTE }
     | "<="         { LTE }    
+    
     | "val"        { VAL }
     | "Num"        { TNUM }
     | "String"     { TSTRING }
@@ -49,7 +52,6 @@ rule token = parse
     | "Tuple"      { TTUPLE }
     | "List"       { TLIST }
 
-
     | num as lxm    { NUM(int_of_string lxm) }
     | "False"       { BOOL(false) }
     | "True"        { BOOL(true) }
@@ -57,8 +59,7 @@ rule token = parse
     | id as lxm     { ID(lxm) }
     | char as lxm   { CHAR(lxm)}
 
-
-    | eof           { EOF }
+    | eof              { EOF }
     | _ as illegal     { raise (Failure("illegal character " ^ Char.escaped illegal)) }
 
 and single_comment = parse

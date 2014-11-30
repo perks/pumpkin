@@ -2,7 +2,7 @@
 
 %token TERMINATOR INDENT DEDENT
 %token LPAREN RPAREN COLON COMMA LBRACK RBRACK TYPEARROW
-%token PLUS MINUS TIMES DIVIDE MODULO EQ NEQ GT LT GTE LTE
+%token PLUS MINUS TIMES DIVIDE MODULO EQ NEQ GT LT GTE LTE AND OR NOT
 %token VAL ASSIGN
 %token IF ELSE
 %token TNUM TUNIT TBOOL TSTRING TCHAR TTUPLE TLIST
@@ -17,6 +17,9 @@
 
 %nonassoc TNUM TUNIT TBOOL TSTRING TCHAR TTUPLE TLIST
 %right ASSIGN
+%left OR
+%left AND
+%left NOT
 %left EQ NEQ
 %left LT GT LTE GTE
 %left PLUS MINUS
@@ -45,6 +48,7 @@ expression:
   | IF LPAREN expression RPAREN COLON block                  { IfBlock($3, $6) }
   | IF LPAREN expression RPAREN COLON block ELSE COLON block { IfElseBlock($3, $6, $9) }
   | VAL ID COLON types ASSIGN expression { TypeAssing($2, $6, $4) }
+  | VAL ID ASSIGN expression             { Assing($2, $4) }
   | expression PLUS   expression         { Binop($1, Plus, $3) }
   | expression MINUS  expression         { Binop($1, Minus, $3) }
   | expression TIMES  expression         { Binop($1, Times, $3) }
@@ -56,6 +60,8 @@ expression:
   | expression LT     expression         { Binop($1, Lt, $3) }
   | expression LTE    expression         { Binop($1, Lte, $3) }
   | expression GTE    expression         { Binop($1, Gte, $3) }
+  | expression AND    expression         { Binop($1, And, $3) }
+  | expression OR     expression         { Binop($1, Or, $3) }
   | NUM                                  { IntLiteral($1) }
   | BOOL                                 { BoolLiteral($1) }
   | STRING                               { StringLiteral($1) }
@@ -64,7 +70,6 @@ expression:
   | LPAREN exp_listing RPAREN            { TupleLiteral($2) }
   | LBRACK exp_listing RBRACK            { ListLiteral($2) }
   | TLIST LPAREN exp_listing RPAREN      { ListLiteral($3) }
-/*  | VAL ID ASSIGN expression                  { Assign($2, $4) }*/
 
 exp_listing:
   expression COMMA          { [$1] }

@@ -21,7 +21,7 @@ Tasks
 4. X Strings/Char []
 5. X Lists/Tupals []
 6. Algebraic Data Types []
-7. Type Checking/Inference
+7. X Type Checking/Inference
 8. Simple Functions: declaration, calling, simple arguments []
 9. Advanced Functions: composition, piping, first class functions, recursion []
 10. Error Handeling []
@@ -29,3 +29,4 @@ Tasks
 12. X If else
 13. String interpolation
 14. Maps
+15. Not
