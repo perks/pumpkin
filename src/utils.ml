@@ -2,7 +2,7 @@ open Ast
 
 (* Raw printer *)
 let type_to_string = function
-    TNum -> "TNUM"
+    TInt -> "TINT"
   | TUnit -> "TUNIT"
   | TBool -> "TBOOL"
   | TString -> "TSTRING"

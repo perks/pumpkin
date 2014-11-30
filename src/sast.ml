@@ -1,6 +1,6 @@
 open Ast
 
-type sTypes = Num | Unit | Bool | String | Char | Tuple | List
+type sTypes = Int | Unit | Bool | String | Char | Tuple | List
 
 type aExpression =
     AnIntLiteral of int * sTypes

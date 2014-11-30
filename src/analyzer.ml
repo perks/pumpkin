@@ -16,7 +16,7 @@ let type_of = function
   | AIfElseBlock(_, _, _, t) -> t
 
 let aType_to_saType = function
-    TNum -> Num
+    TInt -> Int
   | TBool -> Bool
   | TString -> String
   | TChar -> Char
@@ -31,12 +31,39 @@ let match_all_types l =
     else lis::rest 
   in
   let unique = List.fold_left check_types [] temp_types in 
-  if List.length unique != 1 then 0
-  else 1
+  if List.length unique <> 1 then false
+  else true
+
+let valid_binop (e1, e2, op) = 
+  let t1 = (type_of e1) in
+  if (op = Minus || op = Divide || op = Modulo) then
+    if t1 <> Sast.Int then
+      raise(Failure("Operator requires a number"))
+  else if op = Gt || op = Lt ||op = Gte ||op = Lte || op = Plus ||op = Times then
+    if t1 <> Sast.Int && t1 <> Sast.String && t1 <> Sast.Tuple && t1 <> Sast.List then
+      raise (Failure ("Invalid operator for selected types"))
+  else if op = And || op = Or then
+    if (type_of e1) <> Sast.Bool then
+      raise (Failure ("Operator requires Bool type"))
+  else if op = Not then
+    raise(Failure("Invalid Binop"))
+  else if (type_of e1) <> (type_of e2) then
+    raise (Failure ("Type Mismatch"))
+
+let valid_uniop (e, op) = 
+  let t = (type_of e) in
+  if (op = Minus || op = Plus) then
+    if t <> Sast.Int then
+      raise(Failure("Unary plus or minus requires a number"))
+  else if (op = Not) then
+    if t <> Sast.Bool then
+      raise(Failure("Not requires a Bool type"))
+  else raise(Failure("Invalid unary operator"))
+
 
 let rec annotate_expression (expr : Ast.expression) : Sast.aExpression =
   match expr with
-    IntLiteral(n) -> AnIntLiteral(n, Sast.Num)
+    IntLiteral(n) -> AnIntLiteral(n, Sast.Int)
   | BoolLiteral(b) -> ABoolLiteral(b, Sast.Bool)
   | StringLiteral(s) -> AStringLiteral(s, Sast.String)
   | CharLiteral(c) -> ACharLiteral(c, Sast.Char)
@@ -46,26 +73,25 @@ let rec annotate_expression (expr : Ast.expression) : Sast.aExpression =
     ATupleLiteral(at_list, Sast.Tuple)
   | ListLiteral(l) ->
     let a_list = annotate_expression_list l in
-    if (match_all_types a_list) != 1 then
+    if not(match_all_types a_list) then
       raise(Failure("List elemets' types must all be the same"))
     else AListLiteral(a_list, Sast.List);
   | Binop(e1, op, e2) ->
     let ae1 = annotate_expression e1 and
         ae2 = annotate_expression e2 in
-    if (match_all_types [ae1; ae2]) != 1 then
-      raise (Failure ("Type Mismatch"))
-    else
-      let et = type_of ae1 in 
-      ABinop(ae1, op, ae2, et)
+    valid_binop (ae1, ae2, op);
+    let et = type_of ae1 in 
+    ABinop(ae1, op, ae2, et)
   | Uniop(op, e) ->
     let ae = annotate_expression e in
     let et = type_of ae in 
+    valid_uniop(ae, op);
     AUniop(op, ae, et)
   | TypeAssing(i, e, t) ->
     let ae = annotate_expression e in
     let ae_s_type = type_of ae and 
         t_s_type = aType_to_saType t in
-    if ae_s_type != t_s_type then
+    if ae_s_type <> t_s_type then
       raise (Failure ("Type Mismatch"))
     else ATypeAssign(i, ae, t_s_type)
   | Assing(i, e) ->
@@ -78,7 +104,7 @@ let rec annotate_expression (expr : Ast.expression) : Sast.aExpression =
     le = annotate_expression (List.hd (List.rev l)) in
     let ae_s_type = type_of ae and
     le_s_type = type_of le in
-    if ae_s_type != Sast.Bool then
+    if ae_s_type <> Sast.Bool then
       raise (Failure ("If requires a boolean expression"))
     else AIfBlock(ae, a_list, le_s_type)
   | IfElseBlock(e1, l1, l2) ->
@@ -90,9 +116,9 @@ let rec annotate_expression (expr : Ast.expression) : Sast.aExpression =
     let ae_s_type = type_of ae in
     let le1_s_type = type_of le1 and
     le2_s_type = type_of le2 in
-    if ae_s_type != Sast.Bool then
+    if ae_s_type <> Sast.Bool then
       raise (Failure ("If requires a boolean expression"))
-    else if le1_s_type != le2_s_type then
+    else if le1_s_type <> le2_s_type then
       raise (Failure ("Return type of if and else must match"))
     else AIfElseBlock(ae, a_list1, a_list2, le1_s_type)
 

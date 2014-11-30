@@ -2,7 +2,7 @@ type operator =
   Plus | Minus | Times | Divide | Modulo | Eq | Neq | Gt | Lt | Gte | Lte | And | Or | Not
 
 type tType = 
-	TNum | TUnit | TBool | TString | TChar | TTuple | TList
+	TInt | TUnit | TBool | TString | TChar | TTuple | TList
 
 type expression =
     IntLiteral of int
