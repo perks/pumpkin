@@ -1,6 +1,5 @@
 {
     open Parser
-    open Utils
     
     let lineno = ref 1
     let indent_stack = Stack.create ()

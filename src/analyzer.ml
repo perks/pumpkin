@@ -54,11 +54,13 @@ let rec annotate_expression (expr : Ast.expression) : Sast.aExpression =
         ae2 = annotate_expression e2 in
     if (match_all_types [ae1; ae2]) != 1 then
       raise (Failure ("Type Mismatch"))
-    else ABinop(ae1, op, ae2, ae1_s_type)
-  | Uniop(op, e) -> 
+    else
+      let et = type_of ae1 in 
+      ABinop(ae1, op, ae2, et)
+  | Uniop(op, e) ->
     let ae = annotate_expression e in
-    let ae_s_type = type_of ae in
-    AUniop(op, ae, ae_s_type)
+    let et = type_of ae in 
+    AUniop(op, ae, et)
   | TypeAssing(i, e, t) ->
     let ae = annotate_expression e in
     let ae_s_type = type_of ae and 

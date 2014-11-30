@@ -9,6 +9,7 @@
 *.cmxa
 
 *.orig
+*.output
 
 scanner.ml
 parser.ml
