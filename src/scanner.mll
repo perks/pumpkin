@@ -8,7 +8,8 @@
 let alpha = ['a'-'z' 'A'-'Z']
 let digit = ['0'-'9']
 let id  = alpha (alpha | digit | '_')*
-let string = '"' [^ '"' '\\']*('\\' '.' [^ '"' '\\']*)* '"'
+let string_chars = [^ '"' '\\' '#']*('\\' '.' [^ '"' '\\' '#']*)*
+let string = '"' string_chars '"'
 let char = ''' ( alpha | digit ) '''
 let double = digit+ ['.'] digit+
 let int = digit+
@@ -28,6 +29,8 @@ rule token = parse
     | ')' { RPAREN }
     | '[' { LBRACK }
     | ']' { RBRACK }
+    | '{' { LCBRACK }
+    | '}' { RCBRACK }
     | '=' { ASSIGN }
     | '+' { PLUS }
     | '-' { MINUS }
@@ -36,6 +39,8 @@ rule token = parse
     | '%' { MODULO }
     | ':' { COLON }
     | ',' { COMMA }
+    | '"' { QUOTE }
+    | '#' { POUND }
 
     | "->"         { TYPEARROW }
     | "if"         { IF }
@@ -66,7 +71,7 @@ rule token = parse
     | id as lxm     { ID(lxm) }
     | char as lxm   { CHAR(String.get lxm 1)}
     | "^"           { UNIT }
-
+    | string_chars as lxm { STRINGCHARS(lxm)}
 
     | eof           { EOF }
     | _ as illegal  
@@ -113,4 +118,3 @@ and indent = parse
 {
   Stack.push 0 indent_stack
 }
-

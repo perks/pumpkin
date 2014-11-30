@@ -14,6 +14,8 @@ let type_of = function
   | AListLiteral(_, t) -> t
   | AIfBlock(_, _, t) -> t
   | AIfElseBlock(_, _, _, t) -> t
+  | AStringChars(_, t) -> t
+  | AStringInterpolation(_, t) -> t
 
 let aType_to_saType = function
     TInt -> Int
@@ -121,6 +123,11 @@ let rec annotate_expression (expr : Ast.expression) : Sast.aExpression =
     else if le1_s_type <> le2_s_type then
       raise (Failure ("Return type of if and else must match"))
     else AIfElseBlock(ae, a_list1, a_list2, le1_s_type)
+  | StringChars(s) -> AStringChars(s, Sast.String)
+  | StringInterpolation(l) ->
+    let a_list = annotate_expression_list l in
+(*     MAKE IT ONE STRING
+ *)    AStringInterpolation(s. Sast.String)
 
 and annotate_expression_list (expr_list : Ast.expression list) : Sast.aExpression list =
   List.map (fun expr -> annotate_expression expr) expr_list
