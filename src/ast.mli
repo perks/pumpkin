@@ -13,5 +13,10 @@ type expression =
   | Binop of expression * operator * expression
   | Uniop of operator * expression
   | TypeAssing of string * expression * tType
+  | Assing of string * expression
+  | TupleLiteral of expression list
+  | ListLiteral of expression list
+  | IfBlock of expression * expression list
+  | IfElseBlock of expression * expression list * expression list
   
 type root = expression list

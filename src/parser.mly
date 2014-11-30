@@ -62,6 +62,8 @@ expression:
   | expression GTE    expression         { Binop($1, Gte, $3) }
   | expression AND    expression         { Binop($1, And, $3) }
   | expression OR     expression         { Binop($1, Or, $3) }
+  | MINUS expression                     { Uniop(Minus, $2) }
+  | PLUS expression                      { Uniop(Plus, $2) }
   | INT                                  { IntLiteral($1) }
   | BOOL                                 { BoolLiteral($1) }
   | STRING                               { StringLiteral($1) }
@@ -72,8 +74,15 @@ expression:
   | TLIST LPAREN exp_listing RPAREN      { ListLiteral($3) }
 
 exp_listing:
-  expression COMMA          { [$1] }
-  | exp_listing expression  { $2 :: $1}
+    listing_single { $1 }
+  | listing_multi  { $1 }
+
+listing_single:
+  expression COMMA { [$1] }
+
+listing_multi:
+                                  { [] }
+  | exp_listing COMMA expression  { $3 :: $1}
 
 types:
     TNUM       { TNum }

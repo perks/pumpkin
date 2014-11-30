@@ -30,4 +30,4 @@ utils.cmo: utils.ml ast.cmi parser.cmi parser.cmo sast.cmo
 .PHONY : clean
 clean :
 	rm -f pmkn parser.ml parser.mli scanner.ml \
-	*.cmo *.cmi *.out *.diff
+	*.cmo *.cmi *.out *.diff *.orig

@@ -1,5 +1,4 @@
 open Ast
-open Sast
 
 (* Raw printer *)
 let type_to_string = function
@@ -8,6 +7,8 @@ let type_to_string = function
   | TBool -> "TBOOL"
   | TString -> "TSTRING"
   | TChar -> "TCHAR"
+  | TTuple  -> "TTUPAL"
+  | TList -> "TLIST"
 
 let operation_to_string = function
     Plus -> "PLUS"
@@ -21,6 +22,9 @@ let operation_to_string = function
   | Lt -> "LT"
   | Gte -> "GTE"
   | Lte -> "LTE"
+  | And -> "AND"
+  | Or -> "OR"
+  | Not -> "NOT"
 
 let rec expression_to_string = function
     IntLiteral(i) -> string_of_int(i)
@@ -38,9 +42,26 @@ let rec expression_to_string = function
     "U" ^ operation_to_string op ^ " " ^
     "(" ^expression_to_string e ^ ")"
   | TypeAssing(id, e, t) ->
-    "ASSIGN(" ^ type_to_string t ^ ") " ^ 
-    id ^ " " ^
+    "TASSIGN(" ^ type_to_string t ^ ") " ^ 
+    id ^ " = " ^
     expression_to_string e
+  | Assing(id, e) ->
+    "ASSIGN" ^ 
+    id ^ " = " ^
+    expression_to_string e
+  | TupleLiteral(e_list) ->
+    "TUPAL(\n\t" ^ String.concat ",\n\t" (List.map expression_to_string e_list) ^ "\n)"
+  | ListLiteral(e_list) ->
+    "List(\n\t" ^ String.concat ",\n\t" (List.map expression_to_string e_list) ^ "\n)"
+  | IfBlock(e, e_list_if) ->
+    "IF " ^ expression_to_string e ^ "\n" ^
+    String.concat "\n\t" (List.map expression_to_string e_list_if) ^ "\n"
+  | IfElseBlock(e, e_list_if, e_list_else) ->
+    "IF " ^ expression_to_string e ^ "\n" ^
+    String.concat "\n\t" (List.map expression_to_string e_list_if) ^ "\n" ^
+    "ELSE\n" ^
+    String.concat "\n\t" (List.map expression_to_string e_list_else) ^ "\n"
+    
 
 let program_to_string (program : Ast.expression list) =
   "START\n" ^ String.concat "\n" (List.map expression_to_string program) ^ "\nEOF\n"
