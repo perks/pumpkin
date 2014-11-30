@@ -5,7 +5,7 @@
 %token PLUS MINUS TIMES DIVIDE MODULO EQ NEQ GT LT GTE LTE AND OR NOT
 %token VAL ASSIGN
 %token IF ELSE
-%token TNUM TUNIT TBOOL TSTRING TCHAR TTUPLE TLIST
+%token TINT TUNIT TBOOL TSTRING TCHAR TTUPLE TLIST
 %token <string> ID
 %token <int> INT
 %token <int> DEDENT_COUNT
@@ -15,7 +15,7 @@
 %token UNIT
 %token EOF
 
-%nonassoc TNUM TUNIT TBOOL TSTRING TCHAR TTUPLE TLIST
+%nonassoc TINT TUNIT TBOOL TSTRING TCHAR TTUPLE TLIST
 %right ASSIGN
 %left OR
 %left AND
@@ -86,7 +86,7 @@ listing_multi:
   | exp_listing COMMA expression  { $3 :: $1}
 
 types:
-    TNUM       { TInt }
+    TINT       { TInt }
   | TBOOL      { TBool }
   | TSTRING    { TString }
   | TCHAR      { TChar }
