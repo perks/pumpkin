@@ -75,15 +75,12 @@ expression:
   | TLIST LPAREN exp_listing RPAREN      { ListLiteral($3) }
 
 exp_listing:
-    listing_single { $1 }
-  | listing_multi  { $1 }
+    expression COMMA { [$1] }
+  | expression COMMA exp_listing_head { $1::$3 }
 
-listing_single:
-  expression COMMA { [$1] }
-
-listing_multi:
-                                  { [] }
-  | exp_listing COMMA expression  { $3 :: $1}
+exp_listing_head:
+    expression COMMA exp_listing_head { $1::$3 }
+  | expression  { [$1] }
 
 types:
     TINT       { TInt }
