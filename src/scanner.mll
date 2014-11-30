@@ -52,7 +52,7 @@ rule token = parse
     | "<="         { LTE }    
     
     | "val"        { VAL }
-    | "Num"        { TNUM }
+    | "Int"        { TINT }
     | "String"     { TSTRING }
     | "Unit"       { TUNIT }
     | "Char"       { TCHAR }
