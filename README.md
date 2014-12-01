@@ -16,11 +16,7 @@ Tasks
 ======
 
 1. X Numerical expression/Unit []
-<<<<<<< HEAD
-2. Scope/Line Breaks []
-=======
 2. X Scope/Line Breaks []
->>>>>>> 78db75ff66ffca02d3828a3a14eccabcc177055b
 3. X Booleans []
 4. X Strings/Char []
 5. X Lists/Tupals []
@@ -31,9 +27,5 @@ Tasks
 10. Error Handeling []
 11. Importation []
 12. X If else
-<<<<<<< HEAD
-13. X String interpolation
-=======
 13. String interpolation
->>>>>>> 78db75ff66ffca02d3828a3a14eccabcc177055b
 14. Maps

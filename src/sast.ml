@@ -1,9 +1,10 @@
 open Ast
 
-type sTypes = Int | Unit | Bool | String | Char | Tuple | List
+type sTypes = Int | Unit | Bool | String | Char | Tuple | List | Float
 
 type aExpression =
     AnIntLiteral of int * sTypes
+  | AFloatLiteral of floar * sTypes
   | ABinop of aExpression * operator * aExpression * sTypes
   | AUnop of operator * aExpression * sTypes
   | ABoolLiteral of bool * sTypes

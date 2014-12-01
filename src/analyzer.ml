@@ -3,6 +3,7 @@ open Sast
 
 let type_of = function
     AnIntLiteral(_, t) -> t
+  | AFloatLiteral(_, t) -> t
   | ABoolLiteral(_, t) -> t
   | AStringLiteral(_, t) -> t
   | ACharLiteral(_, t) -> t
@@ -19,6 +20,7 @@ let type_of = function
 
 let aType_to_saType = function
     TInt -> Int
+  | TFloat -> Float
   | TBool -> Bool
   | TString -> String
   | TChar -> Char
@@ -39,10 +41,10 @@ let match_all_types l =
 let valid_binop (e1, e2, op) = 
   let t1 = (type_of e1) in
   if (op = Minus || op = Divide || op = Modulo) then
-    if t1 <> Sast.Int then
+    if t1 <> Sast.Int || t1 <> Sast.Float then
       raise(Failure("Operator requires a number"))
   else if op = Gt || op = Lt ||op = Gte ||op = Lte || op = Plus ||op = Times then
-    if t1 <> Sast.Int && t1 <> Sast.String && t1 <> Sast.Tuple && t1 <> Sast.List then
+    if t1 <> Sast.Int && t1 <> Sast.Float && t1 <> Sast.String && t1 <> Sast.Tuple && t1 <> Sast.List then
       raise (Failure ("Invalid operator for selected types"))
   else if op = And || op = Or then
     if (type_of e1) <> Sast.Bool then
@@ -66,6 +68,7 @@ let valid_uniop (e, op) =
 let rec annotate_expression (expr : Ast.expression) : Sast.aExpression =
   match expr with
     IntLiteral(n) -> AnIntLiteral(n, Sast.Int)
+  | FloatLiteral(f) -> AFloatLiteral(f, Sast.Float)
   | BoolLiteral(b) -> ABoolLiteral(b, Sast.Bool)
   | StringLiteral(s) -> AStringLiteral(s, Sast.String)
   | CharLiteral(c) -> ACharLiteral(c, Sast.Char)
