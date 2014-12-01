@@ -55,6 +55,21 @@ let rec expression_to_string = function
     "List(\n\t" ^ String.concat ",\n\t" (List.map expression_to_string e_list) ^ "\n)"
   | Block(e_list) ->
     "\nBLOCK\n" ^ String.concat "\n" (List.map expression_to_string e_list) ^ "\nENDBLOCK\n"
+  | IfBlock(e, e_list) ->
+    "\nIF(" ^ expression_to_string e ^ ")\n" ^
+    "\t" ^ String.concat "\n\t" (List.map expression_to_string e_list) ^ "\n" ^
+    "ENDIF\n"
+  | IfElseBlock(e, e_list1, e_list2) ->
+    "\nIF(" ^ expression_to_string e ^ ")\n" ^
+    "\t" ^ String.concat "\n\t" (List.map expression_to_string e_list1) ^ "\n" ^
+    "ELSE\n" ^
+    "\t" ^ String.concat "\n\t" (List.map expression_to_string e_list2) ^ "\n" ^
+    "ENDIF\n"
+  | StringChars(s) -> "STRINGCHAR(" ^ s ^ ")"
+  | StringInterpolation(e_list) ->
+    "\nSTRINGINTERPOLATION\n" ^
+    "\t" ^ String.concat "\n\t" (List.map expression_to_string e_list) ^ "\n" ^
+    "ENDSTRINGINTERPOLATION\n"
     
 let program_to_string (root : Ast.expression list) =
   "START\n" ^ String.concat "\n" (List.map expression_to_string root) ^ "\nEND\n"

@@ -40,8 +40,7 @@ root:
 expression:
     LPAREN expression RPAREN             { $2 }
   | INDENT expression_block DEDENT       { Block(List.rev $2) }
-  | IF LPAREN expression RPAREN COLON block                  { IfBlock($3, $6) }
-  | IF LPAREN expression RPAREN COLON block ELSE COLON block { IfElseBlock($3, $6, $9) }
+  | controlflow                          { $1 }
   | VAL ID COLON types ASSIGN expression { TypeAssing($2, $6, $4) }
   | VAL ID ASSIGN expression             { Assing($2, $4) }
   | expression PLUS   expression         { Binop($1, Plus, $3) }
@@ -87,6 +86,20 @@ exp_listing_head:
 expression_block:
     expression TERMINATOR { [$1] }
   | expression_block expression TERMINATOR { $2::$1 }
+
+controlflow:
+    if_statement indent_block { IfBlock($1, $2) }
+  | if_statement indent_block else_statement indent_block
+        { IfElseBlock($1, $2, $4) }
+
+if_statement:
+  IF LPAREN expression RPAREN COLON TERMINATOR { $3 }
+
+else_statement:
+  ELSE COLON TERMINATOR { }
+
+indent_block:
+  INDENT expression_block DEDENT TERMINATOR { List.rev $2 }
 
 types:
     TINT       { TInt }

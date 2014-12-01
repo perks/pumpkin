@@ -16,6 +16,7 @@ type expression =
   | Assing of string * expression
   | TupleLiteral of expression list
   | ListLiteral of expression list
+  | Block of expression list
   | IfBlock of expression * expression list
   | IfElseBlock of expression * expression list * expression list
   | StringChars of string

@@ -7,7 +7,7 @@ scanner.ml : scanner.mll
 	ocamllex scanner.mll
 
 parser.ml parser.mli : parser.mly
-	ocamlyacc parser.mly
+	ocamlyacc -v parser.mly
 
 scanner.cmo: scanner.ml parser.cmo utils.cmo
 parser.cmo: ast.cmi parser.cmi
@@ -30,4 +30,4 @@ processor.cmo: processor.ml parser.cmo scanner.cmo
 .PHONY : clean
 clean :
 	rm -f pmkn parser.ml parser.mli scanner.ml \
-	*.cmo *.cmi *.out *.diff *.orig
+	*.cmo *.cmi *.out *.diff *.orig *.output
