@@ -38,7 +38,7 @@ let rec expression_to_string = function
     expression_to_string e1 ^ " " ^
     operation_to_string op ^ " " ^
     expression_to_string e2
-  | Uniop(op, e) ->
+  | Unop(op, e) ->
     "U" ^ operation_to_string op ^ " " ^
     expression_to_string e
   | TypeAssing(id, e, t) ->

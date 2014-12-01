@@ -40,9 +40,40 @@ expression:
     LPAREN expression RPAREN             { $2 }
   | indent_block                         { Block($1) }
   | controlflow                          { $1 }
-  | VAL ID COLON types ASSIGN expression { TypeAssing($2, $6, $4) }
+  | assignment                           { $1 }
+  | binop                                { $1 }
+  | unop                                 { $1 }
+  | literal                              { $1 }
+
+indent_block:
+    INDENT expression_block DEDENT { List.rev $2 }
+
+controlflow:
+    if_statement indent_block  { IfBlock($1, $2) }
+  | if_statement indent_block
+    else_statement indent_block { IfElseBlock($1, $2, $4) }
+
+if_statement:
+    IF expression COLON TERMINATOR { $2 }
+
+else_statement:
+    ELSE COLON TERMINATOR { }
+
+assignment: 
+    VAL ID COLON types ASSIGN expression { TypeAssing($2, $6, $4) }
   | VAL ID ASSIGN expression             { Assing($2, $4) }
-  | expression PLUS   expression         { Binop($1, Plus, $3) }
+
+types:
+    TINT       { TInt }
+  | TBOOL      { TBool }
+  | TSTRING    { TString }
+  | TCHAR      { TChar }
+  | TUNIT      { TUnit }
+  | TTUPLE     { TTuple }
+  | TLIST      { TList }
+
+binop:
+    expression PLUS   expression         { Binop($1, Plus, $3) }
   | expression MINUS  expression         { Binop($1, Minus, $3) }
   | expression TIMES  expression         { Binop($1, Times, $3) }
   | expression DIVIDE expression         { Binop($1, Divide, $3) }
@@ -55,10 +86,14 @@ expression:
   | expression GTE    expression         { Binop($1, Gte, $3) }
   | expression AND    expression         { Binop($1, And, $3) }
   | expression OR     expression         { Binop($1, Or, $3) }
-  | MINUS expression %prec UMINUS        { Uniop(Minus, $2) }
-  | PLUS expression %prec UPLUS          { Uniop(Plus, $2) }
-  | NOT expression                       { Uniop(Not, $2) }
-  | INT                                  { IntLiteral($1) }
+
+unop:
+    MINUS expression %prec UMINUS        { Unop(Minus, $2) }
+  | PLUS expression %prec UPLUS          { Unop(Plus, $2) }
+  | NOT expression                       { Unop(Not, $2) }
+
+literal:
+    INT                                  { IntLiteral($1) }
   | BOOL                                 { BoolLiteral($1) }
   | STRING                               { StringLiteral($1) }
   | CHAR                                 { CharLiteral($1) }
@@ -79,27 +114,4 @@ expression_block:
     expression TERMINATOR { [$1] }
   | expression_block expression TERMINATOR { $2::$1 }
 
-indent_block:
-  INDENT expression_block DEDENT { List.rev $2 }
 
-controlflow:
-    if_statement indent_block  { IfBlock($1, $2) }
-  | if_statement indent_block
-    else_statement indent_block { IfElseBlock($1, $2, $4) }
-
-if_statement:
-  IF expression COLON TERMINATOR { $2 }
-
-else_statement:
-  ELSE COLON TERMINATOR { }
-
-
-
-types:
-    TINT       { TInt }
-  | TBOOL      { TBool }
-  | TSTRING    { TString }
-  | TCHAR      { TChar }
-  | TUNIT      { TUnit }
-  | TTUPLE     { TTuple }
-  | TLIST      { TList }

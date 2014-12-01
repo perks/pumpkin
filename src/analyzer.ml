@@ -8,7 +8,7 @@ let type_of = function
   | ACharLiteral(_, t) -> t
   | AUnit(t) -> t
   | ABinop(_, _, _, t) -> t
-  | AUniop(_, _, t) -> t
+  | AUnop(_, _, t) -> t
   | ATypeAssign(_, _, t) -> t
   | ATupleLiteral(_, t) -> t
   | AListLiteral(_, t) -> t
@@ -84,11 +84,11 @@ let rec annotate_expression (expr : Ast.expression) : Sast.aExpression =
     valid_binop (ae1, ae2, op);
     let et = type_of ae1 in 
     ABinop(ae1, op, ae2, et)
-  | Uniop(op, e) ->
+  | Unop(op, e) ->
     let ae = annotate_expression e in
     let et = type_of ae in 
     valid_uniop(ae, op);
-    AUniop(op, ae, et)
+    AUnop(op, ae, et)
   | TypeAssing(i, e, t) ->
     let ae = annotate_expression e in
     let ae_s_type = type_of ae and 

@@ -5,7 +5,7 @@ type sTypes = Int | Unit | Bool | String | Char | Tuple | List
 type aExpression =
     AnIntLiteral of int * sTypes
   | ABinop of aExpression * operator * aExpression * sTypes
-  | AUniop of operator * aExpression * sTypes
+  | AUnop of operator * aExpression * sTypes
   | ABoolLiteral of bool * sTypes
   | AStringLiteral of string * sTypes
   | ACharLiteral of char * sTypes

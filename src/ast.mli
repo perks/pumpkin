@@ -11,7 +11,7 @@ type expression =
   | CharLiteral of char
   | UnitLiteral
   | Binop of expression * operator * expression
-  | Uniop of operator * expression
+  | Unop of operator * expression
   | TypeAssing of string * expression * tType
   | Assing of string * expression
   | TupleLiteral of expression list
