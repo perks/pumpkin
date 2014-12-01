@@ -19,7 +19,5 @@ type expression =
   | Block of expression list
   | IfBlock of expression * expression list
   | IfElseBlock of expression * expression list * expression list
-  | StringChars of string
-  | StringInterpolation of expression list
 
 type root = expression list

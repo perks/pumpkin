@@ -21,13 +21,6 @@ let token_to_string = function
   | TCHAR -> "TCHAR" | TTUPLE -> "TTUPLE"
   | TLIST -> "TLIST"| UNIT -> "UNIT"
   | EOF -> "EOF" 
-  | POUND -> "POUND"
-  | LCBRACK -> "LCBRACK"
-  | RCBRACK -> "RCBRACK"
-  | QUOTE -> "QUOTE"
-  | OPENSTRING -> "OPENSTRING"
-  | CLOSESTRING -> "CLOSESTRING"
-  | STRINGCHARS(s) -> "STRINGCHARS(" ^ s ^ ")"
   | ID(s) -> "ID(" ^ s ^ ")"
   | INT(i) -> "INT(" ^ string_of_int i ^ ")"
   | DEDENT_COUNT(i) -> "DEDENT_COUNT(" ^ string_of_int i ^ ")"
@@ -65,6 +58,7 @@ let expand_token_list token_list =
 let clean_token_list token_list =
   let rec clean = function
       TERMINATOR::TERMINATOR::tail -> clean (TERMINATOR::tail)
+    | TERMINATOR::ELSE::tail -> clean (ELSE::tail)
     | head::tail -> head::(clean tail)
     | [] -> []
   in clean token_list

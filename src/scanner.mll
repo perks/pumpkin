@@ -8,8 +8,7 @@
 let alpha = ['a'-'z' 'A'-'Z']
 let digit = ['0'-'9']
 let id  = alpha (alpha | digit | '_')*
-let string_chars = [^ '"' '\\' '#']*('\\' '.' [^ '"' '\\' '#']*)*
-let string = '"' string_chars '"'
+let string = '"' [^ '"' '\\']*('\\' '.' [^ '"' '\\']*)* '"'
 let char = ''' ( alpha | digit ) '''
 let double = digit+ ['.'] digit+
 let int = digit+
@@ -20,13 +19,11 @@ rule token = parse
     | "/*"         { block_comment lexbuf }
     | ['\r' '\n']+ { incr lineno; indent lexbuf }
     | [' ' '\t']   { token lexbuf }
-
+    
     | '(' { LPAREN }
     | ')' { RPAREN }
     | '[' { LBRACK }
     | ']' { RBRACK }
-    | '{' { LCBRACK }
-    | '}' { RCBRACK }
     | '=' { ASSIGN }
     | '+' { PLUS }
     | '-' { MINUS }
@@ -35,9 +32,7 @@ rule token = parse
     | '%' { MODULO }
     | ':' { COLON }
     | ',' { COMMA }
-    | '"' { QUOTE }
-    | '#' { POUND }
-
+    
     | "->"         { TYPEARROW }
     | "if"         { IF }
     | "else"       { ELSE }
@@ -59,16 +54,15 @@ rule token = parse
     | "Char"       { TCHAR }
     | "Tuple"      { TTUPLE }
     | "List"       { TLIST }
-
+    
     | int as lxm    { INT(int_of_string lxm) }
     | "False"       { BOOL(false) }
     | "True"        { BOOL(true) }
-    | string as lxm { STRING(lxm)}
+    | string as lxm { STRING(lxm) }
     | id as lxm     { ID(lxm) }
     | char as lxm   { CHAR(String.get lxm 1)}
     | "^"           { UNIT }
-    | string_chars as lxm { STRINGCHARS(lxm)}
-
+    
     | eof           
       {
         let indent_length = Stack.length indent_stack -1 in 

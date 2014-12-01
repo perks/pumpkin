@@ -1,18 +1,17 @@
 %{ open Ast %}
 
 %token TERMINATOR INDENT DEDENT
-%token LPAREN RPAREN COLON COMMA LBRACK RBRACK TYPEARROW POUND LCBRACK RCBRACK QUOTE
+%token LPAREN RPAREN COLON COMMA LBRACK RBRACK TYPEARROW
 %token PLUS MINUS TIMES DIVIDE MODULO EQ NEQ GT LT GTE LTE AND OR NOT
 %token UMINUS UPLUS
 %token VAL ASSIGN
 %token IF ELSE
-%token TINT TUNIT TBOOL TSTRING TCHAR TTUPLE TLIST OPENSTRING CLOSESTRING STRINGCHARS
+%token TINT TUNIT TBOOL TSTRING TCHAR TTUPLE TLIST
 %token <string> ID
 %token <int> INT
 %token <int> DEDENT_COUNT
 %token <bool> BOOL
 %token <string> STRING
-%token <string> STRINGCHARS
 %token <char> CHAR
 %token UNIT
 %token EOF
@@ -39,7 +38,7 @@ root:
   
 expression:
     LPAREN expression RPAREN             { $2 }
-  | INDENT expression_block DEDENT       { Block(List.rev $2) }
+  | indent_block                         { Block($1) }
   | controlflow                          { $1 }
   | VAL ID COLON types ASSIGN expression { TypeAssing($2, $6, $4) }
   | VAL ID ASSIGN expression             { Assing($2, $4) }
@@ -67,39 +66,34 @@ expression:
   | LPAREN exp_listing RPAREN            { TupleLiteral($2) }
   | LBRACK exp_listing RBRACK            { ListLiteral($2) }
   | TLIST LPAREN exp_listing RPAREN      { ListLiteral($3) }
-  | QUOTE string_expression QUOTE        { StringInterpolation($2) }
-
-string_expression:
-    expression                                         { [$1] }
-  | POUND LCBRACK expression RCBRACK                   { [$3] }
-  | STRINGCHARS POUND LCBRACK expression RCBRACK       { $4::[StringChars($1)] }
-  | string_expression STRINGCHARS                      { StringChars($2)::$1 }
 
 exp_listing:
     expression COMMA { [$1] }
-  | expression COMMA exp_listing_head { $1::$3 }
+  | expression COMMA exp_listing_tail { $1::$3 }
 
-exp_listing_head:
-    expression COMMA exp_listing_head { $1::$3 }
+exp_listing_tail:
+    expression COMMA exp_listing_tail { $1::$3 }
   | expression  { [$1] }
 
 expression_block:
     expression TERMINATOR { [$1] }
   | expression_block expression TERMINATOR { $2::$1 }
 
+indent_block:
+  INDENT expression_block DEDENT { List.rev $2 }
+
 controlflow:
-    if_statement indent_block { IfBlock($1, $2) }
-  | if_statement indent_block else_statement indent_block
-        { IfElseBlock($1, $2, $4) }
+    if_statement indent_block  { IfBlock($1, $2) }
+  | if_statement indent_block
+    else_statement indent_block { IfElseBlock($1, $2, $4) }
 
 if_statement:
-  IF LPAREN expression RPAREN COLON TERMINATOR { $3 }
+  IF expression COLON TERMINATOR { $2 }
 
 else_statement:
   ELSE COLON TERMINATOR { }
 
-indent_block:
-  INDENT expression_block DEDENT TERMINATOR { List.rev $2 }
+
 
 types:
     TINT       { TInt }
