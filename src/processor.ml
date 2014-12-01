@@ -19,13 +19,16 @@ let token_to_string = function
   | TINT -> "TINT" | TUNIT -> "TUNIT"
   | TBOOL -> "TBOOL" | TSTRING -> "TSTRING"
   | TCHAR -> "TCHAR" | TTUPLE -> "TTUPLE"
-  | TLIST -> "TLIST"| UNIT -> "UNIT"
+  | TLIST -> "TLIST"| TFLOAT -> "TFLOAT"
+  | UNIT -> "UNIT"
   | EOF -> "EOF" 
   | ID(s) -> "ID(" ^ s ^ ")"
   | INT(i) -> "INT(" ^ string_of_int i ^ ")"
+  | FLOAT(f) -> "FLOAT(" ^ string_of_float f ^ ")"
   | DEDENT_COUNT(i) -> "DEDENT_COUNT(" ^ string_of_int i ^ ")"
   | BOOL(b) -> "BOOL(" ^ (if b then "true" else "false") ^ ")"
   | STRING(s) -> "STRING(" ^ s ^ ")"
+  | TUPALACC(i) -> "TUPALACC(" ^ string_of_int i ^ ")"
   | CHAR(c) -> "CHAR(" ^ Char.escaped c ^ ")"
   | DEDENT_EOF(i) -> "DEDENT_EOF(" ^ string_of_int i ^ ")"
 
@@ -39,9 +42,7 @@ let dedent_list_from_count count =
 let build_token_list lexbuf = 
   let rec helper lexbuf token_list =
     match Scanner.token lexbuf with
-        DEDENT_EOF(c) -> 
-          if c > 0 then DEDENT_COUNT(c)::EOF::token_list
-          else EOF::token_list
+        DEDENT_EOF(_) as eof -> eof::token_list
       | t -> t::(helper lexbuf token_list)
   in helper lexbuf []
 
@@ -50,14 +51,14 @@ let expand_token_list token_list =
       INDENT::tail -> TERMINATOR::INDENT::(expand tail)
     | DEDENT_COUNT(c)::tail -> 
         TERMINATOR::(List.append (dedent_list_from_count c) (expand tail))
-    | EOF::tail -> TERMINATOR::EOF::(expand tail)
+    | DEDENT_EOF(c)::tail -> 
+        TERMINATOR::(List.append (dedent_list_from_count c) (expand (EOF::tail)))
     | head::tail -> head::(expand tail)
     | [] -> []
   in expand token_list
 
 let clean_token_list token_list =
   let rec clean = function
-      TERMINATOR::TERMINATOR::tail -> clean (TERMINATOR::tail)
     | TERMINATOR::ELSE::tail -> clean (ELSE::tail)
     | head::tail -> head::(clean tail)
     | [] -> []

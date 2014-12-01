@@ -39,4 +39,4 @@ let _ =
             Char.escaped c ^ "', line " ^ string_of_int ln ^ "\n"
           )
       | Utils.IndentationError(ln) -> 
-        print_string("IndentationError, line\n" ^ string_of_int ln ^ "\n")
+        print_string("Indentation Error, line " ^ string_of_int ln ^ "\n")

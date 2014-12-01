@@ -10,15 +10,16 @@ let digit = ['0'-'9']
 let id  = alpha (alpha | digit | '_')*
 let string = '"' [^ '"' '\\']*('\\' '.' [^ '"' '\\']*)* '"'
 let char = ''' ( alpha | digit ) '''
-let double = digit+ ['.'] digit+
+let float = digit+ ['.'] digit+
 let int = digit+
-let whitespace = [' ' '\t']*
+let whitespace = [' ' '\t']
+let return = ['\r' '\n']
 
 rule token = parse
-    "//"           { single_comment lexbuf }
+      "//"           { single_comment lexbuf }
     | "/*"         { block_comment lexbuf }
-    | ['\r' '\n']+ { incr lineno; indent lexbuf }
-    | [' ' '\t']   { token lexbuf }
+    | return+ { incr lineno; indent lexbuf }
+    | whitespace   { token lexbuf }
     
     | '(' { LPAREN }
     | ')' { RPAREN }
@@ -32,6 +33,7 @@ rule token = parse
     | '%' { MODULO }
     | ':' { COLON }
     | ',' { COMMA }
+    | '$'(int as lxm) { TUPALACC(int_of_string lxm) }
     
     | "->"         { TYPEARROW }
     | "if"         { IF }
@@ -49,23 +51,25 @@ rule token = parse
     
     | "val"        { VAL }
     | "Int"        { TINT }
+    | "Float"      { TFLOAT }
     | "String"     { TSTRING }
     | "Unit"       { TUNIT }
     | "Char"       { TCHAR }
     | "Tuple"      { TTUPLE }
     | "List"       { TLIST }
     
-    | int as lxm    { INT(int_of_string lxm) }
     | "False"       { BOOL(false) }
     | "True"        { BOOL(true) }
+    | "^"           { UNIT }
+    | int as lxm    { INT(int_of_string lxm) }
+    | float as lxm  { FLOAT(float_of_string lxm) }
     | string as lxm { STRING(lxm) }
     | id as lxm     { ID(lxm) }
     | char as lxm   { CHAR(String.get lxm 1)}
-    | "^"           { UNIT }
     
     | eof           
       {
-        let indent_length = Stack.length indent_stack -1 in 
+        let indent_length = Stack.length indent_stack - 1 in 
         DEDENT_EOF(indent_length)
       }
     | _ as illegal  
@@ -82,7 +86,13 @@ and block_comment = parse
     | _ { block_comment lexbuf }
 
 and indent = parse
-    whitespace as indt
+    whitespace*return+ { incr lineno; indent lexbuf }
+  | whitespace*eof
+    {
+      let indent_length = Stack.length indent_stack - 1 in 
+      DEDENT_EOF(indent_length)
+    }
+  | whitespace* as indt
       {
         let indt_len = (String.length indt) in
         let top_len = (Stack.top indent_stack) in

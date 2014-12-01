@@ -6,18 +6,19 @@
 %token UMINUS UPLUS
 %token VAL ASSIGN
 %token IF ELSE
-%token TINT TUNIT TBOOL TSTRING TCHAR TTUPLE TLIST
+%token TINT TUNIT TBOOL TSTRING TCHAR TTUPLE TLIST TFLOAT
 %token <string> ID
 %token <int> INT
 %token <int> DEDENT_COUNT
 %token <bool> BOOL
 %token <string> STRING
 %token <char> CHAR
+%token <float> FLOAT
+%token <int> TUPALACC
 %token UNIT
 %token EOF
 %token <int> DEDENT_EOF
 
-%nonassoc TINT TUNIT TBOOL TSTRING TCHAR TTUPLE TLIST
 %right ASSIGN
 %left OR
 %left AND
@@ -27,6 +28,7 @@
 %left TIMES DIVIDE MODULO
 %right UMINUS UPLUS
 %right NOT
+%left TUPALACC
 
 %start root
 %type < Ast.root > root
@@ -71,6 +73,7 @@ types:
   | TUNIT      { TUnit }
   | TTUPLE     { TTuple }
   | TLIST      { TList }
+  | TFLOAT     { TFloat }
 
 binop:
     expression PLUS   expression         { Binop($1, Plus, $3) }
@@ -94,13 +97,16 @@ unop:
 
 literal:
     INT                                  { IntLiteral($1) }
+  | FLOAT                                { FloatLiteral($1) }
   | BOOL                                 { BoolLiteral($1) }
   | STRING                               { StringLiteral($1) }
   | CHAR                                 { CharLiteral($1) }
   | UNIT                                 { UnitLiteral }
   | LPAREN exp_listing RPAREN            { TupleLiteral($2) }
+  | expression TUPALACC                  { TupalAcess($1, $2)}
   | LBRACK exp_listing RBRACK            { ListLiteral($2) }
   | TLIST LPAREN exp_listing RPAREN      { ListLiteral($3) }
+  | ID                                   { IdLiteral($1) }
 
 exp_listing:
     expression COMMA { [$1] }

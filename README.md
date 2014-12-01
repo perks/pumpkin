@@ -16,7 +16,7 @@ Tasks
 ======
 
 1. X Numerical expression/Unit []
-2. Scope/Line Breaks []
+2. X Scope/Line Breaks []
 3. X Booleans []
 4. X Strings/Char []
 5. X Lists/Tupals []

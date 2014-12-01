@@ -9,6 +9,7 @@ let type_to_string = function
   | TChar -> "TCHAR"
   | TTuple  -> "TTUPAL"
   | TList -> "TLIST"
+  | TFloat -> "TFLOAT"
 
 let operation_to_string = function
     Plus -> "PLUS"
@@ -28,12 +29,14 @@ let operation_to_string = function
 
 let rec expression_to_string = function
     IntLiteral(i) -> string_of_int(i)
+  | FloatLiteral(f) -> string_of_float(f)
   | BoolLiteral(b) -> 
     if b then "TRUE"
     else "FALSE"
   | StringLiteral(s) -> s
   | CharLiteral(c) -> Char.escaped c
   | UnitLiteral -> "UNIT"
+  | IdLiteral(id) -> id
   | Binop(e1, op, e2) -> 
     expression_to_string e1 ^ " " ^
     operation_to_string op ^ " " ^
@@ -51,6 +54,8 @@ let rec expression_to_string = function
     expression_to_string e
   | TupleLiteral(e_list) ->
     "TUPAL(\n\t" ^ String.concat ",\n\t" (List.map expression_to_string e_list) ^ "\n)"
+  | TupalAcess(e, i) ->
+    "(" ^ expression_to_string e ^ ")TUPALACC(" ^ string_of_int i ^ ")"
   | ListLiteral(e_list) ->
     "List(\n\t" ^ String.concat ",\n\t" (List.map expression_to_string e_list) ^ "\n)"
   | Block(e_list) ->
