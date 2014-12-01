@@ -3,6 +3,7 @@
 %token TERMINATOR INDENT DEDENT
 %token LPAREN RPAREN COLON COMMA LBRACK RBRACK TYPEARROW POUND LCBRACK RCBRACK QUOTE
 %token PLUS MINUS TIMES DIVIDE MODULO EQ NEQ GT LT GTE LTE AND OR NOT
+%token UMINUS UPLUS
 %token VAL ASSIGN
 %token IF ELSE
 %token TINT TUNIT TBOOL TSTRING TCHAR TTUPLE TLIST OPENSTRING CLOSESTRING STRINGCHARS
@@ -15,17 +16,18 @@
 %token <char> CHAR
 %token UNIT
 %token EOF
+%token <int> DEDENT_EOF
 
 %nonassoc TINT TUNIT TBOOL TSTRING TCHAR TTUPLE TLIST
 %right ASSIGN
 %left OR
 %left AND
-%left NOT
 %left EQ NEQ
 %left LT GT LTE GTE
 %left PLUS MINUS
 %left TIMES DIVIDE MODULO
-%left LPAREN RPAREN
+%right UMINUS UPLUS
+%right NOT
 
 %start root
 %type < Ast.root > root
@@ -33,19 +35,11 @@
 %%
 root:
     /* nothing */ { [] }
-  | body { $1 }
-  | block TERMINATOR { $1 }
-
-body:
-    expression { [$1] }
-  | body TERMINATOR expression { List.append $1 [$3] }
-  | body TERMINATOR { $1 }
-
-block:
-    INDENT body DEDENT { $2 }
- 
+  | root expression TERMINATOR { $2::$1 }
+  
 expression:
-    LPAREN expression RPAREN                                 { $2 }
+    LPAREN expression RPAREN             { $2 }
+  | INDENT expression_block DEDENT       { Block(List.rev $2) }
   | IF LPAREN expression RPAREN COLON block                  { IfBlock($3, $6) }
   | IF LPAREN expression RPAREN COLON block ELSE COLON block { IfElseBlock($3, $6, $9) }
   | VAL ID COLON types ASSIGN expression { TypeAssing($2, $6, $4) }
@@ -63,8 +57,8 @@ expression:
   | expression GTE    expression         { Binop($1, Gte, $3) }
   | expression AND    expression         { Binop($1, And, $3) }
   | expression OR     expression         { Binop($1, Or, $3) }
-  | MINUS expression                     { Uniop(Minus, $2) }
-  | PLUS expression                      { Uniop(Plus, $2) }
+  | MINUS expression %prec UMINUS        { Uniop(Minus, $2) }
+  | PLUS expression %prec UPLUS          { Uniop(Plus, $2) }
   | NOT expression                       { Uniop(Not, $2) }
   | INT                                  { IntLiteral($1) }
   | BOOL                                 { BoolLiteral($1) }
@@ -89,6 +83,10 @@ exp_listing:
 exp_listing_head:
     expression COMMA exp_listing_head { $1::$3 }
   | expression  { [$1] }
+
+expression_block:
+    expression TERMINATOR { [$1] }
+  | expression_block expression TERMINATOR { $2::$1 }
 
 types:
     TINT       { TInt }

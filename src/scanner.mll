@@ -18,12 +18,8 @@ let whitespace = [' ' '\t']*
 rule token = parse
     "//"           { single_comment lexbuf }
     | "/*"         { block_comment lexbuf }
-    | ['\r' '\n']+ 
-      { 
-        incr lineno;
-        indent lexbuf;
-      }
-    | [' ' '\t']    { token lexbuf }
+    | ['\r' '\n']+ { incr lineno; indent lexbuf }
+    | [' ' '\t']   { token lexbuf }
 
     | '(' { LPAREN }
     | ')' { RPAREN }
@@ -73,7 +69,11 @@ rule token = parse
     | "^"           { UNIT }
     | string_chars as lxm { STRINGCHARS(lxm)}
 
-    | eof           { EOF }
+    | eof           
+      {
+        let indent_length = Stack.length indent_stack -1 in 
+        DEDENT_EOF(indent_length)
+      }
     | _ as illegal  
       { 
         raise (Utils.IllegalCharacter(illegal, !lineno))
