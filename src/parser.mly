@@ -15,6 +15,7 @@
 %token <char> CHAR
 %token <float> FLOAT
 %token <int> TUPALACC
+%token <int> LISTACC
 %token UNIT
 %token EOF
 %token <int> DEDENT_EOF
@@ -28,7 +29,7 @@
 %left TIMES DIVIDE MODULO
 %right UMINUS UPLUS
 %right NOT
-%left TUPALACC
+%left TUPALACC LISTACC
 
 %start root
 %type < Ast.root > root
@@ -103,9 +104,10 @@ literal:
   | CHAR                                 { CharLiteral($1) }
   | UNIT                                 { UnitLiteral }
   | LPAREN exp_listing RPAREN            { TupleLiteral($2) }
-  | expression TUPALACC                  { TupalAcess($1, $2)}
+  | expression TUPALACC                  { TupalAccess($1, $2)}
   | LBRACK exp_listing RBRACK            { ListLiteral($2) }
   | TLIST LPAREN exp_listing RPAREN      { ListLiteral($3) }
+  | expression LISTACC                   { ListAccess($1, $2) }
   | ID                                   { IdLiteral($1) }
 
 exp_listing:

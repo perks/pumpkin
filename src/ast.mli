@@ -17,8 +17,9 @@ type expression =
   | TypeAssing of string * expression * tType
   | Assing of string * expression
   | TupleLiteral of expression list
-  | TupalAcess of expression * int
+  | TupalAccess of expression * int
   | ListLiteral of expression list
+  | ListAccess of expression * int
   | Block of expression list
   | IfBlock of expression * expression list
   | IfElseBlock of expression * expression list * expression list

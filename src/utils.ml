@@ -53,11 +53,13 @@ let rec expression_to_string = function
     id ^ " = " ^
     expression_to_string e
   | TupleLiteral(e_list) ->
-    "TUPAL(\n\t" ^ String.concat ",\n\t" (List.map expression_to_string e_list) ^ "\n)"
-  | TupalAcess(e, i) ->
+    "TUPAL(" ^ String.concat ", " (List.map expression_to_string e_list) ^ ")"
+  | TupalAccess(e, i) ->
     "(" ^ expression_to_string e ^ ")TUPALACC(" ^ string_of_int i ^ ")"
   | ListLiteral(e_list) ->
-    "List(\n\t" ^ String.concat ",\n\t" (List.map expression_to_string e_list) ^ "\n)"
+    "List(" ^ String.concat ", " (List.map expression_to_string e_list) ^ ")"
+  | ListAccess(e, i) ->
+    "(" ^ expression_to_string e ^ ")LISTACC(" ^ string_of_int i ^ ")"
   | Block(e_list) ->
     "\nBLOCK\n" ^ String.concat "\n" (List.map expression_to_string e_list) ^ "\nENDBLOCK\n"
   | IfBlock(e, e_list) ->

@@ -29,6 +29,7 @@ let token_to_string = function
   | BOOL(b) -> "BOOL(" ^ (if b then "true" else "false") ^ ")"
   | STRING(s) -> "STRING(" ^ s ^ ")"
   | TUPALACC(i) -> "TUPALACC(" ^ string_of_int i ^ ")"
+  | LISTACC(i) -> "LISTACC(" ^ string_of_int i ^ ")"
   | CHAR(c) -> "CHAR(" ^ Char.escaped c ^ ")"
   | DEDENT_EOF(i) -> "DEDENT_EOF(" ^ string_of_int i ^ ")"
 
