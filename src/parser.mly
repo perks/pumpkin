@@ -1,10 +1,10 @@
 %{ open Ast %}
 
 %token TERMINATOR INDENT DEDENT
-%token LPAREN RPAREN COLON COMMA LBRACK RBRACK TYPEARROW
+%token LPAREN RPAREN COLON COMMA LBRACK RBRACK TYPEARROW DEFARROW
 %token PLUS MINUS TIMES DIVIDE MODULO EQ NEQ GT LT GTE LTE AND OR NOT
 %token UMINUS UPLUS
-%token VAL ASSIGN
+%token VAL ASSIGN DEF
 %token IF ELSE
 %token TINT TUNIT TBOOL TSTRING TCHAR TTUPLE TLIST TFLOAT
 %token <string> ID
@@ -47,6 +47,7 @@ expression:
   | binop                                { $1 }
   | unop                                 { $1 }
   | literal                              { $1 }
+  | func_declaration                     { $1 }
 
 indent_block:
     INDENT expression_block DEDENT { List.rev $2 }
@@ -65,6 +66,10 @@ else_statement:
 assignment: 
     VAL ID COLON types ASSIGN expression { TypeAssing($2, $6, $4) }
   | VAL ID ASSIGN expression             { Assing($2, $4) }
+
+func_declaration:
+    DEF ID LPAREN parameters RPAREN COLON types DEFARROW indent_block { FuncDecl($2, $4, $9, $7) }
+  | DEF ID COLON types DEFARROW indent_block                          { FuncDecl($2, [], $6, $4) }
 
 types:
     TINT       { TInt }
@@ -117,6 +122,10 @@ exp_listing:
 exp_listing_tail:
     expression COMMA exp_listing_tail { $1::$3 }
   | expression  { [$1] }
+
+parameters:
+    ID COLON types                       { [Parameter($1, $3)] }
+  | parameters COMMA ID COLON types      { Parameter($3, $5)::$1 }
 
 expression_block:
     expression TERMINATOR { [$1] }

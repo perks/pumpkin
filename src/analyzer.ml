@@ -16,7 +16,8 @@ let type_of = function
   | AIfBlock(_, _, t) -> t
   | AIfElseBlock(_, _, _, t) -> t
   | AStringChars(_, t) -> t
-  | AStringInterpolation(_, t) -> t
+  | AParameter(_, t) -> t
+  | AFuncDecl(_, _, _, t) -> t
 
 let aType_to_saType = function
     TInt -> Int
@@ -126,10 +127,18 @@ let rec annotate_expression (expr : Ast.expression) : Sast.aExpression =
     else if le1_s_type <> le2_s_type then
       raise (Failure ("Return type of if and else must match"))
     else AIfElseBlock(ae, a_list1, a_list2, le1_s_type)
-  | StringChars(s) -> AStringChars(s, Sast.String)
-  | StringInterpolation(l) ->
-    let a_list = annotate_expression_list l in
-    AStringInterpolation(a_list, Sast.String)
+  | Parameter(s, t) -> 
+    let s_type = aType_to_saType t in
+    AParameter(s, s_type)
+  | FuncDecl(s, params, code, t) ->
+    let s_params = annotate_expression_list params in 
+    let s_code = annotate_expression_list code in
+    let s_type = aType_to_saType t in 
+    let le = annotate_expression (List.hd (List.rev code)) in 
+    let le_s_type = type_of le in
+    if le_s_type <> s_type then
+      raise (Failure("Declared function type and actual function type don't match"))
+    else AFuncDecl(s, s_params, s_code, s_type)
 
 and annotate_expression_list (expr_list : Ast.expression list) : Sast.aExpression list =
   List.map (fun expr -> annotate_expression expr) expr_list

@@ -25,7 +25,7 @@ let operation_to_string = function
   | Lte -> "LTE"
   | And -> "AND"
   | Or -> "OR"
-  | Not -> "NOT"
+  | Not -> "NOT"  
 
 let rec expression_to_string = function
     IntLiteral(i) -> string_of_int(i)
@@ -72,6 +72,16 @@ let rec expression_to_string = function
     "ELSE\n" ^
     "\t" ^ String.concat "\n\t" (List.map expression_to_string e_list2) ^ "\n" ^
     "ENDIF\n"
+  | Parameter(id, t) -> 
+    "\n " ^ id ^ " : " ^ type_to_string t
+  | FuncDecl(id, p_list, e_list, t) -> 
+    if (List.length p_list) <> 0 then 
+      "\n def " ^ id ^ " (" ^ String.concat ", " (List.map expression_to_string p_list) ^ ") : " ^ type_to_string t ^ " =>\n" ^
+      "\t" ^ String.concat "\n\t" (List.map expression_to_string e_list) ^ "\n"
+    else
+      "\n def " ^ id ^ " : " ^ type_to_string t ^ " =>\n" ^
+      "\t" ^ String.concat "\n\t" (List.map expression_to_string e_list) ^ "\n"
+
     
 let program_to_string (root : Ast.expression list) =
   "START\n" ^ String.concat "\n" (List.map expression_to_string root) ^ "\nEND\n"

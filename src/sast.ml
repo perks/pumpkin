@@ -4,7 +4,7 @@ type sTypes = Int | Unit | Bool | String | Char | Tuple | List | Float
 
 type aExpression =
     AnIntLiteral of int * sTypes
-  | AFloatLiteral of floar * sTypes
+  | AFloatLiteral of float * sTypes
   | ABinop of aExpression * operator * aExpression * sTypes
   | AUnop of operator * aExpression * sTypes
   | ABoolLiteral of bool * sTypes
@@ -17,6 +17,8 @@ type aExpression =
   | AIfBlock of aExpression * aExpression list * sTypes
   | AIfElseBlock of aExpression * aExpression list * aExpression list * sTypes
   | AStringChars of string * sTypes
-  | AStringInterpolation of aExpression list * sTypes
+  | AParameter of string * sTypes
+  | AFuncDecl of string * aExpression list * aExpression list * sTypes 
+
 
 type aRoot = aExpression list

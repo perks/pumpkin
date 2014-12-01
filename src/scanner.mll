@@ -36,6 +36,7 @@ rule token = parse
     | '['(int as lxm)']' { LISTACC(int_of_string lxm) }
     
     | "->"         { TYPEARROW }
+    | "=>"         { DEFARROW }
     | "if"         { IF }
     | "else"       { ELSE }
     
@@ -50,6 +51,8 @@ rule token = parse
     | "<="         { LTE }    
     
     | "val"        { VAL }
+    | "def"         { DEF }
+
     | "Int"        { TINT }
     | "Float"      { TFLOAT }
     | "String"     { TSTRING }

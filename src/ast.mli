@@ -1,7 +1,7 @@
 type operator = 
   Plus | Minus | Times | Divide | Modulo | Eq | Neq | Gt | Lt | Gte | Lte | And | Or | Not
 
-type tType = 
+type tTypes = 
 	TInt | TUnit | TBool | TString | TChar | TTuple | TList | TFloat
 
 type expression =
@@ -14,7 +14,7 @@ type expression =
   | IdLiteral of string
   | Binop of expression * operator * expression
   | Unop of operator * expression
-  | TypeAssing of string * expression * tType
+  | TypeAssing of string * expression * tTypes
   | Assing of string * expression
   | TupleLiteral of expression list
   | TupalAccess of expression * int
@@ -23,5 +23,7 @@ type expression =
   | Block of expression list
   | IfBlock of expression * expression list
   | IfElseBlock of expression * expression list * expression list
+  | Parameter of string * tTypes
+  | FuncDecl of string * expression list * expression list * tTypes 
 
 type root = expression list
