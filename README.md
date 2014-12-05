@@ -22,7 +22,7 @@ Tasks
 5. X Lists/Tupals []
 6. Algebraic Data Types []
 7. X Type Checking/Inference
-8. Simple Functions: declaration, calling, simple arguments []
+8. X Simple Functions: declaration, calling, simple arguments []
 9. Advanced Functions: composition, piping, first class functions, recursion []
 10. Error Handeling []
 11. Importation []
@@ -32,4 +32,9 @@ Tasks
 
 Obs.
 ======
-I turned off warnings because that fragile thing was annoying. Feel free to turn it back on
+1. I turned off warnings because that fragile thing was annoying. Feel free to turn it back on
+2. Eliminated one parameter function calling with this syntax: even 2
+3. Haven't implemented function declaration as follows: def x : Int => 1 + 1
+Implemented only as follows:
+def x : Int =>
+	1 + 1

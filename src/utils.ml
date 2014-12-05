@@ -86,6 +86,8 @@ let rec expression_to_string = function
       "\n" ^ id ^ " (" ^ String.concat ", " (List.map expression_to_string p_list) ^ ")\n"
     else
       "\n " ^ id ^ "()"
+  | FuncPiping(e_list) ->
+      "\n" ^ String.concat "|> " (List.map expression_to_string e_list) ^ ")\n"
 
 
     

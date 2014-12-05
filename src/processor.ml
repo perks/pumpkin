@@ -6,6 +6,7 @@ let token_to_string = function
   | RPAREN -> "RPAREN" | COLON -> "COLON"
   | COMMA -> "COMMA" | LBRACK -> "LBRACK"
   | RBRACK -> "RBRACK" | TYPEARROW -> "TYPEARROW" | DEFARROW ->  "DEFARROW"
+  | FPIPE -> "FPIPE" | BPIPE -> "BPIPE"
   | PLUS -> "PLUS" | MINUS -> "MINUS"
   | TIMES -> "TIMES" | DIVIDE -> "DIVIDE"
   | MODULO -> "MODULO" | EQ -> "EQ"

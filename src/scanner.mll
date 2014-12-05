@@ -48,9 +48,11 @@ rule token = parse
     | '>'          { GT }
     | '<'          { LT }
     | ">="         { GTE }
-    | "<="         { LTE }    
+    | "<="         { LTE }
+    | "|>"         { FPIPE }
+    | "<|"         { BPIPE }    
     
-    | "val"        { VAL }
+    | "val"         { VAL }
     | "def"         { DEF }
 
     | "Int"        { TINT }

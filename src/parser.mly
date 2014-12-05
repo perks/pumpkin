@@ -2,6 +2,7 @@
 
 %token TERMINATOR INDENT DEDENT
 %token LPAREN RPAREN COLON COMMA LBRACK RBRACK TYPEARROW DEFARROW
+%token FPIPE BPIPE
 %token PLUS MINUS TIMES DIVIDE MODULO EQ NEQ GT LT GTE LTE AND OR NOT
 %token UMINUS UPLUS
 %token VAL ASSIGN DEF
@@ -20,6 +21,8 @@
 %token EOF
 %token <int> DEDENT_EOF
 
+%right BPIPE
+%left FPIPE
 %right ASSIGN
 %left OR
 %left AND
@@ -47,8 +50,13 @@ expression:
   | binop                                { $1 }
   | unop                                 { $1 }
   | literal                              { $1 }
-  | func_declaration                     { $1 }
+  | funcs                                { $1 }
+  | func_piping                          { $1 }
+
+funcs:
+    func_declaration                     { $1 }
   | func_calling                         { $1 }
+
 
 indent_block:
     INDENT expression_block DEDENT { List.rev $2 }
@@ -74,6 +82,19 @@ func_declaration:
 
 func_calling:
     ID LPAREN literal_listing_comma RPAREN    { FuncCall($1, $3) }
+  | ID LPAREN RPAREN                          { FuncCall($1, [])}
+
+func_piping:
+    func_piping_list                          { FuncPiping($1) }
+
+func_piping_list:
+    funcs FPIPE func_piping_list_tail      { $1::$3 }
+  | funcs BPIPE func_piping_list_tail      { List.append $3 [$1] }
+
+func_piping_list_tail:
+    funcs                                  { [$1] }
+  | funcs FPIPE func_piping_list_tail      { $1::$3 }
+  | funcs BPIPE func_piping_list_tail      { List.append $3 [$1] }
 
 types:
     TINT       { TInt }
