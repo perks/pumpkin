@@ -62,6 +62,8 @@ rule token = parse
     | "Char"       { TCHAR }
     | "Tuple"      { TTUPLE }
     | "List"       { TLIST }
+    | "Map"        { TMAP }
+    
     | "False"       { BOOL(false) }
     | "True"        { BOOL(true) }
     | "^"           { UNIT }

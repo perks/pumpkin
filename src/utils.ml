@@ -60,6 +60,11 @@ let rec expression_to_string = function
     "List(" ^ String.concat ", " (List.map expression_to_string e_list) ^ ")"
   | ListAccess(e, i) ->
     "(" ^ expression_to_string e ^ ")LISTACC(" ^ string_of_int i ^ ")"
+  | MapLiteral(map_list) ->
+    let map_expression_tupal_to_string (e1, e2) = 
+      "(" ^ expression_to_string e1 ^ " -> " ^ expression_to_string e2 ^ ")"
+    in
+    "MAP(" ^ String.concat ", " (List.map map_expression_tupal_to_string map_list) ^ ")"
   | Block(e_list) ->
     "\nBLOCK\n" ^ String.concat "\n" (List.map expression_to_string e_list) ^ "\nENDBLOCK\n"
   | IfBlock(e, e_list) ->

@@ -27,5 +27,6 @@ type expression =
   | FuncDecl of string * expression list * expression list * tTypes
   | FuncCall of string * expression list
   | FuncPiping of expression list
+  | MapLiteral of (expression * expression) list
 
 type root = expression list
