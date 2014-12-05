@@ -1,5 +1,7 @@
 OBJS = utils.cmo scanner.cmo parser.cmo processor.cmo pumpkin.cmo
 
+all: scanner.ml parser.ml analyzer.cmo pmkn
+
 pmkn : $(OBJS)
 	ocamlc -o pmkn $(OBJS)
 
@@ -22,10 +24,10 @@ utils.cmo: utils.ml ast.cmi parser.cmi sast.cmo
 processor.cmo: processor.ml parser.cmo scanner.cmo
 
 %.cmo : %.ml
-	ocamlc -w A -c $<
+	ocamlc -c $<
 
 %.cmi : %.mli
-	ocamlc -w A -c $<
+	ocamlc -c $<
 
 .PHONY : clean
 clean :

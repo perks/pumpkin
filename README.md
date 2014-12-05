@@ -29,3 +29,7 @@ Tasks
 12. X If else
 13. String interpolation
 14. Maps
+
+Obs.
+======
+I turned off warnings because that fragile thing was annoying. Feel free to turn it back on

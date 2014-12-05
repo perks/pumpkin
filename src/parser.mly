@@ -14,7 +14,7 @@
 %token <string> STRING
 %token <char> CHAR
 %token <float> FLOAT
-%token <int> TUPALACC
+%token <int> TUPLEACC
 %token <int> LISTACC
 %token UNIT
 %token EOF
@@ -29,7 +29,7 @@
 %left TIMES DIVIDE MODULO
 %right UMINUS UPLUS
 %right NOT
-%left TUPALACC LISTACC
+%left TUPLEACC LISTACC
 
 %start root
 %type < Ast.root > root
@@ -48,6 +48,7 @@ expression:
   | unop                                 { $1 }
   | literal                              { $1 }
   | func_declaration                     { $1 }
+  | func_calling                         { $1 }
 
 indent_block:
     INDENT expression_block DEDENT { List.rev $2 }
@@ -68,8 +69,11 @@ assignment:
   | VAL ID ASSIGN expression             { Assing($2, $4) }
 
 func_declaration:
-    DEF ID LPAREN parameters RPAREN COLON types DEFARROW indent_block { FuncDecl($2, $4, $9, $7) }
-  | DEF ID COLON types DEFARROW indent_block                          { FuncDecl($2, [], $6, $4) }
+    DEF ID LPAREN parameters RPAREN COLON types DEFARROW TERMINATOR indent_block { FuncDecl($2, $4, $10, $7) }
+  | DEF ID COLON types DEFARROW TERMINATOR indent_block                          { FuncDecl($2, [], $7, $4) }
+
+func_calling:
+    ID LPAREN literal_listing_comma RPAREN    { FuncCall($1, $3) }
 
 types:
     TINT       { TInt }
@@ -109,19 +113,27 @@ literal:
   | CHAR                                 { CharLiteral($1) }
   | UNIT                                 { UnitLiteral }
   | LPAREN exp_listing RPAREN            { TupleLiteral($2) }
-  | expression TUPALACC                  { TupalAccess($1, $2)}
+  | expression TUPLEACC                  { TupleAccess($1, $2)}
   | LBRACK exp_listing RBRACK            { ListLiteral($2) }
   | TLIST LPAREN exp_listing RPAREN      { ListLiteral($3) }
   | expression LISTACC                   { ListAccess($1, $2) }
   | ID                                   { IdLiteral($1) }
 
+literal_listing_comma:
+    literal COMMA                            { [$1] }
+  | literal COMMA literal_listing_comma_tail { $1::$3 }
+
+literal_listing_comma_tail:
+    literal                                  { [$1] }
+  | literal COMMA literal_listing_comma_tail { $1::$3 }
+
 exp_listing:
-    expression COMMA { [$1] }
+    expression COMMA                  { [$1] }
   | expression COMMA exp_listing_tail { $1::$3 }
 
 exp_listing_tail:
-    expression COMMA exp_listing_tail { $1::$3 }
-  | expression  { [$1] }
+    expression                        { [$1] }
+  | expression COMMA exp_listing_tail { $1::$3 }
 
 parameters:
     ID COLON types                       { [Parameter($1, $3)] }

@@ -1,3 +1,2 @@
-val test : Float = 1.1
-
-val test : Tuple = (x,1)$1[11]
+def x( y: Int ): Int =>
+	y + 1

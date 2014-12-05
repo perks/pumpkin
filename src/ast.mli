@@ -17,13 +17,14 @@ type expression =
   | TypeAssing of string * expression * tTypes
   | Assing of string * expression
   | TupleLiteral of expression list
-  | TupalAccess of expression * int
+  | TupleAccess of expression * int
   | ListLiteral of expression list
   | ListAccess of expression * int
   | Block of expression list
   | IfBlock of expression * expression list
   | IfElseBlock of expression * expression list * expression list
   | Parameter of string * tTypes
-  | FuncDecl of string * expression list * expression list * tTypes 
+  | FuncDecl of string * expression list * expression list * tTypes
+  | FuncCall of string * expression list
 
 type root = expression list

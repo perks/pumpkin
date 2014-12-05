@@ -1,6 +1,6 @@
 open Ast
 
-type sTypes = Int | Unit | Bool | String | Char | Tuple | List | Float
+type sTypes = Int | Unit | Bool | String | Char | Tuple | List | Float | Function | Id | TAccess | LAccess
 
 type aExpression =
     AnIntLiteral of int * sTypes
@@ -11,14 +11,18 @@ type aExpression =
   | AStringLiteral of string * sTypes
   | ACharLiteral of char * sTypes
   | AUnit of sTypes
+  | AIdLiteral of string * sTypes
   | ATypeAssign of string * aExpression * sTypes
   | ATupleLiteral of aExpression list * sTypes
+  | ATupleAccess of aExpression * int * sTypes
   | AListLiteral of aExpression list * sTypes
+  | AListAccess of aExpression * int * sTypes
   | AIfBlock of aExpression * aExpression list * sTypes
   | AIfElseBlock of aExpression * aExpression list * aExpression list * sTypes
   | AStringChars of string * sTypes
   | AParameter of string * sTypes
   | AFuncDecl of string * aExpression list * aExpression list * sTypes 
-
+  | AFuncCall of string * aExpression list * sTypes
+  | ABlock of aExpression list * sTypes
 
 type aRoot = aExpression list

@@ -7,7 +7,7 @@ let type_to_string = function
   | TBool -> "TBOOL"
   | TString -> "TSTRING"
   | TChar -> "TCHAR"
-  | TTuple  -> "TTUPAL"
+  | TTuple  -> "TTUPLE"
   | TList -> "TLIST"
   | TFloat -> "TFLOAT"
 
@@ -53,9 +53,9 @@ let rec expression_to_string = function
     id ^ " = " ^
     expression_to_string e
   | TupleLiteral(e_list) ->
-    "TUPAL(" ^ String.concat ", " (List.map expression_to_string e_list) ^ ")"
-  | TupalAccess(e, i) ->
-    "(" ^ expression_to_string e ^ ")TUPALACC(" ^ string_of_int i ^ ")"
+    "TUPLE(" ^ String.concat ", " (List.map expression_to_string e_list) ^ ")"
+  | TupleAccess(e, i) ->
+    "(" ^ expression_to_string e ^ ")TUPLEACC(" ^ string_of_int i ^ ")"
   | ListLiteral(e_list) ->
     "List(" ^ String.concat ", " (List.map expression_to_string e_list) ^ ")"
   | ListAccess(e, i) ->
@@ -73,7 +73,7 @@ let rec expression_to_string = function
     "\t" ^ String.concat "\n\t" (List.map expression_to_string e_list2) ^ "\n" ^
     "ENDIF\n"
   | Parameter(id, t) -> 
-    "\n " ^ id ^ " : " ^ type_to_string t
+    id ^ " : " ^ type_to_string t
   | FuncDecl(id, p_list, e_list, t) -> 
     if (List.length p_list) <> 0 then 
       "\n def " ^ id ^ " (" ^ String.concat ", " (List.map expression_to_string p_list) ^ ") : " ^ type_to_string t ^ " =>\n" ^
@@ -81,6 +81,12 @@ let rec expression_to_string = function
     else
       "\n def " ^ id ^ " : " ^ type_to_string t ^ " =>\n" ^
       "\t" ^ String.concat "\n\t" (List.map expression_to_string e_list) ^ "\n"
+  | FuncCall(id, p_list) ->
+    if (List.length p_list) <> 0 then 
+      "\n" ^ id ^ " (" ^ String.concat ", " (List.map expression_to_string p_list) ^ ")\n"
+    else
+      "\n " ^ id ^ "()"
+
 
     
 let program_to_string (root : Ast.expression list) =

@@ -8,16 +8,21 @@ let type_of = function
   | AStringLiteral(_, t) -> t
   | ACharLiteral(_, t) -> t
   | AUnit(t) -> t
+  | AIdLiteral(_, t) -> t
   | ABinop(_, _, _, t) -> t
   | AUnop(_, _, t) -> t
   | ATypeAssign(_, _, t) -> t
   | ATupleLiteral(_, t) -> t
+  | ATupleAccess(_, _, t) -> t
   | AListLiteral(_, t) -> t
+  | AListAccess(_, _, t) -> t
   | AIfBlock(_, _, t) -> t
   | AIfElseBlock(_, _, _, t) -> t
   | AStringChars(_, t) -> t
   | AParameter(_, t) -> t
   | AFuncDecl(_, _, _, t) -> t
+  | AFuncCall(_, _, t) -> t
+  | ABlock(_, t) -> t
 
 let aType_to_saType = function
     TInt -> Int
@@ -74,14 +79,29 @@ let rec annotate_expression (expr : Ast.expression) : Sast.aExpression =
   | StringLiteral(s) -> AStringLiteral(s, Sast.String)
   | CharLiteral(c) -> ACharLiteral(c, Sast.Char)
   | UnitLiteral -> AUnit(Sast.Unit)
+  | IdLiteral(id) -> AIdLiteral(id, Sast.Id)
   | TupleLiteral(l) -> 
     let at_list = annotate_expression_list l in
     ATupleLiteral(at_list, Sast.Tuple)
+  | TupleAccess(e, index) -> 
+    let ae = annotate_expression e in 
+    let ae_t = type_of ae in
+    if ae_t <> Sast.Id && ae_t <> Sast.Tuple then
+      raise(Failure("Indexing tuple on a non tuple object"))
+    else
+      ATupleAccess(ae, index, Sast.TAccess)
   | ListLiteral(l) ->
     let a_list = annotate_expression_list l in
     if not(match_all_types a_list) then
       raise(Failure("List elemets' types must all be the same"))
-    else AListLiteral(a_list, Sast.List);
+    else AListLiteral(a_list, Sast.List)
+  | ListAccess(e, index) -> 
+    let ae = annotate_expression e in 
+    let ae_t = type_of ae in
+    if ae_t <> Sast.Id && ae_t <> Sast.List then
+      raise(Failure("Indexing list on a non list object"))
+    else
+      ATupleAccess(ae, index, Sast.LAccess)
   | Binop(e1, op, e2) ->
     let ae1 = annotate_expression e1 and
         ae2 = annotate_expression e2 in
@@ -139,6 +159,14 @@ let rec annotate_expression (expr : Ast.expression) : Sast.aExpression =
     if le_s_type <> s_type then
       raise (Failure("Declared function type and actual function type don't match"))
     else AFuncDecl(s, s_params, s_code, s_type)
+  | FuncCall(id, params) -> 
+    let s_params = annotate_expression_list params in 
+    AFuncCall(id, s_params, Sast.Function)
+  | Block(l) ->
+    let s_code = annotate_expression_list l and
+    le = annotate_expression (List.hd (List.rev l)) in
+    let b_type = type_of le in
+    ABlock(s_code, b_type) 
 
 and annotate_expression_list (expr_list : Ast.expression list) : Sast.aExpression list =
   List.map (fun expr -> annotate_expression expr) expr_list
