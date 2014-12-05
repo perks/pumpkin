@@ -6,7 +6,7 @@
 %token UMINUS UPLUS
 %token VAL ASSIGN DEF
 %token IF ELSE
-%token TINT TUNIT TBOOL TSTRING TCHAR TTUPLE TLIST TFLOAT
+%token TINT TUNIT TBOOL TSTRING TCHAR TTUPLE TLIST TFLOAT TMAP
 %token <string> ID
 %token <int> INT
 %token <int> DEDENT_COUNT
@@ -117,7 +117,23 @@ literal:
   | LBRACK exp_listing RBRACK            { ListLiteral($2) }
   | TLIST LPAREN exp_listing RPAREN      { ListLiteral($3) }
   | expression LISTACC                   { ListAccess($1, $2) }
+  | TMAP LPAREN map_list_regular RPAREN  { MapLiteral($3) }
+  | LPAREN map_list_special RPAREN       { MapLiteral($2) }
   | ID                                   { IdLiteral($1) }
+
+map_list_regular:
+    LPAREN map_item_regular RPAREN                          { [$2] }
+  | map_list_regular COMMA LPAREN map_item_regular RPAREN   { $4::$1 }
+
+map_item_regular:
+    expression COMMA expression { $1, $3 }
+
+map_list_special:
+    LPAREN map_item_special RPAREN                        { [$2] }
+  | map_list_special COMMA LPAREN map_item_special RPAREN { $4::$1 }
+
+map_item_special:
+  expression TYPEARROW expression { $1, $3 }
 
 literal_listing_comma:
     literal COMMA                            { [$1] }
