@@ -23,12 +23,12 @@ Tasks
 6. Algebraic Data Types []
 7. X Type Checking/Inference
 8. X Simple Functions: declaration, calling, simple arguments []
-9. Advanced Functions: composition, piping, first class functions, recursion []
+9. X Advanced Functions: composition, piping, first class functions, recursion []
 10. Error Handeling []
 11. Importation []
 12. X If else
 13. X Maps
-14. Composition plus piping
+14. X Composition plus piping
 
 Obs.
 ======
@@ -39,3 +39,9 @@ Implemented only as follows:
 def x : Int =>
 	1 + 1
 4. Gabi will not write string interpolation, if you feel strongly about it, do it yourself
+5. PIPING: Basically what I said is you can only pipe an expression into a function call. You cannot pipe an expression into another expression.
+So:
+x() <| a  ok
+a |> x()  ok
+a |> x() |> z() ok
+a |> x() <| z() NOT ok

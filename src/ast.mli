@@ -19,6 +19,7 @@ type expression =
   | TupleLiteral of expression list
   | TupleAccess of expression * expression
   | ListLiteral of expression list
+  | MapLiteral of (expression * expression) list
   | Access of expression * expression
   | Block of expression list
   | IfBlock of expression * expression list
@@ -28,6 +29,6 @@ type expression =
   | FuncCall of string * expression list
   | FuncPiping of expression list
   | FuncComposition of expression list
-  | MapLiteral of (expression * expression) list
+  | FuncAnon of expression list * expression * tTypes
 
 type root = expression list

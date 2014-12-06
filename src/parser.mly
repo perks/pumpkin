@@ -52,9 +52,14 @@ expression:
   | unop                                 { $1 }
   | literal                              { $1 }
   | func_declaration                     { $1 }
-  | func_calling                         { $1 }
   | func_piping                          { $1 }
-  | func_composition                     { $1 }
+  | funcs                                { $1 }
+
+funcs:
+    func_composition                     { $1 }
+  | func_calling                         { $1 }
+  | func_anon                            { $1 }
+
 
 indent_block:
     INDENT expression_block DEDENT { List.rev $2 }
@@ -82,29 +87,14 @@ func_calling:
     ID LPAREN literal_listing_comma RPAREN    { FuncCall($1, $3) }
   | ID LPAREN RPAREN                          { FuncCall($1, [])}
 
+func_anon:
+  LPAREN parameters DEFARROW expression RPAREN COLON types  { FuncAnon($2, $4, $7)}
+
 func_piping:
     func_piping_list                              { FuncPiping($1) }
 
-func_piping_list:
-    func_piping_list_tail FPIPE func_calling      { List.append $1 [$3] }
-  | func_piping_list_tail BPIPE func_calling      { $3::$1 }
-
-func_piping_list_tail:
-    func_calling                                  { [$1] }
-  | func_piping_list_tail FPIPE func_calling      { List.append $1 [$3] }
-  | func_piping_list_tail BPIPE func_calling      { $3::$1 }
-
 func_composition:
-    func_composition_list                              { FuncComposition($1) }
-
-func_composition_list:
-    func_composition_list_tail RCOMPOSE func_calling   { List.append $1 [$3] }
-  | func_composition_list_tail LCOMPOSE func_calling   { $3::$1 }
-
-func_composition_list_tail:
-    func_calling                                       { [$1] }
-  | func_composition_list_tail RCOMPOSE func_calling   { List.append $1 [$3] }
-  | func_composition_list_tail FCOMPOSE func_calling   { $3::$1 }
+    func_composition_list                         { FuncComposition($1) }
 
 types:
     TINT       { TInt }
@@ -187,5 +177,25 @@ parameters:
   | parameters COMMA ID COLON types      { Parameter($3, $5)::$1 }
 
 expression_block:
-    expression TERMINATOR { [$1] }
+    expression TERMINATOR                  { [$1] }
   | expression_block expression TERMINATOR { $2::$1 }
+
+func_piping_list:
+    expression FPIPE funcs      { List.append [$1] [$3] }
+  | funcs BPIPE expression      { List.append [$3] [$1] }
+
+func_composition_list:
+    func_composition_list_tail RCOMPOSE func_calling   { List.append $1 [$3] }
+  | func_composition_list_tail LCOMPOSE func_calling   { $3::$1 }
+  | func_composition_list_tail RCOMPOSE func_anon      { List.append $1 [$3] }
+  | func_composition_list_tail LCOMPOSE func_anon      { $3::$1 }
+
+func_composition_list_tail:
+    func_calling                                       { [$1] }
+  | func_anon                                          { [$1] }
+  | func_composition_list_tail RCOMPOSE func_calling   { List.append $1 [$3] }
+  | func_composition_list_tail FCOMPOSE func_calling   { $3::$1 }
+  | func_composition_list_tail RCOMPOSE func_anon      { List.append $1 [$3] }
+  | func_composition_list_tail FCOMPOSE func_anon      { $3::$1 }
+
+

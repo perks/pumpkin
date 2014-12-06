@@ -95,7 +95,9 @@ let rec expression_to_string = function
       "\n" ^ String.concat "|> " (List.map expression_to_string e_list) ^ "\n"
   | FuncComposition(e_list) ->
       "\n" ^ String.concat ">> " (List.map expression_to_string e_list) ^ "\n"
-
+  | FuncAnon(p_list, e, t) ->
+      "\n (" ^ String.concat ", " (List.map expression_to_string p_list) ^ " => " ^ expression_to_string e ^
+        " ) : " ^ type_to_string t ^ "\n"
     
 let program_to_string (root : Ast.expression list) =
   "START\n" ^ String.concat "\n" (List.map expression_to_string root) ^ "\nEND\n"
