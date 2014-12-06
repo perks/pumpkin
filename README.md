@@ -34,10 +34,7 @@ Obs.
 ======
 1. I turned off warnings because that fragile thing was annoying. Feel free to turn it back on
 2. Eliminated one parameter function calling with this syntax: even 2
-3. Haven't implemented function declaration as follows: def x : Int => 1 + 1
-Implemented only as follows:
-def x : Int =>
-	1 + 1
+3. Function declarations of the type: def x : Int => (1 + 1) the "code" part needs to be in parenthesis
 4. Gabi will not write string interpolation, if you feel strongly about it, do it yourself
 5. PIPING: Basically what I said is you can only pipe an expression into a function call. You cannot pipe an expression into another expression.
 So:

@@ -60,7 +60,6 @@ funcs:
   | func_calling                         { $1 }
   | func_anon                            { $1 }
 
-
 indent_block:
     INDENT expression_block DEDENT { List.rev $2 }
 
@@ -80,12 +79,14 @@ assignment:
   | VAL ID ASSIGN expression             { Assing($2, $4) }
 
 func_declaration:
-    DEF ID LPAREN parameters RPAREN COLON types DEFARROW TERMINATOR indent_block { FuncDecl($2, $4, $10, $7) }
-  | DEF ID COLON types DEFARROW TERMINATOR indent_block                          { FuncDecl($2, [], $7, $4) }
+    DEF ID LPAREN parameters RPAREN COLON types DEFARROW TERMINATOR indent_block  { FuncDecl($2, $4, $10, $7) }
+  | DEF ID COLON types DEFARROW TERMINATOR indent_block                           { FuncDecl($2, [], $7, $4) }
+  | DEF ID LPAREN parameters RPAREN COLON types DEFARROW LPAREN expression RPAREN { FuncDecl($2, $4, [$10], $7) }
+  | DEF ID COLON types DEFARROW LPAREN expression RPAREN                          { FuncDecl($2, [], [$7], $4) }
 
 func_calling:
     ID LPAREN literal_listing_comma RPAREN    { FuncCall($1, $3) }
-  | ID LPAREN RPAREN                          { FuncCall($1, [])}
+  | ID LPAREN RPAREN                          { FuncCall($1, []) }
 
 func_anon:
   LPAREN parameters DEFARROW expression RPAREN COLON types  { FuncAnon($2, $4, $7)}
