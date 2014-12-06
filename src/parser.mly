@@ -85,7 +85,7 @@ func_declaration:
   | DEF ID COLON types DEFARROW LPAREN expression RPAREN                          { FuncDecl($2, [], [$7], $4) }
 
 func_calling:
-    ID LPAREN literal_listing_comma RPAREN    { FuncCall($1, $3) }
+    ID LPAREN literal_listing RPAREN          { FuncCall($1, $3) }
   | ID LPAREN RPAREN                          { FuncCall($1, []) }
 
 func_anon:
@@ -157,13 +157,9 @@ map_list_special:
 map_item_special:
   expression TYPEARROW expression { $1, $3 }
 
-literal_listing_comma:
-    literal COMMA                            { [$1] }
-  | literal COMMA literal_listing_comma_tail { $1::$3 }
-
-literal_listing_comma_tail:
+literal_listing:
     literal                                  { [$1] }
-  | literal COMMA literal_listing_comma_tail { $1::$3 }
+  | literal COMMA literal_listing            { $1::$3 }
 
 exp_listing:
     expression COMMA                  { [$1] }

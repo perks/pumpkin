@@ -42,3 +42,5 @@ x() <| a  ok
 a |> x()  ok
 a |> x() |> z() ok
 a |> x() <| z() NOT ok
+6. When we access a tuple how do we know the type? What about Access?
+7. A function declaration has the type of its return type. A function call has type function (because of partially applied we are not sure what it will return)

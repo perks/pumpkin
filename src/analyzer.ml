@@ -1,6 +1,17 @@
 open Ast
 open Sast
 
+module Env = Map.Make(String)
+
+let symbolTable = Array.make 10 Env.empty
+
+let getCurrentEnvironment = 
+  let rec helper l current  =
+  match l with
+       [] -> current
+    |  hd::tl -> if Env.is_empty hd then current else helper tl (current + 1)
+  in helper (Array.to_list symbolTable) 0
+
 let type_of = function
     AnIntLiteral(_, t) -> t
   | AFloatLiteral(_, t) -> t
@@ -16,12 +27,15 @@ let type_of = function
   | ATupleAccess(_, _, t) -> t
   | AListLiteral(_, t) -> t
   | AListAccess(_, _, t) -> t
+  | AMapLiteral(_, t) -> t
   | AIfBlock(_, _, t) -> t
   | AIfElseBlock(_, _, _, t) -> t
   | AStringChars(_, t) -> t
   | AParameter(_, t) -> t
   | AFuncDecl(_, _, _, t) -> t
   | AFuncCall(_, _, t) -> t
+  | AFuncComposition(_, t) -> t
+  | AFuncPiping(_, t) -> t
   | ABlock(_, t) -> t
 
 let aType_to_saType = function
@@ -79,29 +93,47 @@ let rec annotate_expression (expr : Ast.expression) : Sast.aExpression =
   | StringLiteral(s) -> AStringLiteral(s, Sast.String)
   | CharLiteral(c) -> ACharLiteral(c, Sast.Char)
   | UnitLiteral -> AUnit(Sast.Unit)
-  | IdLiteral(id) -> AIdLiteral(id, Sast.Id)
+  | IdLiteral(id) -> 
+    let cenv = getCurrentEnvironment in
+    if Env.mem id symbolTable.(cenv) then
+      let s_type = Env.find id symbolTable.(cenv) in
+      AIdLiteral(id, s_type)
+    else raise(Failure("Undeclared variable"))
   | TupleLiteral(l) -> 
     let at_list = annotate_expression_list l in
     ATupleLiteral(at_list, Sast.Tuple)
   | TupleAccess(e, index) -> 
-    let ae = annotate_expression e in 
-    let ae_t = type_of ae in
-    if ae_t <> Sast.Id && ae_t <> Sast.Tuple then
+    let ae = annotate_expression e and
+    ind = annotate_expression index in 
+    let ae_t = type_of ae and 
+    ind_t = type_of ind in
+    if ae_t <> Sast.Tuple then
       raise(Failure("Indexing tuple on a non tuple object"))
+    else if ind_t <> Sast.Int then
+      raise(Failure("Invalid type of index (expected int)"))
     else
-      ATupleAccess(ae, index, Sast.TAccess)
+      ATupleAccess(ae, ind, Sast.TAccess)
   | ListLiteral(l) ->
     let a_list = annotate_expression_list l in
     if not(match_all_types a_list) then
       raise(Failure("List elemets' types must all be the same"))
     else AListLiteral(a_list, Sast.List)
-  | ListAccess(e, index) -> 
-    let ae = annotate_expression e in 
+  | MapLiteral(elist) ->
+    let s_map = List.map (fun (expr1, expr2) -> (annotate_expression expr1, annotate_expression expr2)) elist in
+    let key_list = List.map (fun (expr1, expr2) -> expr1) s_map and
+    value_list = List.map (fun (expr1, expr2) -> expr2) s_map in
+    if not(match_all_types key_list && match_all_types value_list) then
+      raise(Failure("Map element's types or key's types are not consistent"))
+    else
+      AMapLiteral(s_map, Sast.Map)
+  | Access(e, index) -> 
+    let ae = annotate_expression e and
+    ind = annotate_expression index in 
     let ae_t = type_of ae in
-    if ae_t <> Sast.Id && ae_t <> Sast.List then
+    if ae_t <> Sast.List then
       raise(Failure("Indexing list on a non list object"))
     else
-      ATupleAccess(ae, index, Sast.LAccess)
+      ATupleAccess(ae, ind, Sast.LMAccess)
   | Binop(e1, op, e2) ->
     let ae1 = annotate_expression e1 and
         ae2 = annotate_expression e2 in
@@ -119,11 +151,16 @@ let rec annotate_expression (expr : Ast.expression) : Sast.aExpression =
         t_s_type = aType_to_saType t in
     if ae_s_type <> t_s_type then
       raise (Failure ("Type Mismatch"))
-    else ATypeAssign(i, ae, t_s_type)
+    else 
+      let cenv = getCurrentEnvironment in
+      symbolTable.(cenv) <- Env.add i t_s_type symbolTable.(cenv);
+      ATypeAssign(i, ae, t_s_type)
   | Assing(i, e) ->
     let ae = annotate_expression e in
     let ae_s_type = type_of ae in
-    ATypeAssign(i, ae, ae_s_type)
+    let cenv = getCurrentEnvironment in
+      symbolTable.(cenv) <- Env.add i ae_s_type symbolTable.(cenv);
+      ATypeAssign(i, ae, ae_s_type)
   | IfBlock(e1, l) -> 
     let a_list = annotate_expression_list l in
     let ae = annotate_expression e1 and
@@ -149,8 +186,13 @@ let rec annotate_expression (expr : Ast.expression) : Sast.aExpression =
     else AIfElseBlock(ae, a_list1, a_list2, le1_s_type)
   | Parameter(s, t) -> 
     let s_type = aType_to_saType t in
-    AParameter(s, s_type)
-  | FuncDecl(s, params, code, t) ->
+    let cenv = getCurrentEnvironment in
+      symbolTable.(cenv) <- Env.add s s_type symbolTable.(cenv);
+      AParameter(s, s_type)
+  | FuncDecl(id, params, code, t) ->
+    let cenv = getCurrentEnvironment in
+      symbolTable.(cenv) <- Env.add id Sast.Function symbolTable.(cenv);
+      symbolTable.(cenv + 1) <- symbolTable.(cenv);
     let s_params = annotate_expression_list params in 
     let s_code = annotate_expression_list code in
     let s_type = aType_to_saType t in 
@@ -158,10 +200,35 @@ let rec annotate_expression (expr : Ast.expression) : Sast.aExpression =
     let le_s_type = type_of le in
     if le_s_type <> s_type then
       raise (Failure("Declared function type and actual function type don't match"))
-    else AFuncDecl(s, s_params, s_code, s_type)
+    else 
+      symbolTable.(cenv + 1) <- Env.empty;
+      AFuncDecl(id, s_params, s_code, s_type)
   | FuncCall(id, params) -> 
-    let s_params = annotate_expression_list params in 
-    AFuncCall(id, s_params, Sast.Function)
+    let cenv = getCurrentEnvironment in
+    if Env.mem id symbolTable.(cenv) then
+      let s_params = annotate_expression_list params in
+        AFuncCall(id, s_params, Sast.Function)
+    else raise(Failure("Undeclared function"))
+  | FuncAnon(params, e , t) ->
+    let cenv = getCurrentEnvironment in
+      symbolTable.(cenv + 1) <- symbolTable.(cenv);
+    let s_params = annotate_expression_list params and 
+    s_e = annotate_expression e in
+    let s_e_type = type_of s_e in
+    let s_type = aType_to_saType t in 
+    if s_e_type <> s_type then
+      raise (Failure("Declared anon function type and actual anon function type don't match"))
+    else 
+      symbolTable.(cenv + 1) <- Env.empty;
+      AFuncDecl("", s_params, [s_e], Sast.Function)
+  | FuncComposition(l) ->
+    let s_l =  annotate_expression_list l in
+    AFuncComposition(s_l, Sast.Function)
+  | FuncPiping(l) ->
+    let s_l = annotate_expression_list l in
+    let s_le = annotate_expression (List.hd (List.rev l)) in 
+    let s_le_type = type_of s_le in
+    AFuncPiping(s_l, s_le_type)
   | Block(l) ->
     let s_code = annotate_expression_list l and
     le = annotate_expression (List.hd (List.rev l)) in
