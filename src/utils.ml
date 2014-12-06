@@ -54,12 +54,12 @@ let rec expression_to_string = function
     expression_to_string e
   | TupleLiteral(e_list) ->
     "TUPLE(" ^ String.concat ", " (List.map expression_to_string e_list) ^ ")"
-  | TupleAccess(e, i) ->
-    "(" ^ expression_to_string e ^ ")TUPLEACC(" ^ string_of_int i ^ ")"
+  | TupleAccess(e, e_acc) ->
+    "(" ^ expression_to_string e ^ ")TUPLEACC(" ^ expression_to_string e_acc ^ ")"
   | ListLiteral(e_list) ->
     "List(" ^ String.concat ", " (List.map expression_to_string e_list) ^ ")"
-  | ListAccess(e, i) ->
-    "(" ^ expression_to_string e ^ ")LISTACC(" ^ string_of_int i ^ ")"
+  | Access(e, e_acc) ->
+    "(" ^ expression_to_string e ^ ")ACCESS(" ^ expression_to_string e_acc ^ ")"
   | MapLiteral(map_list) ->
     let map_expression_tupal_to_string (e1, e2) = 
       "(" ^ expression_to_string e1 ^ " -> " ^ expression_to_string e2 ^ ")"

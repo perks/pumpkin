@@ -1,7 +1,5 @@
 OBJS = utils.cmo scanner.cmo parser.cmo processor.cmo pumpkin.cmo
 
-all: scanner.ml parser.ml analyzer.cmo pmkn
-
 pmkn : $(OBJS)
 	ocamlc -o pmkn $(OBJS)
 

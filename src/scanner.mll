@@ -32,8 +32,8 @@ rule token = parse
     | '%' { MODULO }
     | ':' { COLON }
     | ',' { COMMA }
-    | '$'(int as lxm)    { TUPLEACC(int_of_string lxm) }
-    | '['(int as lxm)']' { LISTACC(int_of_string lxm) }
+    | '$' { TUPLEACC }
+    | '.' { ACCESSOR }
     
     | "->"         { TYPEARROW }
     | "=>"         { DEFARROW }
