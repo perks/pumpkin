@@ -1,4 +1,4 @@
-type action = Tokens | Raw | Ast | Interpret | Compile
+type action = Tokens | Raw | Ast | Sast | Interpret | Compile
 
 let _ =
   if Array.length Sys.argv < 2 then
@@ -15,6 +15,7 @@ let _ =
     let action = List.assoc Sys.argv.(1) [ ("-t", Tokens);
                                            ("-r", Raw);
                                            ("-a", Ast);
+                                           ("-s", Sast);
                                            ("-i", Interpret);
                                            ("-c", Compile) ] and
     filename = Sys.argv.(2) in
@@ -29,6 +30,10 @@ let _ =
           let program = List.rev (Processor.parser token_list) in
             print_string (Utils.program_to_string program)
         | Ast -> print_string("\nAst\n")
+        | Sast -> 
+          let program = List.rev (Processor.parser token_list) in
+          let sast_output = Analyzer.annotate_expression_list program in
+            print_string (Utils.s_program_to_string sast_output)
         | Interpret -> print_string("\nInterpret\n")
         | Compile -> print_string("\nCompile\n")
     with
