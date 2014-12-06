@@ -18,6 +18,10 @@ let return = ['\r' '\n']
 rule token = parse
       "//"           { single_comment lexbuf }
     | "/*"         { block_comment lexbuf }
+    | return* "|>" | "|>" return*{ FPIPE }
+    | return* "<|" | "<|" return*{ BPIPE }
+    | return* ">>" | ">>" return*{ RCOMPOSE }
+    | return* "<<" | "<<" return*{ LCOMPOSE }
     | return+ { incr lineno; indent lexbuf }
     | whitespace   { token lexbuf }
     | '(' { LPAREN }
@@ -49,8 +53,6 @@ rule token = parse
     | '<'          { LT }
     | ">="         { GTE }
     | "<="         { LTE }
-    | "|>"         { FPIPE }
-    | "<|"         { BPIPE }    
     
     | "val"         { VAL }
     | "def"         { DEF }

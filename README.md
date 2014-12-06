@@ -27,8 +27,8 @@ Tasks
 10. Error Handeling []
 11. Importation []
 12. X If else
-13. String interpolation
-14. Maps
+13. X Maps
+14. Composition plus piping
 
 Obs.
 ======
@@ -38,3 +38,4 @@ Obs.
 Implemented only as follows:
 def x : Int =>
 	1 + 1
+4. Gabi will not write string interpolation, if you feel strongly about it, do it yourself

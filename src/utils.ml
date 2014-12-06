@@ -92,8 +92,9 @@ let rec expression_to_string = function
     else
       "\n " ^ id ^ "()"
   | FuncPiping(e_list) ->
-      "\n" ^ String.concat "|> " (List.map expression_to_string e_list) ^ ")\n"
-
+      "\n" ^ String.concat "|> " (List.map expression_to_string e_list) ^ "\n"
+  | FuncComposition(e_list) ->
+      "\n" ^ String.concat ">> " (List.map expression_to_string e_list) ^ "\n"
 
     
 let program_to_string (root : Ast.expression list) =
