@@ -1,1 +1,6 @@
-3
+val a = 3.5
+a
+def b(c:String, d:List):Int => (2)
+def e(c:String, d:List):Int => (2)
+def f(c:String, d:List):Int => (2)
+b() >> e() >> f() <| a

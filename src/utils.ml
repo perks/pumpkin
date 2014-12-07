@@ -118,10 +118,10 @@ let rec aexpression_to_string = function
     AnIntLiteral(i, t) -> string_of_int(i) ^ s_type_to_string(t)
   | AFloatLiteral(f, t) -> string_of_float(f) ^ s_type_to_string(t)
   | ABinop(e1, op, e2, t) ->
-    aexpression_to_string(e1) ^ " " ^
+    "( " ^ aexpression_to_string(e1) ^ " " ^
     operation_to_string(op) ^ " " ^
-    aexpression_to_string(e1) ^ " " ^
-    s_type_to_string(t)
+    aexpression_to_string(e2) ^ " " ^
+    ")"^ s_type_to_string(t)
   | AUnop(op, e1, t) ->
     operation_to_string(op) ^ " " ^
     aexpression_to_string(e1) ^ " " ^
@@ -138,8 +138,8 @@ let rec aexpression_to_string = function
     id ^ " = " ^
     aexpression_to_string e
   | ATupleLiteral(e_list, t) ->
-    "TUPLE(" ^ String.concat ", " (List.map aexpression_to_string e_list) ^ ") " ^ s_type_to_string(t)
-  | ATupleAccess(e, e_acc, t) ->
+    "(" ^ String.concat ", " (List.map aexpression_to_string e_list) ^ ") " ^ s_type_to_string(t)
+  | ATupleAccess(e, e_acc, t)  ->
     "(" ^ aexpression_to_string e ^ ")TUPLEACC(" ^ aexpression_to_string e_acc ^ ") " ^ s_type_to_string(t)
   | AListLiteral(e_list, t) ->
     "LIST(" ^ String.concat ", " (List.map aexpression_to_string e_list) ^ ") " ^ s_type_to_string(t)
@@ -165,7 +165,7 @@ let rec aexpression_to_string = function
     id ^ " : " ^ s_type_to_string t
   | AFuncDecl(id, p_list, e_list, t) ->
     if (List.length p_list) <> 0 then
-      "\n def " ^ id ^ " (" ^ String.concat ", " (List.map aexpression_to_string p_list) ^ ") : " ^ s_type_to_string t ^ " =>\n" ^
+      "\n def " ^ id ^ " (" ^ String.concat ", " (List.map aexpression_to_string (List.rev p_list)) ^ ") : " ^ s_type_to_string t ^ " =>\n" ^
       "\t" ^ String.concat "\n\t" (List.map aexpression_to_string e_list) ^ "\n"
     else
       "\n def " ^ id ^ " : " ^ s_type_to_string t ^ " =>\n" ^

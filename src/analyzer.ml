@@ -60,7 +60,9 @@ let match_all_types l =
 
 let valid_binop (e1, e2, op) = 
   let t1 = (type_of e1) in
-  if (op = Minus || op = Divide || op = Modulo) then
+  if (type_of e1) <> (type_of e2) then
+    raise (Failure ("Type Mismatch"))
+  else if (op = Minus || op = Divide || op = Modulo) then
     if t1 <> Sast.Int || t1 <> Sast.Float then
       raise(Failure("Operator requires a number"))
   else if op = Gt || op = Lt ||op = Gte ||op = Lte || op = Plus ||op = Times then
@@ -71,8 +73,6 @@ let valid_binop (e1, e2, op) =
       raise (Failure ("Operator requires Bool type"))
   else if op = Not then
     raise(Failure("Invalid Binop"))
-  else if (type_of e1) <> (type_of e2) then
-    raise (Failure ("Type Mismatch"))
 
 let valid_uniop (e, op) = 
   let t = (type_of e) in
