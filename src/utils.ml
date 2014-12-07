@@ -182,8 +182,24 @@ let rec aexpression_to_string = function
   | ABlock(e_list, t) ->
     "\nBLOCK\n" ^ String.concat "\n" (List.map aexpression_to_string e_list) ^ " " ^ s_type_to_string(t) ^ "\nENDBLOCK\n"
 
-let program_to_string (root : Ast.expression list) =
-  "START\n" ^ String.concat "\n" (List.map expression_to_string root) ^ "\nEND\n"
+let algebraic_params_to_string = function
+    NativeParam(id, t) -> id ^ ": " ^ type_to_string t
+  | AlgebraicParam(id, alg_t) -> id ^ ": " ^ alg_t
+
+let algrbraic_types_to_string = function
+    AlgrbraicBase(id, params) ->
+      id ^ "(" ^ String.concat "," (List.map algebraic_params_to_string params) ^ ")\n"
+  | AlgrbraicDerived(id, super, params) ->
+      id ^ "(" ^ String.concat "," (List.map algebraic_params_to_string params) ^ ")\n" ^
+      " EXTENDS " ^ super ^"\n"
+
+let program_to_string (expressions, algrbraic_types) =
+  "START-ALGDECLS\n" ^
+  String.concat "\n" (List.map algrbraic_types_to_string algrbraic_types) ^ 
+  "END-ALGDECLS\n" ^
+  "START-PROG\n" ^
+  String.concat "\n" (List.map expression_to_string expressions) ^ 
+  "END-PROG\n"
 
 let s_program_to_string (aRoot : Sast.aExpression list) =
   "START SAST\n" ^ String.concat "\n" (List.map aexpression_to_string aRoot) ^ "\nEND SAST\n"

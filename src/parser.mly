@@ -7,6 +7,7 @@
 %token UMINUS UPLUS
 %token VAL ASSIGN DEF
 %token IF ELSE
+%token TYPE EXTENDS
 %token TINT TUNIT TBOOL TSTRING TCHAR TTUPLE TLIST TFLOAT TMAP
 %token <string> ID
 %token <int> INT
@@ -40,9 +41,10 @@
 
 %%
 root:
-    /* nothing */ { [] }
-  | root expression TERMINATOR { $2::$1 }
-
+    /* nothing */ { [], [] }
+  | root expression TERMINATOR { $2::(fst $1), snd $1 }
+  | root algebraic_decl TERMINATOR  { fst $1, $2::(snd $1) }
+  
 expression:
     LPAREN expression RPAREN             { $2 }
   | indent_block                         { Block($1) }
@@ -198,3 +200,19 @@ func_composition_list_tail:
   | func_composition_list_tail FCOMPOSE func_calling   { $3::$1 }
   | func_composition_list_tail RCOMPOSE func_anon      { List.append $1 [$3] }
   | func_composition_list_tail FCOMPOSE func_anon      { $3::$1 }
+
+algebraic_decl:
+    TYPE ID algrbraic_param_list_opt            { AlgrbraicBase($2, $3) }
+  | TYPE ID algrbraic_param_list_opt EXTENDS ID { AlgrbraicDerived($2, $5, $3) }
+
+algrbraic_param_list_opt:
+    /* nothing */                      { [] }
+  | LPAREN algrbraic_param_list RPAREN { $2 }
+
+algrbraic_param_list:
+    algrbraic_param                            { [$1] }
+  | algrbraic_param_list COMMA algrbraic_param { $3::$1 }
+
+algrbraic_param:
+    ID COLON types { NativeParam($1, $3) }
+  | ID COLON ID    { AlgebraicParam($1, $3) }

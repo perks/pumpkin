@@ -4,6 +4,14 @@ type operator =
 type tTypes =
 	TInt | TUnit | TBool | TString | TChar | TTuple | TList | TFloat
 
+type param = 
+    NativeParam of string * tTypes
+  | AlgebraicParam of string * string
+
+type algebraic = 
+    AlgrbraicBase of string * param list
+  | AlgrbraicDerived of string * string * param list
+
 type expression =
     IntLiteral of int
   | FloatLiteral of float
@@ -31,4 +39,4 @@ type expression =
   | FuncComposition of expression list
   | FuncAnon of expression list * expression * tTypes
 
-type root = expression list
+type root = expression list * algebraic list

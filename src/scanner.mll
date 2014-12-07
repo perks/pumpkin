@@ -43,6 +43,8 @@ rule token = parse
     | "=>"         { DEFARROW }
     | "if"         { IF }
     | "else"       { ELSE }
+    | "type"       { TYPE }
+    | "extends"    { EXTENDS }
     
     | "is"  | "==" { EQ }
     | "and" | "&&" { AND }

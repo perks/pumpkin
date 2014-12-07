@@ -33,6 +33,11 @@ Tasks
 16. Function (+piping and composition) type checking
 17. Code generation
 
+Changes
+======
+1. Changed list and tupal accessor to be "."
+
+
 Obs.
 ======
 1. I turned off warnings because that fragile thing was annoying. Feel free to turn it back on

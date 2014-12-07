@@ -1,2 +1,1 @@
-def f(c:Int, d:Int):Int => ()
-f("_", 3, 4)
+def f(c:Int, d:Int):Int => (1)

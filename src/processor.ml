@@ -21,6 +21,7 @@ let token_to_string = function
   | TBOOL -> "TBOOL" | TSTRING -> "TSTRING"
   | TCHAR -> "TCHAR" | TTUPLE -> "TTUPLE"
   | TLIST -> "TLIST"| TFLOAT -> "TFLOAT"
+  | TYPE -> "TYPE" | EXTENDS -> "EXTENDS"
   | TMAP -> "TMAP"
   | UNIT -> "UNIT"
   | EOF -> "EOF" 
