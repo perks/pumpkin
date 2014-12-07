@@ -20,28 +20,28 @@ let _ =
                                            ("-c", Compile) ] and
     filename = Sys.argv.(2) in
     let file_in = open_in filename in
-    try 
+    try
       let lexbuf = Lexing.from_channel file_in in
       let token_list = Processor.get_token_list lexbuf in
-      match action with 
-          Tokens -> 
+      match action with
+          Tokens ->
             print_string (String.concat " " (List.map Processor.token_to_string token_list) ^ "\n")
         | Raw ->
           let program = List.rev (Processor.parser token_list) in
             print_string (Utils.program_to_string program)
         | Ast -> print_string("\nAst\n")
-        | Sast -> 
+        | Sast ->
           let program = List.rev (Processor.parser token_list) in
           let sast_output = Analyzer.annotate_expression_list program in
             print_string (Utils.s_program_to_string sast_output)
         | Interpret -> print_string("\nInterpret\n")
         | Compile -> print_string("\nCompile\n")
     with
-        Utils.IllegalCharacter(c, ln) -> 
+        Utils.IllegalCharacter(c, ln) ->
           print_string
           (
-            "In \"" ^ filename ^ "\", Illegal Character, '" ^ 
+            "In \"" ^ filename ^ "\", Illegal Character, '" ^
             Char.escaped c ^ "', line " ^ string_of_int ln ^ "\n"
           )
-      | Utils.IndentationError(ln) -> 
+      | Utils.IndentationError(ln) ->
         print_string("Indentation Error, line " ^ string_of_int ln ^ "\n")

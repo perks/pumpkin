@@ -1,7 +1,7 @@
-type operator = 
+type operator =
   Plus | Minus | Times | Divide | Modulo | Eq | Neq | Gt | Lt | Gte | Lte | And | Or | Not
 
-type tTypes = 
+type tTypes =
 	TInt | TUnit | TBool | TString | TChar | TTuple | TList | TFloat
 
 type expression =

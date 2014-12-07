@@ -1,4 +1,5 @@
 open Ast
+open Sast
 
 (* Raw printer *)
 let type_to_string = function
@@ -10,6 +11,20 @@ let type_to_string = function
   | TTuple  -> "TTUPLE"
   | TList -> "TLIST"
   | TFloat -> "TFLOAT"
+
+let s_type_to_string = function
+  Int -> "INT"
+| Unit -> "UNIT"
+| Bool -> "BOOL"
+| String -> "STRING"
+| Char -> "CHAR"
+| Tuple -> "TUPLE"
+| List -> "LIST"
+| Float -> "FLOAT"
+| Function -> "FUNCTION"
+| Map -> "MAP"
+| TAccess -> "TACCESS"
+| LMAccess -> "LMACCESS"
 
 let operation_to_string = function
     Plus -> "PLUS"
@@ -25,19 +40,19 @@ let operation_to_string = function
   | Lte -> "LTE"
   | And -> "AND"
   | Or -> "OR"
-  | Not -> "NOT"  
+  | Not -> "NOT"
 
 let rec expression_to_string = function
     IntLiteral(i) -> string_of_int(i)
   | FloatLiteral(f) -> string_of_float(f)
-  | BoolLiteral(b) -> 
+  | BoolLiteral(b) ->
     if b then "TRUE"
     else "FALSE"
   | StringLiteral(s) -> s
   | CharLiteral(c) -> Char.escaped c
   | UnitLiteral -> "UNIT"
   | IdLiteral(id) -> id
-  | Binop(e1, op, e2) -> 
+  | Binop(e1, op, e2) ->
     expression_to_string e1 ^ " " ^
     operation_to_string op ^ " " ^
     expression_to_string e2
@@ -45,11 +60,11 @@ let rec expression_to_string = function
     "U" ^ operation_to_string op ^ " " ^
     expression_to_string e
   | TypeAssing(id, e, t) ->
-    "TASSIGN(" ^ type_to_string t ^ ") " ^ 
+    "TASSIGN(" ^ type_to_string t ^ ") " ^
     id ^ " = " ^
     expression_to_string e
   | Assing(id, e) ->
-    "ASSIGN " ^ 
+    "ASSIGN " ^
     id ^ " = " ^
     expression_to_string e
   | TupleLiteral(e_list) ->
@@ -61,7 +76,7 @@ let rec expression_to_string = function
   | Access(e, e_acc) ->
     "(" ^ expression_to_string e ^ ")ACCESS(" ^ expression_to_string e_acc ^ ")"
   | MapLiteral(map_list) ->
-    let map_expression_tupal_to_string (e1, e2) = 
+    let map_expression_tupal_to_string (e1, e2) =
       "(" ^ expression_to_string e1 ^ " -> " ^ expression_to_string e2 ^ ")"
     in
     "MAP(" ^ String.concat ", " (List.map map_expression_tupal_to_string map_list) ^ ")"
@@ -77,17 +92,17 @@ let rec expression_to_string = function
     "ELSE\n" ^
     "\t" ^ String.concat "\n\t" (List.map expression_to_string e_list2) ^ "\n" ^
     "ENDIF\n"
-  | Parameter(id, t) -> 
+  | Parameter(id, t) ->
     id ^ " : " ^ type_to_string t
-  | FuncDecl(id, p_list, e_list, t) -> 
-    if (List.length p_list) <> 0 then 
+  | FuncDecl(id, p_list, e_list, t) ->
+    if (List.length p_list) <> 0 then
       "\n def " ^ id ^ " (" ^ String.concat ", " (List.map expression_to_string p_list) ^ ") : " ^ type_to_string t ^ " =>\n" ^
       "\t" ^ String.concat "\n\t" (List.map expression_to_string e_list) ^ "\n"
     else
       "\n def " ^ id ^ " : " ^ type_to_string t ^ " =>\n" ^
       "\t" ^ String.concat "\n\t" (List.map expression_to_string e_list) ^ "\n"
   | FuncCall(id, p_list) ->
-    if (List.length p_list) <> 0 then 
+    if (List.length p_list) <> 0 then
       "\n" ^ id ^ " (" ^ String.concat ", " (List.map expression_to_string p_list) ^ ")\n"
     else
       "\n " ^ id ^ "()"
@@ -98,9 +113,25 @@ let rec expression_to_string = function
   | FuncAnon(p_list, e, t) ->
       "\n (" ^ String.concat ", " (List.map expression_to_string p_list) ^ " => " ^ expression_to_string e ^
         " ) : " ^ type_to_string t ^ "\n"
-    
+
+let rec aexpression_to_string = function
+    AnIntLiteral(i, t) -> string_of_int(i) ^ s_type_to_string(t)
+  | AFloatLiteral(f, t) -> string_of_float(f) ^ s_type_to_string(t)
+  | ABinop(e1, op, e2, t) ->
+    aexpression_to_string(e1) ^ " " ^
+    operation_to_string(op) ^ " " ^
+    aexpression_to_string(e1) ^ " " ^
+    s_type_to_string(t)
+  | AUnop(op, e1, t) ->
+    operation_to_string(op) ^ " " ^
+    aexpression_to_string(e1) ^ " " ^
+    s_type_to_string(t)
+
 let program_to_string (root : Ast.expression list) =
   "START\n" ^ String.concat "\n" (List.map expression_to_string root) ^ "\nEND\n"
+
+let s_program_to_string (aRoot : Sast.aExpression list) =
+  "START SAST\n" ^ String.concat "\n" (List.map aexpression_to_string aRoot) ^ "\nEND SAST\n"
 
 (* Compiler Exception *)
 exception IllegalCharacter of char * int
