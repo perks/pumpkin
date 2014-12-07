@@ -198,5 +198,3 @@ func_composition_list_tail:
   | func_composition_list_tail FCOMPOSE func_calling   { $3::$1 }
   | func_composition_list_tail RCOMPOSE func_anon      { List.append $1 [$3] }
   | func_composition_list_tail FCOMPOSE func_anon      { $3::$1 }
-
-

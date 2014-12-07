@@ -4,6 +4,7 @@ open Sast
 module Env = Map.Make(String)
 
 let symbolTable = Array.make 10 Env.empty
+let functionsTable = ref([])
 
 let getCurrentEnvironment = 
   let rec helper l current  =
@@ -83,6 +84,25 @@ let valid_uniop (e, op) =
     if t <> Sast.Bool then
       raise(Failure("Not requires a Bool type"))
   else raise(Failure("Invalid unary operator"))
+
+let check_call (id, params, cenv) =
+  let get_param_value (AStringLiteral(a, t)) = a in
+  let find_entry (a, b, c) = if a = id && c = cenv then true else false in
+  let func_entry = List.find find_entry !functionsTable in
+  let declared_types = (fun (a, b, c) -> b) func_entry in
+  let rec match_types l1 l2 =
+  match l1 with
+    [] -> if l2 = l1 then true else false
+  | hd::tl -> 
+  if (type_of hd) = type_of (List.hd l2) then
+    match_types tl (List.tl l2) 
+  else if type_of hd = Sast.String then
+    (if get_param_value hd = "_" then match_types tl (List.tl l2) else false)
+  else 
+    false 
+  in 
+  if not(match_types (List.rev params) declared_types) then
+    raise(Failure("Wrong arguments/types for function call"))
 
 
 let rec annotate_expression (expr : Ast.expression) : Sast.aExpression =
@@ -202,11 +222,13 @@ let rec annotate_expression (expr : Ast.expression) : Sast.aExpression =
       raise (Failure("Declared function type and actual function type don't match"))
     else 
       symbolTable.(cenv + 1) <- Env.empty;
+      ignore(functionsTable := (id, s_params, cenv)::!functionsTable);
       AFuncDecl(id, s_params, s_code, s_type)
   | FuncCall(id, params) -> 
     let cenv = getCurrentEnvironment in
     if Env.mem id symbolTable.(cenv) then
       let s_params = annotate_expression_list params in
+        check_call(id, s_params, cenv);
         AFuncCall(id, s_params, Sast.Function)
     else raise(Failure("Undeclared function"))
   | FuncAnon(params, e , t) ->
