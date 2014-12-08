@@ -38,6 +38,7 @@ rule token = parse
     | ',' { COMMA }
     | '$' { TUPLEACC }
     | '.' { ACCESSOR }
+    | '|' { SELECTION }
     
     | "->"         { TYPEARROW }
     | "=>"         { DEFARROW }

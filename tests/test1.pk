@@ -1,9 +1,2 @@
-type Expression
-
-type Binop(op : string, e1 : Expression, e2 : Expression) extends Expression
-
-def f(): Int =>
-    if a :
-        5
-    else :
-    6
+1 match :
+    1 => 1

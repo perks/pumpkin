@@ -8,7 +8,7 @@
 %token VAL ASSIGN DEF
 %token IF ELSE
 %token TYPE EXTENDS
-%token MATCH
+%token MATCH SELECTION
 %token TINT TUNIT TBOOL TSTRING TCHAR TTUPLE TLIST TFLOAT TMAP
 %token <string> ID
 %token <int> INT
@@ -22,6 +22,7 @@
 %token EOF
 %token <int> DEDENT_EOF
 
+%nonassoc MATCH DEFARROW
 %left BPIPE
 %left FPIPE
 %left FCOMPOSE
@@ -82,11 +83,11 @@ match_statement:
     expression MATCH COLON TERMINATOR match_block { MatchBlock($1, $5) }
 
 match_block:
-    INDENT matches DEDENT { $2 }
+    INDENT matches DEDENT TERMINATOR { $2 }
 
 matches:
-      expression DEFARROW expression TERMINATOR { ($1, $3)::[] }
-    | matches expression DEFARROW expression TERMINATOR { ($2, $4)::$1 }
+    expression DEFARROW expression TERMINATOR { ($1, $3)::[] }
+  | matches SELECTION expression DEFARROW expression TERMINATOR { ($3, $5)::$1 }
 
 assignment:
     VAL ID COLON types ASSIGN expression { TypeAssing($2, $6, $4) }
