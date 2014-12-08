@@ -1,0 +1,3 @@
+type Expression
+
+type Binop(op : string, e1 : Expression, e2 : Expression) extends Expression

@@ -1,18 +1,17 @@
 SRC = src/
 
-OBJS = \
-	$(SRC)utils.cmo \
-	$(SRC)scanner.cmo \
-	$(SRC)parser.cmo \
-	$(SRC)analyzer.cmo \
-	$(SRC)processor.cmo \
-	$(SRC)pumpkin.cmo
-
-pmkn :
-	make -C $(SRC)
-	ocamlc -o pmkn $(OBJS)
+.PHONY : all
+all : 
+	@make -C $(SRC)
+	@cp src/pmkn .
 
 .PHONY : clean
 clean :
-	make -C $(SRC) clean
-	rm -f pmkn *.diff *.orig *.output
+	@make -C $(SRC) clean
+	@rm pmkn
+	rm -f *.diff *.orig *.output
+
+.PHONY : test
+test :
+	@echo "Begin Tests"
+	@echo "End Tests"
