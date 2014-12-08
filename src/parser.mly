@@ -44,7 +44,7 @@ root:
     /* nothing */ { [], [] }
   | root expression TERMINATOR { $2::(fst $1), snd $1 }
   | root algebraic_decl TERMINATOR  { fst $1, $2::(snd $1) }
-  
+
 expression:
     LPAREN expression RPAREN             { $2 }
   | indent_block                         { Block($1) }
@@ -202,8 +202,8 @@ func_composition_list_tail:
   | func_composition_list_tail FCOMPOSE func_anon      { $3::$1 }
 
 algebraic_decl:
-    TYPE ID algrbraic_param_list_opt            { AlgrbraicBase($2, $3) }
-  | TYPE ID algrbraic_param_list_opt EXTENDS ID { AlgrbraicDerived($2, $5, $3) }
+    TYPE ID algrbraic_param_list_opt            { AlgebraicBase($2, $3) }
+  | TYPE ID algrbraic_param_list_opt EXTENDS ID { AlgebraicDerived($2, $5, $3) }
 
 algrbraic_param_list_opt:
     /* nothing */                      { [] }

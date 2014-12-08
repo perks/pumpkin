@@ -4,13 +4,13 @@ type operator =
 type tTypes =
 	TInt | TUnit | TBool | TString | TChar | TTuple | TList | TFloat
 
-type param = 
+type param =
     NativeParam of string * tTypes
   | AlgebraicParam of string * string
 
-type algebraic = 
-    AlgrbraicBase of string * param list
-  | AlgrbraicDerived of string * string * param list
+type algebraic =
+    AlgebraicBase of string * param list
+  | AlgebraicDerived of string * string * param list
 
 type expression =
     IntLiteral of int
