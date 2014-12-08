@@ -1,0 +1,40 @@
+3
+(4)
+val i = 8
+
+2.5
+
+6 + 7
+2.9 + 9.6
+
++5
+++5
+
+val t = True
+val f = False
+
+"cats and dogs"
+
+'c'
+
+"AUnit ???"
+
+"AIdLiteral ???"
+
+(1, 2, 3)
+val tup = (2, 4, 6)
+val ple = (1, "hello", "world")
+
+val t = tup$0
+val d = ple$1
+
+val myList1 = List(1,2,3,4)
+val myList2 = [1,2,3,4]
+
+val myMap1 = Map(("x", "y"), ("a", "b"), ("m", "n"))
+
+def z(a:Int):Int => (a + 2)
+
+def q(c:String, d:Int):Int => (2)
+def r(c:String, d:Int):Int => (2)
+def s(c:String, d:Int):Int => (2)

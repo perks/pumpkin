@@ -39,7 +39,7 @@ Changes
 
 Errors
 ======
-1. Function bodies cannot take match or control statements 
+1. Function bodies cannot take match or control statements
 because they are not strickly defined as indent_block will fix after gaby finishes functions -Q
 
 Obs.
@@ -56,3 +56,14 @@ a |> x() |> z() ok
 a |> x() <| z() NOT ok
 6. When we access a tuple how do we know the type? What about Access?
 7. A function declaration has the type of its return type. A function call has type function (because of partially applied we are not sure what it will return)
+
+Josh's Test Findings (check out test2)
+======
+1. Only the plus operator compiles for me
+2. I cant access tuples (Works for raw, not for SAST)
+3. I can't write comments
+4. Not sure how to check: AUnit, AIdLiteral, AStringChars
+5. I can't call functions
+6. Cannot access values of maps: val fetch = myMap1("x")
+7. This map syntax doesn't work yet: val myMap2 = Map("x" -> "y", "a" -> "b", "m" -> "n")
+8. This LRM syntax won't compile with List[Int] in the decl: val myList: List[Int] = List(1,2,3,4)
