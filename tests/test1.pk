@@ -1,4 +1,9 @@
-def f(c:Int, d:Int, e:Int):Int => (c + d)
-val x = f(3)
-val y = x(4)
-y(1)
+type Expression
+
+type Binop(op : string, e1 : Expression, e2 : Expression) extends Expression
+
+def f(): Int =>
+    if a :
+        5
+    else :
+    6
