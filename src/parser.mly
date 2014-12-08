@@ -8,6 +8,7 @@
 %token VAL ASSIGN DEF
 %token IF ELSE
 %token TYPE EXTENDS
+%token MATCH
 %token TINT TUNIT TBOOL TSTRING TCHAR TTUPLE TLIST TFLOAT TMAP
 %token <string> ID
 %token <int> INT
@@ -49,6 +50,7 @@ expression:
     LPAREN expression RPAREN             { $2 }
   | indent_block                         { Block($1) }
   | controlflow                          { $1 }
+  | match_statement                       { $1 }
   | assignment                           { $1 }
   | binop                                { $1 }
   | unop                                 { $1 }
@@ -75,6 +77,16 @@ if_statement:
 
 else_statement:
     ELSE COLON TERMINATOR { }
+
+match_statement:
+    expression MATCH COLON TERMINATOR match_block { MatchBlock($1, $5) }
+
+match_block:
+    INDENT matches DEDENT { $2 }
+
+matches:
+      expression DEFARROW expression TERMINATOR { ($1, $3)::[] }
+    | matches expression DEFARROW expression TERMINATOR { ($2, $4)::$1 }
 
 assignment:
     VAL ID COLON types ASSIGN expression { TypeAssing($2, $6, $4) }

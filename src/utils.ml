@@ -165,6 +165,13 @@ let rec expression_to_string = function
     "ELSE\n" ^
     "\t" ^ String.concat "\n\t" (List.map expression_to_string e_list2) ^ "\n" ^
     "ENDIF\n"
+  | MatchBlock(e, match_list) ->
+    let match_expression_tupal_to_string (e1, e2) =
+      expression_to_string e1 ^ " => " ^ expression_to_string e2
+    in
+    expression_to_string e ^ " MATCH\n" ^
+    "\t" ^ String.concat "\n\t" (List.map match_expression_tupal_to_string match_list) ^ "\n" ^
+    "ENDMATCH\n"
   | Parameter(id, t) ->
     id ^ " : " ^ type_to_string t
   | FuncDecl(id, p_list, e_list, t) ->
@@ -193,9 +200,9 @@ let algebraic_params_to_string = function
 
 let algebraic_types_to_string = function
     AlgebraicBase(id, params) ->
-      id ^ "(" ^ String.concat "," (List.map algebraic_params_to_string params) ^ ")\n"
+      id ^ "(" ^ String.concat ", " (List.map algebraic_params_to_string params) ^ ")\n"
   | AlgebraicDerived(id, super, params) ->
-      id ^ "(" ^ String.concat "," (List.map algebraic_params_to_string params) ^ ")\n" ^
+      id ^ "(" ^ String.concat ", " (List.map algebraic_params_to_string params) ^ ")\n" ^
       " EXTENDS " ^ super ^"\n"
 
 let program_to_string (expressions, algebraic_types) =

@@ -37,6 +37,10 @@ Changes
 ======
 1. Changed list and tupal accessor to be "."
 
+Errors
+======
+1. Function bodies cannot take match or control statements 
+because they are not strickly defined as indent_block will fix after gaby finishes functions -Q
 
 Obs.
 ======

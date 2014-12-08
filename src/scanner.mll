@@ -45,6 +45,7 @@ rule token = parse
     | "else"       { ELSE }
     | "type"       { TYPE }
     | "extends"    { EXTENDS }
+    | "match"      { MATCH }
     
     | "is"  | "==" { EQ }
     | "and" | "&&" { AND }
