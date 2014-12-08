@@ -1,5 +1,2 @@
-def f(a:Int, b:Int, c:Int):Int => (3)
-val g = f(2)
-val h = g(3)
+a match :
 
- h(1) >> h()
