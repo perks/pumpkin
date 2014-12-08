@@ -1,1 +1,0 @@
-def f(c:Int, d:Int):Int => (1)
