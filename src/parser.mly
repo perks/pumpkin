@@ -202,8 +202,8 @@ func_composition_list_tail:
   | func_composition_list_tail FCOMPOSE func_anon      { $3::$1 }
 
 algebraic_decl:
-    TYPE ID algrbraic_param_list_opt            { AlgrbraicBase($2, List.rev $3) }
-  | TYPE ID algrbraic_param_list_opt EXTENDS ID { AlgrbraicDerived($2, $5, List.rev $3) }
+    TYPE ID algrbraic_param_list_opt            { AlgebraicBase($2, List.rev $3) }
+  | TYPE ID algrbraic_param_list_opt EXTENDS ID { AlgebraicDerived($2, $5, List.rev $3) }
 
 algrbraic_param_list_opt:
     /* nothing */                      { [] }
