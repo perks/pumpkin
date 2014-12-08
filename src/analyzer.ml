@@ -49,6 +49,35 @@ let aType_to_saType = function
   | TTuple -> Tuple
   | TList -> List
 
+let get_function_name = function
+    AFuncDecl(i, _, _, _) -> i
+  | AFuncCall(i, _, t) -> i
+  | _ -> raise(Failure("Trying to get func name on non function type"))
+
+let get_function_parameters = function
+    AFuncDecl(_, p, _, _) -> p
+  | AFuncCall(_, p, _) -> p
+  | _ -> raise(Failure("Trying to get func params on non function type"))
+
+let filter_params (op, gp) = 
+  let rec sublist i l = 
+    match l with
+      [] -> []
+    | h :: t -> if (i = 0) then h::t else sublist (i - 1) t     
+  in let new_params = sublist (List.length gp) (List.rev op) in
+  List.rev new_params
+
+let create_new_func(i, ae, cenv) = 
+  if (type_of ae) = Sast.Function then
+    let find_func_entry (a, b, c) = if (a = (get_function_name ae) && c = cenv) then true else false in
+    let original_function = List.find find_func_entry !functionsTable in
+    let original_params = (fun (a, b, c) -> b) original_function in
+    let given_params = get_function_parameters ae in
+    let new_params = filter_params(original_params, given_params) in
+    ignore(functionsTable := (i, new_params, cenv)::!functionsTable);
+    Env.find (get_function_name ae) symbolTable.(cenv)
+  else (type_of ae)
+
 let match_all_types l = 
   let temp_types = List.map type_of l in 
   let check_types rest lis = 
@@ -86,23 +115,18 @@ let valid_uniop (e, op) =
   else raise(Failure("Invalid unary operator"))
 
 let check_call (id, params, cenv) =
-  let get_param_value (AStringLiteral(a, t)) = a in
-  let find_entry (a, b, c) = if a = id && c = cenv then true else false in
-  let func_entry = List.find find_entry !functionsTable in
+  let find_func_entry (a, b, c) = if (a = id && c = cenv) then true else false in
+  let func_entry = List.find find_func_entry !functionsTable in
   let declared_types = (fun (a, b, c) -> b) func_entry in
   let rec match_types l1 l2 =
   match l1 with
-    [] -> if l2 = l1 then true else false
-  | hd::tl -> 
-  if (type_of hd) = type_of (List.hd l2) then
-    match_types tl (List.tl l2) 
-  else if type_of hd = Sast.String then
-    (if get_param_value hd = "_" then match_types tl (List.tl l2) else false)
-  else 
-    false 
+    [] -> true
+  | hd::tl -> if (type_of hd) = type_of (List.hd l2) then match_types tl (List.tl l2) else false 
   in 
   if not(match_types (List.rev params) declared_types) then
     raise(Failure("Wrong arguments/types for function call"))
+  else if (List.length params) <> (List.length declared_types) then Sast.Function 
+  else Env.find id symbolTable.(cenv)
 
 
 let rec annotate_expression (expr : Ast.expression) : Sast.aExpression =
@@ -173,14 +197,15 @@ let rec annotate_expression (expr : Ast.expression) : Sast.aExpression =
       raise (Failure ("Type Mismatch"))
     else 
       let cenv = getCurrentEnvironment in
-      symbolTable.(cenv) <- Env.add i t_s_type symbolTable.(cenv);
-      ATypeAssign(i, ae, t_s_type)
+      let ft = create_new_func(i, ae, cenv) in
+      symbolTable.(cenv) <- Env.add i ft symbolTable.(cenv);
+      ATypeAssign(i, ae, ft)
   | Assing(i, e) ->
     let ae = annotate_expression e in
-    let ae_s_type = type_of ae in
     let cenv = getCurrentEnvironment in
-      symbolTable.(cenv) <- Env.add i ae_s_type symbolTable.(cenv);
-      ATypeAssign(i, ae, ae_s_type)
+    let ft = create_new_func(i, ae, cenv) in
+    symbolTable.(cenv) <- Env.add i ft symbolTable.(cenv);
+    ATypeAssign(i, ae, ft)
   | IfBlock(e1, l) -> 
     let a_list = annotate_expression_list l in
     let ae = annotate_expression e1 and
@@ -211,7 +236,7 @@ let rec annotate_expression (expr : Ast.expression) : Sast.aExpression =
       AParameter(s, s_type)
   | FuncDecl(id, params, code, t) ->
     let cenv = getCurrentEnvironment in
-      symbolTable.(cenv) <- Env.add id Sast.Function symbolTable.(cenv);
+      symbolTable.(cenv) <- Env.add id (aType_to_saType t) symbolTable.(cenv);
       symbolTable.(cenv + 1) <- symbolTable.(cenv);
     let s_params = annotate_expression_list params in 
     let s_code = annotate_expression_list code in
@@ -228,8 +253,8 @@ let rec annotate_expression (expr : Ast.expression) : Sast.aExpression =
     let cenv = getCurrentEnvironment in
     if Env.mem id symbolTable.(cenv) then
       let s_params = annotate_expression_list params in
-        check_call(id, s_params, cenv);
-        AFuncCall(id, s_params, Sast.Function)
+      let s_type = check_call(id, s_params, cenv) in
+        AFuncCall(id, s_params, s_type)
     else raise(Failure("Undeclared function"))
   | FuncAnon(params, e , t) ->
     let cenv = getCurrentEnvironment in
