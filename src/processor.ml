@@ -24,7 +24,7 @@ let token_to_string = function
   | TYPE -> "TYPE" | EXTENDS -> "EXTENDS"
   | TMAP -> "TMAP"
   | UNIT -> "UNIT"
-  | MATCH -> "MATCH" | SELECTION -> "SELECTION"
+  | MATCH -> "MATCH" | SELECTION -> "SELECTION" | WILDCARD -> "WILDCARD"
   | EOF -> "EOF" 
   | ID(s) -> "ID(" ^ s ^ ")"
   | INT(i) -> "INT(" ^ string_of_int i ^ ")"

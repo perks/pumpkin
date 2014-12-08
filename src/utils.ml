@@ -154,7 +154,7 @@ let rec expression_to_string = function
     in
     "MAP(" ^ String.concat ", " (List.map map_expression_tupal_to_string map_list) ^ ")"
   | Block(e_list) ->
-    "\nBLOCK\n" ^ String.concat "\n" (List.map expression_to_string e_list) ^ "\nENDBLOCK\n"
+    "\nBLOCK" ^ String.concat "\n" (List.map expression_to_string e_list) ^ "\nENDBLOCK\n"
   | IfBlock(e, e_list) ->
     "\nIF(" ^ expression_to_string e ^ ")\n" ^
     "\t" ^ String.concat "\n\t" (List.map expression_to_string e_list) ^ "\n" ^
@@ -170,22 +170,22 @@ let rec expression_to_string = function
       expression_to_string e1 ^ " => " ^ expression_to_string e2
     in
     expression_to_string e ^ " MATCH\n" ^
-    "\t" ^ String.concat "\n\t" (List.map match_expression_tupal_to_string match_list) ^ "\n" ^
+    "\t" ^ String.concat "\n\t| " (List.map match_expression_tupal_to_string match_list) ^ "\n" ^
     "ENDMATCH\n"
   | Parameter(id, t) ->
     id ^ " : " ^ type_to_string t
   | FuncDecl(id, p_list, e_list, t) ->
     if (List.length p_list) <> 0 then
-      "\n def " ^ id ^ " (" ^ String.concat ", " (List.map expression_to_string p_list) ^ ") : " ^ type_to_string t ^ " =>\n" ^
+      "\ndef " ^ id ^ " (" ^ String.concat ", " (List.map expression_to_string p_list) ^ ") : " ^ type_to_string t ^ " =>\n" ^
       "\t" ^ String.concat "\n\t" (List.map expression_to_string e_list) ^ "\n"
     else
-      "\n def " ^ id ^ " : " ^ type_to_string t ^ " =>\n" ^
+      "\ndef " ^ id ^ " : " ^ type_to_string t ^ " =>\n" ^
       "\t" ^ String.concat "\n\t" (List.map expression_to_string e_list) ^ "\n"
   | FuncCall(id, p_list) ->
     if (List.length p_list) <> 0 then
       "\n" ^ id ^ " (" ^ String.concat ", " (List.map expression_to_string p_list) ^ ")\n"
     else
-      "\n " ^ id ^ "()"
+      "\n" ^ id ^ "()"
   | FuncPiping(e_list) ->
       "\n" ^ String.concat "|> " (List.map expression_to_string e_list) ^ "\n"
   | FuncComposition(e_list) ->
@@ -193,6 +193,7 @@ let rec expression_to_string = function
   | FuncAnon(p_list, e, t) ->
       "\n (" ^ String.concat ", " (List.map expression_to_string p_list) ^ " => " ^ expression_to_string e ^
         " ) : " ^ type_to_string t ^ "\n"
+  | Wildcard -> "Wildcard"
 
 let algebraic_params_to_string = function
     NativeParam(id, t) -> id ^ ": " ^ type_to_string t

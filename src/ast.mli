@@ -19,6 +19,7 @@ type expression =
   | StringLiteral of string
   | CharLiteral of char
   | UnitLiteral
+  | Wildcard
   | IdLiteral of string
   | Binop of expression * operator * expression
   | Unop of operator * expression

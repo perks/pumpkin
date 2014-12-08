@@ -39,6 +39,7 @@ rule token = parse
     | '$' { TUPLEACC }
     | '.' { ACCESSOR }
     | '|' { SELECTION }
+    | '_' { WILDCARD }
     
     | "->"         { TYPEARROW }
     | "=>"         { DEFARROW }
