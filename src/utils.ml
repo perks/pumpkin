@@ -191,6 +191,74 @@ let algebraic_params_to_string = function
     NativeParam(id, t) -> id ^ ": " ^ type_to_string t
   | AlgebraicParam(id, alg_t) -> id ^ ": " ^ alg_t
 
+let rec aexpression_to_string = function
+    AnIntLiteral(i, t) -> string_of_int(i) ^ "_" ^ s_type_to_string(t)
+  | AFloatLiteral(f, t) -> string_of_float(f) ^ "_" ^ s_type_to_string(t)
+  | ABinop(e1, op, e2, t) ->
+    "( " ^ aexpression_to_string(e1) ^ " " ^
+    operation_to_string(op) ^ " " ^
+    aexpression_to_string(e2) ^ " " ^
+    ")" ^ "_" ^ s_type_to_string(t)
+  | AUnop(op, e1, t) ->
+    operation_to_string(op) ^ " " ^
+    aexpression_to_string(e1) ^ "_" ^
+    s_type_to_string(t)
+  | ABoolLiteral(b, t) ->
+    if b then "TRUE" ^ "_" ^ s_type_to_string(t)
+    else "FALSE" ^ "_" ^ s_type_to_string(t)
+  | AStringLiteral(s, t) -> s ^ "_" ^ s_type_to_string(t)
+  | ACharLiteral(c, t) -> Char.escaped c ^ "_" ^ s_type_to_string(t)
+  | AUnit(t) -> "UNIT" ^ "_" ^ s_type_to_string(t)
+  | AIdLiteral(id, t) -> id ^ "_" ^ s_type_to_string(t)
+  | ATypeAssign(id, e, t) ->
+    "TASSIGN(" ^ "_" ^ s_type_to_string t ^ ") " ^
+    id ^ " = " ^
+    aexpression_to_string e
+  | ATupleLiteral(e_list, t) ->
+    "(" ^ String.concat ", " (List.map aexpression_to_string e_list) ^ ")" ^ "_" ^ s_type_to_string(t)
+  | ATupleAccess(e, e_acc, t)  ->
+    "(" ^ aexpression_to_string e ^ ")TUPLEACC(" ^ aexpression_to_string e_acc ^ ")" ^ "_" ^ s_type_to_string(t)
+  | AListLiteral(e_list, t) ->
+    "LIST(" ^ String.concat ", " (List.map aexpression_to_string e_list) ^ ")" ^ "_" ^ s_type_to_string(t)
+  | AListAccess(e_list, i, t) ->
+    "LISTACCESS" ^ " " ^ string_of_int(i) ^ "_" ^ s_type_to_string(t)
+  | AMapLiteral(map_list, t) ->
+    let map_expression_tupal_to_string (e1, e2) =
+      "(" ^ aexpression_to_string e1 ^ " -> " ^ aexpression_to_string e2 ^ ")"
+    in
+    "MAP(" ^ String.concat ", " (List.map map_expression_tupal_to_string map_list) ^ ")" ^ "_" ^ s_type_to_string(t)
+  | AIfBlock(e, e_list, t) ->
+    "\nIF(" ^ aexpression_to_string e ^ ")\n" ^
+    "\t" ^ String.concat "\n\t" (List.map aexpression_to_string e_list) ^ "_" ^ s_type_to_string(t) ^ "\n" ^
+    "ENDIF\n"
+  | AIfElseBlock(e, e_list1, e_list2, t) ->
+    "\nIF(" ^ aexpression_to_string e ^ ")\n" ^
+    "\t" ^ String.concat "\n\t" (List.map aexpression_to_string e_list1) ^ "_" ^ s_type_to_string(t) ^ "\n" ^
+    "ELSE\n" ^
+    "\t" ^ String.concat "\n\t" (List.map aexpression_to_string e_list2) ^ "_" ^ s_type_to_string(t) ^ "\n" ^
+    "ENDIF\n"
+  | AStringChars(s, t) -> s ^ "_" ^ s_type_to_string(t)
+  | AParameter(id, t) ->
+    id ^ " : " ^ s_type_to_string t
+  | AFuncDecl(id, p_list, e_list, t) ->
+    if (List.length p_list) <> 0 then
+      "\n def " ^ id ^ " (" ^ String.concat ", " (List.map aexpression_to_string (List.rev p_list)) ^ ") : " ^ s_type_to_string t ^ " =>\n" ^
+      "\t" ^ String.concat "\n\t" (List.map aexpression_to_string e_list) ^ "\n"
+    else
+      "\n def " ^ id ^ " : " ^ s_type_to_string t ^ " =>\n" ^
+      "\t" ^ String.concat "\n\t" (List.map aexpression_to_string e_list) ^ "\n"
+  | AFuncCall(id, p_list, t) ->
+    if (List.length p_list) <> 0 then
+      "\n" ^ id ^ " (" ^ String.concat ", " (List.map aexpression_to_string p_list) ^ ")" ^ "_" ^ s_type_to_string(t) ^ "\n"
+    else
+      "\n " ^ id ^ "()" ^ "_" ^ s_type_to_string(t)
+  | AFuncComposition(e_list, t) ->
+      "\n" ^ String.concat ">> " (List.map aexpression_to_string e_list) ^ "_" ^ s_type_to_string(t) ^ "\n"
+  | AFuncPiping(e_list, t) ->
+      "\n" ^ String.concat "|> " (List.map aexpression_to_string e_list) ^ "_" ^ s_type_to_string(t) ^ "\n"
+  | ABlock(e_list, t) ->
+    "\nBLOCK\n" ^ String.concat "\n" (List.map aexpression_to_string e_list) ^ "_" ^ s_type_to_string(t) ^ "\nENDBLOCK\n"
+
 let algrbraic_types_to_string = function
     AlgrbraicBase(id, params) ->
       id ^ "(" ^ String.concat "," (List.map algebraic_params_to_string params) ^ ")\n"
@@ -200,10 +268,10 @@ let algrbraic_types_to_string = function
 
 let program_to_string (expressions, algrbraic_types) =
   "START-ALGDECLS\n" ^
-  String.concat "\n" (List.map algrbraic_types_to_string algrbraic_types) ^ 
+  String.concat "\n" (List.map algrbraic_types_to_string algrbraic_types) ^
   "END-ALGDECLS\n" ^
   "START-PROG\n" ^
-  String.concat "\n" (List.map expression_to_string expressions) ^ 
+  String.concat "\n" (List.map expression_to_string expressions) ^
   "END-PROG\n"
 
 (* Compiler Exception *)
