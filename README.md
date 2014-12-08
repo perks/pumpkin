@@ -29,7 +29,7 @@ Tasks
 12. X If else
 13. X Maps
 14. X Composition plus piping
-15. Partial functions
+15. X Partial functions
 16. Function (+piping and composition) type checking
 17. Code generation
 

@@ -51,7 +51,7 @@ expression:
     LPAREN expression RPAREN             { $2 }
   | indent_block                         { Block($1) }
   | controlflow                          { $1 }
-  | match_statement                       { $1 }
+  | match_statement                      { $1 }
   | assignment                           { $1 }
   | binop                                { $1 }
   | unop                                 { $1 }

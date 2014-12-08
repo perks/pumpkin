@@ -286,4 +286,4 @@ and annotate_expression_list (expr_list : Ast.expression list) : Sast.aExpressio
   List.map (fun expr -> annotate_expression expr) expr_list
 
 and annotate_program (expressions , alg_decls) : Sast.aRoot =
-  annotate_expression_list expressions
+  annotate_expression_list (List.rev expressions)
