@@ -32,38 +32,3 @@ Tasks
 15. X Partial functions
 16. Function (+piping and composition) type checking
 17. Code generation
-
-Changes
-======
-1. Changed list and tupal accessor to be "."
-
-Errors
-======
-1. Function bodies cannot take match or control statements
-because they are not strickly defined as indent_block will fix after gaby finishes functions -Q
-
-Obs.
-======
-1. I turned off warnings because that fragile thing was annoying. Feel free to turn it back on
-2. Eliminated one parameter function calling with this syntax: even 2
-3. Function declarations of the type: def x : Int => (1 + 1) the "code" part needs to be in parenthesis
-4. Gabi will not write string interpolation, if you feel strongly about it, do it yourself
-5. PIPING: Basically what I said is you can only pipe an expression into a function call. You cannot pipe an expression into another expression.
-So:
-x() <| a  ok
-a |> x()  ok
-a |> x() |> z() ok
-a |> x() <| z() NOT ok
-6. When we access a tuple how do we know the type? What about Access?
-7. A function declaration has the type of its return type. A function call has type function (because of partially applied we are not sure what it will return)
-
-Josh's Test Findings (check out test2)
-======
-1. Only the plus operator compiles for me
-2. I cant access tuples (Works for raw, not for SAST)
-3. I can't write comments 
-4. Not sure how to check: AUnit, AIdLiteral, AStringChars
-5. I can't call functions
-6. Cannot access values of maps: val fetch = myMap1("x")
-7. This map syntax doesn't work yet: val myMap2 = Map("x" -> "y", "a" -> "b", "m" -> "n")
-8. This LRM syntax won't compile with List[Int] in the decl: val myList: List[Int] = List(1,2,3,4)
