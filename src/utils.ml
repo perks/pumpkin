@@ -198,9 +198,9 @@ let rec expression_to_string = function
       "\t" ^ String.concat "\n\t" (List.map expression_to_string e_list) ^ "\n"
   | FuncCall(id, p_list) ->
     if (List.length p_list) <> 0 then
-      "\n" ^ id ^ " (" ^ String.concat ", " (List.map expression_to_string p_list) ^ ")\n"
+      id ^ " (" ^ String.concat ", " (List.map expression_to_string p_list) ^ ")"
     else
-      "\n" ^ id ^ "()"
+      id ^ "()"
   | FuncPiping(e_list) ->
       "\n" ^ String.concat "|> " (List.map expression_to_string e_list) ^ "\n"
   | FuncComposition(e_list) ->
@@ -227,7 +227,7 @@ let program_to_string (expressions, algebraic_types) =
   "END-ALGDECLS\n" ^
   "START-PROG\n" ^
   String.concat "\n" (List.map expression_to_string expressions) ^
-  "END-PROG\n"
+  "\nEND-PROG\n"
 
 (* Tokens to String *)
 
