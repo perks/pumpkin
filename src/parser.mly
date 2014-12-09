@@ -113,7 +113,7 @@ func_calling:
   | ID LPAREN RPAREN                          { FuncCall($1, []) }
 
 func_anon:
-  LPAREN parameters DEFARROW expression RPAREN COLON types  { FuncAnon($2, $4, $7)}
+    LPAREN parameters DEFARROW expression RPAREN COLON types  { FuncAnon($2, $4, $7)}
 
 func_piping:
     func_piping_list                              { FuncPiping($1) }
@@ -162,36 +162,32 @@ literal:
   | expression TUPLEACC expression       { TupleAccess($1, $3)}
   | LBRACK exp_listing RBRACK            { ListLiteral($2) }
   | TLIST LPAREN exp_listing RPAREN      { ListLiteral($3) }
-  | TMAP LPAREN map_list_regular RPAREN  { MapLiteral($3) }
-  | LPAREN map_list_special RPAREN       { MapLiteral($2) }
+  | TMAP LPAREN map_list RPAREN          { MapLiteral($3) }
   | expression ACCESSOR expression       { Access($1, $3) }
   | ID                                   { IdLiteral($1) }
 
-map_list_regular:
-    LPAREN map_item_regular RPAREN                          { [$2] }
-  | map_list_regular COMMA LPAREN map_item_regular RPAREN   { $4::$1 }
+map_list:
+    map_item                { [$1] }
+  | map_list COMMA map_item { $3::$1 }
 
-map_item_regular:
-    expression COMMA expression { $1, $3 }
-
-map_list_special:
-    LPAREN map_item_special RPAREN                        { [$2] }
-  | map_list_special COMMA LPAREN map_item_special RPAREN { $4::$1 }
-
-map_item_special:
-  expression TYPEARROW expression { $1, $3 }
+map_item:
+    LPAREN expression COMMA expression RPAREN      { $2, $4 }
+  | LPAREN expression TYPEARROW expression RPAREN  { $2, $4 }
 
 literal_listing:
     literal                                 { [$1] }
   | literal COMMA literal_listing           { $1::$3 }
 
 exp_listing:
-    expression COMMA                  { [$1] }
-  | expression COMMA exp_listing_tail { $1::$3 }
+    exp_list_single   { $1 }
+  | exp_listing_multi { $1 }
 
-exp_listing_tail:
-    expression                        { [$1] }
-  | expression COMMA exp_listing_tail { $1::$3 }
+exp_list_single:
+    expression COMMA  { [$1] }
+
+exp_listing_multi:
+    expression COMMA expression { [$1;$3] }
+  | exp_listing_multi COMMA expression { $3::$1 }
 
 parameters:
     ID COLON types                       { [Parameter($1, $3)] }
