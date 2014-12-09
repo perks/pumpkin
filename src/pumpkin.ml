@@ -35,7 +35,11 @@ let _ =
           let sast_output = Analyzer.annotate_program program in
             print_string (Utils.s_program_to_string sast_output)
         | Interpret -> print_string("\nInterpret\n")
-        | Compile -> print_string("\nCompile\n")
+        | Compile -> 
+          let program = Processor.parser token_list in
+          let sast_output = Analyzer.annotate_program program in
+            print_string (Codegen.gen_program sast_output)
+
     with
         Utils.IllegalCharacter(c, ln) ->
           print_string
