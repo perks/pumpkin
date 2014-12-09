@@ -65,7 +65,7 @@ let get_function_parameters = function
   | _ -> raise(Failure("Trying to get func params on non function type"))
 
 let get_declared_parameters = function
-    AFuncDecl(_, p, _, _) -> p
+    ATypeFuncDecl(_, p, _, _) -> p
   | AFuncCall(i, _, _) -> 
       let find_func_entry (a, b, c) = if (a = i && c = getCurrentEnvironment) then true else false in
       let original_function = List.find find_func_entry !functionsTable in
