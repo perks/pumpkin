@@ -1,41 +1,5 @@
 open Parser
 
-let token_to_string = function
-    TERMINATOR -> "TERMINATOR" | INDENT -> "INDENT"
-  | DEDENT -> "DEDENT" | LPAREN -> "LPAREN"
-  | RPAREN -> "RPAREN" | COLON -> "COLON"
-  | COMMA -> "COMMA" | LBRACK -> "LBRACK"
-  | RBRACK -> "RBRACK" | TYPEARROW -> "TYPEARROW" | DEFARROW ->  "DEFARROW"
-  | FPIPE -> "FPIPE" | BPIPE -> "BPIPE" | LCOMPOSE -> "LCOMPOSE" | RCOMPOSE -> "RCOMPOSE"
-  | PLUS -> "PLUS" | MINUS -> "MINUS"
-  | TIMES -> "TIMES" | DIVIDE -> "DIVIDE"
-  | MODULO -> "MODULO" | EQ -> "EQ"
-  | NEQ -> "NEQ" | GT -> "GT"
-  | LT -> "LT" | GTE -> "GTE"
-  | LTE -> "LTE" | AND -> "AND"
-  | OR -> "OR" | NOT -> "NOT"
-  | UMINUS -> "UMINUS" | UPLUS -> "UPLUS"
-  | VAL -> "VAL" | ASSIGN -> "ASSIGN" | DEF -> "DEF"
-  | IF -> "IF" | ELSE -> "ELSE"
-  | TINT -> "TINT" | TUNIT -> "TUNIT"
-  | TBOOL -> "TBOOL" | TSTRING -> "TSTRING"
-  | TCHAR -> "TCHAR" | TTUPLE -> "TTUPLE"
-  | TLIST -> "TLIST"| TFLOAT -> "TFLOAT"
-  | TYPE -> "TYPE" | EXTENDS -> "EXTENDS"
-  | TMAP -> "TMAP"
-  | UNIT -> "UNIT"
-  | MATCH -> "MATCH" | SELECTION -> "SELECTION" | WILDCARD -> "WILDCARD"
-  | EOF -> "EOF" 
-  | ID(s) -> "ID(" ^ s ^ ")"
-  | INT(i) -> "INT(" ^ string_of_int i ^ ")"
-  | FLOAT(f) -> "FLOAT(" ^ string_of_float f ^ ")"
-  | DEDENT_COUNT(i) -> "DEDENT_COUNT(" ^ string_of_int i ^ ")"
-  | BOOL(b) -> "BOOL(" ^ (if b then "true" else "false") ^ ")"
-  | STRING(s) -> "STRING(" ^ s ^ ")"
-  | TUPLEACC -> "TUPLEACC" | ACCESSOR -> "ACCESSOR"
-  | CHAR(c) -> "CHAR(" ^ Char.escaped c ^ ")"
-  | DEDENT_EOF(i) -> "DEDENT_EOF(" ^ string_of_int i ^ ")"
-
 (* Custom parser to account for dedent *)
 let dedent_list_from_count count =
   let rec helper count dedent_list =

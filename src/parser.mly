@@ -99,10 +99,14 @@ assignment:
   | VAL ID ASSIGN expression             { Assing($2, $4) }
 
 func_declaration:
-    DEF ID LPAREN parameters RPAREN COLON types DEFARROW TERMINATOR indent_block  { FuncDecl($2, $4, $10, $7) }
-  | DEF ID COLON types DEFARROW TERMINATOR indent_block                           { FuncDecl($2, [], $7, $4) }
-  | DEF ID LPAREN parameters RPAREN COLON types DEFARROW LPAREN expression RPAREN { FuncDecl($2, $4, [$10], $7) }
-  | DEF ID COLON types DEFARROW LPAREN expression RPAREN                          { FuncDecl($2, [], [$7], $4) }
+    DEF ID LPAREN parameters RPAREN COLON types DEFARROW TERMINATOR indent_block  { TypeFuncDecl($2, $4, $10, $7) }
+  | DEF ID COLON types DEFARROW TERMINATOR indent_block                           { TypeFuncDecl($2, [], $7, $4) }
+  | DEF ID LPAREN parameters RPAREN COLON types DEFARROW LPAREN expression RPAREN { TypeFuncDecl($2, $4, [$10], $7) }
+  | DEF ID COLON types DEFARROW LPAREN expression RPAREN                          { TypeFuncDecl($2, [], [$7], $4) }
+  | DEF ID LPAREN parameters RPAREN DEFARROW TERMINATOR indent_block              { FuncDecl($2, $4, $8) }
+  | DEF ID DEFARROW TERMINATOR indent_block                                       { FuncDecl($2, [], $5) }
+  | DEF ID LPAREN parameters RPAREN DEFARROW LPAREN expression RPAREN             { FuncDecl($2, $4, [$8]) }
+  | DEF ID DEFARROW LPAREN expression RPAREN                                      { FuncDecl($2, [], [$5]) }
 
 func_calling:
     ID LPAREN literal_listing RPAREN          { FuncCall($1, $3) }

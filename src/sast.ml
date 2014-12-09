@@ -22,7 +22,7 @@ type aExpression =
   | AIfElseBlock of aExpression * aExpression list * aExpression list * sTypes
   | AStringChars of string * sTypes
   | AParameter of string * sTypes
-  | AFuncDecl of string * aExpression list * aExpression list * sTypes
+  | ATypeFuncDecl of string * aExpression list * aExpression list * sTypes
   | AFuncCall of string * aExpression list * sTypes
   | AFuncComposition of aExpression list * sTypes
   | AFuncPiping of aExpression list * sTypes

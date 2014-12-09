@@ -35,7 +35,8 @@ type expression =
   | IfElseBlock of expression * expression list * expression list
   | MatchBlock of expression * (expression * expression) list
   | Parameter of string * tTypes
-  | FuncDecl of string * expression list * expression list * tTypes
+  | TypeFuncDecl of string * expression list * expression list * tTypes
+  | FuncDecl of string * expression list * expression list
   | FuncCall of string * expression list
   | FuncPiping of expression list
   | FuncComposition of expression list

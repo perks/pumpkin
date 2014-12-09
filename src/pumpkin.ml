@@ -25,7 +25,7 @@ let _ =
       let token_list = Processor.get_token_list lexbuf in
       match action with
           Tokens ->
-            print_string (String.concat " " (List.map Processor.token_to_string token_list) ^ "\n")
+            print_string (String.concat " " (List.map Utils.token_to_string token_list) ^ "\n")
         | Raw ->
           let program = (Processor.parser token_list) in
             print_string (Utils.program_to_string program)

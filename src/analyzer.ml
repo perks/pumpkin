@@ -33,7 +33,7 @@ let type_of = function
   | AIfElseBlock(_, _, _, t) -> t
   | AStringChars(_, t) -> t
   | AParameter(_, t) -> t
-  | AFuncDecl(_, _, _, t) -> t
+  | ATypeFuncDecl(_, _, _, t) -> t
   | AFuncCall(_, _, t) -> t
   | AFuncComposition(_, t) -> t
   | AFuncPiping(_, t) -> t
@@ -50,12 +50,12 @@ let aType_to_saType = function
   | TList -> List
 
 let get_function_name = function
-    AFuncDecl(i, _, _, _) -> i
+    ATypeFuncDecl(i, _, _, _) -> i
   | AFuncCall(i, _, t) -> i
   | _ -> raise(Failure("Trying to get func name on non function type"))
 
 let get_function_parameters = function
-    AFuncDecl(_, p, _, _) -> p
+    ATypeFuncDecl(_, p, _, _) -> p
   | AFuncCall(_, p, _) -> p
   | _ -> raise(Failure("Trying to get func params on non function type"))
 
@@ -234,7 +234,7 @@ let rec annotate_expression (expr : Ast.expression) : Sast.aExpression =
     let cenv = getCurrentEnvironment in
       symbolTable.(cenv) <- Env.add s s_type symbolTable.(cenv);
       AParameter(s, s_type)
-  | FuncDecl(id, params, code, t) ->
+  | TypeFuncDecl(id, params, code, t) ->
     let cenv = getCurrentEnvironment in
       symbolTable.(cenv) <- Env.add id (aType_to_saType t) symbolTable.(cenv);
       symbolTable.(cenv + 1) <- symbolTable.(cenv);
@@ -248,7 +248,7 @@ let rec annotate_expression (expr : Ast.expression) : Sast.aExpression =
     else 
       symbolTable.(cenv + 1) <- Env.empty;
       ignore(functionsTable := (id, s_params, cenv)::!functionsTable);
-      AFuncDecl(id, s_params, s_code, s_type)
+      ATypeFuncDecl(id, s_params, s_code, s_type)
   | FuncCall(id, params) -> 
     let cenv = getCurrentEnvironment in
     if Env.mem id symbolTable.(cenv) then
@@ -267,7 +267,7 @@ let rec annotate_expression (expr : Ast.expression) : Sast.aExpression =
       raise (Failure("Declared anon function type and actual anon function type don't match"))
     else 
       symbolTable.(cenv + 1) <- Env.empty;
-      AFuncDecl("", s_params, [s_e], Sast.Function)
+      ATypeFuncDecl("", s_params, [s_e], Sast.Function)
   | FuncComposition(l) ->
     let s_l =  annotate_expression_list l in
     AFuncComposition(s_l, Sast.Function)
