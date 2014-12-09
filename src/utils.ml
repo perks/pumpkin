@@ -1,5 +1,6 @@
 open Ast
 open Sast
+open Parser
 
 let operation_to_string = function
     Plus -> "PLUS"
@@ -82,7 +83,7 @@ let rec aexpression_to_string = function
   | AStringChars(s, t) -> s ^ "_" ^ s_type_to_string(t)
   | AParameter(id, t) ->
     id ^ " : " ^ s_type_to_string t
-  | AFuncDecl(id, p_list, e_list, t) ->
+  | ATypeFuncDecl(id, p_list, e_list, t) ->
     if (List.length p_list) <> 0 then
       "\n def " ^ id ^ " (" ^ String.concat ", " (List.map aexpression_to_string (List.rev p_list)) ^ ") : " ^ s_type_to_string t ^ " =>\n" ^
       "\t" ^ String.concat "\n\t" (List.map aexpression_to_string e_list) ^ "\n"
@@ -161,7 +162,7 @@ let rec expression_to_string = function
     in
     "MAP(" ^ String.concat ", " (List.map map_expression_tupal_to_string map_list) ^ ")"
   | Block(e_list) ->
-    "\nBLOCK\n" ^ String.concat "\n" (List.map expression_to_string e_list) ^ "\nENDBLOCK\n"
+    "\nBLOCK" ^ String.concat "\n" (List.map expression_to_string e_list) ^ "\nENDBLOCK\n"
   | IfBlock(e, e_list) ->
     "\nIF(" ^ expression_to_string e ^ ")\n" ^
     "\t" ^ String.concat "\n\t" (List.map expression_to_string e_list) ^ "\n" ^
@@ -177,22 +178,29 @@ let rec expression_to_string = function
       expression_to_string e1 ^ " => " ^ expression_to_string e2
     in
     expression_to_string e ^ " MATCH\n" ^
-    "\t" ^ String.concat "\n\t" (List.map match_expression_tupal_to_string match_list) ^ "\n" ^
+    "\t" ^ String.concat "\n\t| " (List.map match_expression_tupal_to_string match_list) ^ "\n" ^
     "ENDMATCH\n"
   | Parameter(id, t) ->
     id ^ " : " ^ type_to_string t
-  | FuncDecl(id, p_list, e_list, t) ->
+  | TypeFuncDecl(id, p_list, e_list, t) ->
     if (List.length p_list) <> 0 then
-      "\n def " ^ id ^ " (" ^ String.concat ", " (List.map expression_to_string p_list) ^ ") : " ^ type_to_string t ^ " =>\n" ^
+      "\ndef " ^ id ^ " (" ^ String.concat ", " (List.map expression_to_string p_list) ^ ") : " ^ type_to_string t ^ " =>\n" ^
       "\t" ^ String.concat "\n\t" (List.map expression_to_string e_list) ^ "\n"
     else
-      "\n def " ^ id ^ " : " ^ type_to_string t ^ " =>\n" ^
+      "\ndef " ^ id ^ " : " ^ type_to_string t ^ " =>\n" ^
+      "\t" ^ String.concat "\n\t" (List.map expression_to_string e_list) ^ "\n"
+  | FuncDecl (id, p_list, e_list) ->
+    if (List.length p_list) <> 0 then
+      "\ndef " ^ id ^ " (" ^ String.concat ", " (List.map expression_to_string p_list) ^ ") =>\n" ^
+      "\t" ^ String.concat "\n\t" (List.map expression_to_string e_list) ^ "\n"
+    else
+      "\ndef " ^ id ^ " =>\n" ^
       "\t" ^ String.concat "\n\t" (List.map expression_to_string e_list) ^ "\n"
   | FuncCall(id, p_list) ->
     if (List.length p_list) <> 0 then
       "\n" ^ id ^ " (" ^ String.concat ", " (List.map expression_to_string p_list) ^ ")\n"
     else
-      "\n " ^ id ^ "()"
+      "\n" ^ id ^ "()"
   | FuncPiping(e_list) ->
       "\n" ^ String.concat "|> " (List.map expression_to_string e_list) ^ "\n"
   | FuncComposition(e_list) ->
@@ -200,6 +208,7 @@ let rec expression_to_string = function
   | FuncAnon(p_list, e, t) ->
       "\n (" ^ String.concat ", " (List.map expression_to_string p_list) ^ " => " ^ expression_to_string e ^
         " ) : " ^ type_to_string t ^ "\n"
+  | Wildcard -> "Wildcard"
 
 let algebraic_params_to_string = function
     NativeParam(id, t) -> id ^ ": " ^ type_to_string t
@@ -219,6 +228,44 @@ let program_to_string (expressions, algebraic_types) =
   "START-PROG\n" ^
   String.concat "\n" (List.map expression_to_string expressions) ^
   "END-PROG\n"
+
+(* Tokens to String *)
+
+let token_to_string = function
+    TERMINATOR -> "TERMINATOR" | INDENT -> "INDENT"
+  | DEDENT -> "DEDENT" | LPAREN -> "LPAREN"
+  | RPAREN -> "RPAREN" | COLON -> "COLON"
+  | COMMA -> "COMMA" | LBRACK -> "LBRACK"
+  | RBRACK -> "RBRACK" | TYPEARROW -> "TYPEARROW" | DEFARROW ->  "DEFARROW"
+  | FPIPE -> "FPIPE" | BPIPE -> "BPIPE" | LCOMPOSE -> "LCOMPOSE" | RCOMPOSE -> "RCOMPOSE"
+  | PLUS -> "PLUS" | MINUS -> "MINUS"
+  | TIMES -> "TIMES" | DIVIDE -> "DIVIDE"
+  | MODULO -> "MODULO" | EQ -> "EQ"
+  | NEQ -> "NEQ" | GT -> "GT"
+  | LT -> "LT" | GTE -> "GTE"
+  | LTE -> "LTE" | AND -> "AND"
+  | OR -> "OR" | NOT -> "NOT"
+  | UMINUS -> "UMINUS" | UPLUS -> "UPLUS"
+  | VAL -> "VAL" | ASSIGN -> "ASSIGN" | DEF -> "DEF"
+  | IF -> "IF" | ELSE -> "ELSE"
+  | TINT -> "TINT" | TUNIT -> "TUNIT"
+  | TBOOL -> "TBOOL" | TSTRING -> "TSTRING"
+  | TCHAR -> "TCHAR" | TTUPLE -> "TTUPLE"
+  | TLIST -> "TLIST"| TFLOAT -> "TFLOAT"
+  | TYPE -> "TYPE" | EXTENDS -> "EXTENDS"
+  | TMAP -> "TMAP"
+  | UNIT -> "UNIT"
+  | MATCH -> "MATCH" | SELECTION -> "SELECTION" | WILDCARD -> "WILDCARD"
+  | EOF -> "EOF" 
+  | ID(s) -> "ID(" ^ s ^ ")"
+  | INT(i) -> "INT(" ^ string_of_int i ^ ")"
+  | FLOAT(f) -> "FLOAT(" ^ string_of_float f ^ ")"
+  | DEDENT_COUNT(i) -> "DEDENT_COUNT(" ^ string_of_int i ^ ")"
+  | BOOL(b) -> "BOOL(" ^ (if b then "true" else "false") ^ ")"
+  | STRING(s) -> "STRING(" ^ s ^ ")"
+  | TUPLEACC -> "TUPLEACC" | ACCESSOR -> "ACCESSOR"
+  | CHAR(c) -> "CHAR(" ^ Char.escaped c ^ ")"
+  | DEDENT_EOF(i) -> "DEDENT_EOF(" ^ string_of_int i ^ ")"
 
 (* Compiler Exception *)
 exception IllegalCharacter of char * int

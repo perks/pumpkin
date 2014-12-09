@@ -3,3 +3,4 @@ val g = (a:Int, b:Int => a+b):Int
 val h = g(2)
 val p = g() >> h()
 val q = p(3)
+val myMap2 = (("x" -> "y"), ("a" -> "b"), ("m" -> "n"))

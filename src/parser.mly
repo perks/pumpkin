@@ -8,7 +8,7 @@
 %token VAL ASSIGN DEF
 %token IF ELSE
 %token TYPE EXTENDS
-%token MATCH SELECTION
+%token MATCH SELECTION WILDCARD
 %token TINT TUNIT TBOOL TSTRING TCHAR TTUPLE TLIST TFLOAT TMAP
 %token <string> ID
 %token <int> INT
@@ -49,7 +49,7 @@ root:
 
 expression:
     LPAREN expression RPAREN             { $2 }
-  | indent_block                         { Block($1) }
+  | indent_block_wrapped                 { $1 }
   | controlflow                          { $1 }
   | match_statement                      { $1 }
   | assignment                           { $1 }
@@ -59,11 +59,15 @@ expression:
   | func_declaration                     { $1 }
   | func_piping                          { $1 }
   | funcs                                { $1 }
+  | WILDCARD                             { Wildcard }
 
 funcs:
     func_composition                     { $1 }
   | func_calling                         { $1 }
   | func_anon                            { $1 }
+
+indent_block_wrapped:
+    indent_block { Block($1) }
 
 indent_block:
     INDENT expression_block DEDENT { List.rev $2 }
@@ -80,24 +84,29 @@ else_statement:
     ELSE COLON TERMINATOR { }
 
 match_statement:
-    expression MATCH COLON TERMINATOR match_block { MatchBlock($1, $5) }
+    MATCH expression COLON TERMINATOR match_block { MatchBlock($2, $5) }
 
 match_block:
-    INDENT matches DEDENT TERMINATOR { $2 }
+    INDENT matches DEDENT { List.rev $2 }
 
 matches:
-    expression DEFARROW expression TERMINATOR { ($1, $3)::[] }
+    /* nothing */ { [] }
   | matches SELECTION expression DEFARROW expression TERMINATOR { ($3, $5)::$1 }
+  | matches SELECTION expression DEFARROW TERMINATOR indent_block_wrapped TERMINATOR { ($3, $6)::$1 }
 
 assignment:
     VAL ID COLON types ASSIGN expression { TypeAssing($2, $6, $4) }
   | VAL ID ASSIGN expression             { Assing($2, $4) }
 
 func_declaration:
-    DEF ID LPAREN parameters RPAREN COLON types DEFARROW TERMINATOR indent_block  { FuncDecl($2, $4, $10, $7) }
-  | DEF ID COLON types DEFARROW TERMINATOR indent_block                           { FuncDecl($2, [], $7, $4) }
-  | DEF ID LPAREN parameters RPAREN COLON types DEFARROW LPAREN expression RPAREN { FuncDecl($2, $4, [$10], $7) }
-  | DEF ID COLON types DEFARROW LPAREN expression RPAREN                          { FuncDecl($2, [], [$7], $4) }
+    DEF ID LPAREN parameters RPAREN COLON types DEFARROW TERMINATOR indent_block  { TypeFuncDecl($2, $4, $10, $7) }
+  | DEF ID COLON types DEFARROW TERMINATOR indent_block                           { TypeFuncDecl($2, [], $7, $4) }
+  | DEF ID LPAREN parameters RPAREN COLON types DEFARROW LPAREN expression RPAREN { TypeFuncDecl($2, $4, [$10], $7) }
+  | DEF ID COLON types DEFARROW LPAREN expression RPAREN                          { TypeFuncDecl($2, [], [$7], $4) }
+  | DEF ID LPAREN parameters RPAREN DEFARROW TERMINATOR indent_block              { FuncDecl($2, $4, $8) }
+  | DEF ID DEFARROW TERMINATOR indent_block                                       { FuncDecl($2, [], $5) }
+  | DEF ID LPAREN parameters RPAREN DEFARROW LPAREN expression RPAREN             { FuncDecl($2, $4, [$8]) }
+  | DEF ID DEFARROW LPAREN expression RPAREN                                      { FuncDecl($2, [], [$5]) }
 
 func_calling:
     ID LPAREN literal_listing RPAREN          { FuncCall($1, $3) }
