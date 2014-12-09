@@ -12,23 +12,24 @@ branch.autosetuprebase always```
 2) No branch/pull requests, since we are doing rebase on master, master should
 always be up to date and free of merge conflits
 
-Tasks
+Task Sign Off
 ======
 
-1. X Numerical expression/Unit []
-2. X Scope/Line Breaks []
-3. X Booleans []
-4. X Strings/Char []
-5. X Lists/Tupals []
-6. Algebraic Data Types []
-7. X Type Checking/Inference
-8. X Simple Functions: declaration, calling, simple arguments []
-9. X Advanced Functions: composition, piping, first class functions, recursion []
-10. Error Handeling []
-11. Importation []
-12. X If else
-13. X Maps
-14. X Composition plus piping
-15. X Partial functions
-16. Function (+piping and composition) type checking
-17. Code generation
+Task                | Parser | Analyzer | CodeGen |
+------------------- | ------ |--------- | ------- |
+Comments            | | | |
+Numerical           | | | |
+Boolean             | | | |
+Unit                | | | |
+Scoping/Indentation | | | |
+Char                | | | |
+Strings             | | | |
+Lists               | | | |
+Tupals              | | | |
+Algebraic           | | | |
+Map                 | | | |
+Control Flow        | | | |
+Function            | | | |
+Piping              | | | |
+Composition         | | | |
+
