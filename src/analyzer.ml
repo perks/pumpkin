@@ -77,7 +77,8 @@ let get_func_return_type = function
     AFuncAnon(_, _, t, _) -> t 
   | AFuncComposition(_, _, t, _) -> t
   | AFuncCall(i, _, _) -> (Env.find i symbolTable.(getCurrentEnvironment))
-  | _ -> raise(Failure("Trying to get return type on non anon func"))
+  | AFuncPiping(_, t) -> t
+  | _ -> raise(Failure("Trying to get return type on non function type"))
 
 let filter_params (op, gp) = 
   let rec sublist i l = 
@@ -87,7 +88,7 @@ let filter_params (op, gp) =
   in let new_params = sublist (List.length gp) (List.rev op) in
   List.rev new_params
 
-let create_new_func(i, ae, cenv) = 
+let assign_func_check(i, ae, cenv) = 
   if (type_of ae) = Sast.Function then
     let original_func_name = get_function_name ae in 
     if original_func_name <> "" then
@@ -221,13 +222,17 @@ let rec annotate_expression (expr : Ast.expression) : Sast.aExpression =
       raise (Failure ("Type Mismatch"))
     else 
       let cenv = getCurrentEnvironment in
-      let ft = create_new_func(i, ae, cenv) in
+      let ft = assign_func_check(i, ae, cenv) in
       symbolTable.(cenv) <- Env.add i ft symbolTable.(cenv);
       ATypeAssign(i, ae, ft)
   | Assing(i, e) ->
     let ae = annotate_expression e in
     let cenv = getCurrentEnvironment in
-    let ft = create_new_func(i, ae, cenv) in
+    print_string(i);
+    print_string(Utils.aexpression_to_string ae);
+    print_string(Utils.s_type_to_string (type_of ae));
+    print_string("here\n");
+    let ft = assign_func_check(i, ae, cenv) in
     symbolTable.(cenv) <- Env.add i ft symbolTable.(cenv);
     ATypeAssign(i, ae, ft)
   | IfBlock(e1, l) -> 
@@ -294,27 +299,48 @@ let rec annotate_expression (expr : Ast.expression) : Sast.aExpression =
       AFuncAnon(s_params, [s_e], s_type, Sast.Function)
   | FuncComposition(l) ->
     let s_l =  annotate_expression_list l in
-    let rec helper l current =
+    let rec comp_checking l current =
       match l with
         [] -> true
       | h :: t -> 
         let c_r_type = get_func_return_type current in
         let temp =  get_declared_parameters h in
         if (temp = []) then 
-        (if c_r_type = Sast.Unit then helper t h else false) 
-        else if c_r_type = type_of (List.hd temp) then helper t h
+        (if c_r_type = Sast.Unit then comp_checking t h else false) 
+        else if c_r_type = type_of (List.hd temp) then comp_checking t h
         else false
     in 
-    if (helper (List.tl s_l) (List.hd s_l)) then 
+    if (comp_checking (List.tl s_l) (List.hd s_l)) then 
       let new_params = get_declared_parameters (List.hd s_l) in 
       let new_return = get_func_return_type (List.hd (List.rev s_l))in
       AFuncComposition(new_params, s_l, new_return, Sast.Function)
     else raise(Failure("Composition type mismatch"))
   | FuncPiping(l) ->
+    print_string("Length");
+    print_string(string_of_int(List.length l));
     let s_l = annotate_expression_list l in
-    let s_le = annotate_expression (List.hd (List.rev l)) in 
-    let s_le_type = type_of s_le in
-    AFuncPiping(s_l, s_le_type)
+    let cenv = getCurrentEnvironment in
+    let rec comp_checking(l, current, c_type) =
+      match l with
+        [] -> c_type
+      | h :: t -> 
+        if (c_type = Sast.Function) then
+          let n_type = get_func_return_type h in
+          let temp =  get_declared_parameters h in
+          if (temp = []) then 
+          (if c_type = Sast.Unit then comp_checking(t, h, c_type) else raise(Failure("Piping mismatch"))) 
+          else if c_type = type_of (List.hd temp) then 
+          (if List.length temp = 1 then comp_checking(t, h, n_type) else comp_checking(t, h, Sast.Function))
+          else raise(Failure("Piping mismatch"))
+        else 
+          let temp = check_call((get_function_name h), [current], cenv) in
+          comp_checking(t, h, temp)
+    in 
+    let p_type = (comp_checking((List.tl s_l), (List.hd s_l), type_of(List.hd s_l))) in
+    print_string(":)\n");
+    print_string(Utils.s_type_to_string p_type);
+    print_string(":(\n");
+    AFuncPiping(s_l, p_type)
   | Block(l) ->
     let s_code = annotate_expression_list l and
     le = annotate_expression (List.hd (List.rev l)) in

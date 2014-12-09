@@ -1,6 +1,6 @@
 def f(a:Int, b:Int, c:Int):Int => (3)
-val g = (a:Int, b:Int => a+b):Int
+val g = (a:Int, b:Int => 2):Int
 val h = g(2)
-val p = g() >> h()
-val q = p(3)
-val myMap2 = (("x" -> "y"), ("a" -> "b"), ("m" -> "n"))
+val q = 3 |> h() |> g()
+Assing(q, FuncPiping(3, h(), g()))
+q
