@@ -207,12 +207,17 @@ func_composition_list_tail:
   | func_composition_list_tail FCOMPOSE func_anon      { $3::$1 }
 
 algebraic_decl:
-    TYPE ID algrbraic_param_list_opt            { AlgebraicBase($2, List.rev $3) }
-  | TYPE ID algrbraic_param_list_opt EXTENDS ID { AlgebraicDerived($2, $5, List.rev $3) }
+    TYPE ID                                              { AlgebraicEmpty($2) }
+  | TYPE ID LPAREN algrbraic_param_list RPAREN           { AlgebraicProduct($2, List.rev $4) }
+  | TYPE ID ASSIGN TERMINATOR INDENT variant_list DEDENT { AlgebraicSum($2, List.rev $6) }
 
-algrbraic_param_list_opt:
-    /* nothing */                      { [] }
-  | LPAREN algrbraic_param_list RPAREN { $2 }
+variant_list:
+    SELECTION variant TERMINATOR              { [$2] }
+  | variant_list SELECTION variant TERMINATOR { $3::$1}
+
+variant:
+    ID                                    { VariantEmpty($1) }
+  | ID LPAREN algrbraic_param_list RPAREN { VariantProduct($1, List.rev $3) }
 
 algrbraic_param_list:
     algrbraic_param                            { [$1] }

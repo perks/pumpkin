@@ -27,13 +27,15 @@ let _ =
           Tokens ->
             print_string (String.concat " " (List.map Utils.token_to_string token_list) ^ "\n")
         | Raw ->
-          let program = (Processor.parser token_list) in
+            let program = (Processor.parser token_list) in
             print_string (Utils.program_to_string program)
         | Ast -> print_string("\nAst\n")
         | Sast ->
-          let program = Processor.parser token_list in
+          (*let program = Processor.parser token_list in
           let sast_output = Analyzer.annotate_program program in
-            print_string (Utils.s_program_to_string sast_output)
+            print_string (Utils.s_program_to_string sast_output)*)
+          let program = Processor.parser token_list in
+          ignore(Analyzer.annotate_program program)
         | Interpret -> print_string("\nInterpret\n")
         | Compile -> 
           let program = Processor.parser token_list in

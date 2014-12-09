@@ -214,17 +214,24 @@ let algebraic_params_to_string = function
     NativeParam(id, t) -> id ^ ": " ^ type_to_string t
   | AlgebraicParam(id, alg_t) -> id ^ ": " ^ alg_t
 
-let algebraic_types_to_string = function
-    AlgebraicBase(id, params) ->
-      id ^ "(" ^ String.concat ", " (List.map algebraic_params_to_string params) ^ ")\n"
-  | AlgebraicDerived(id, super, params) ->
-      id ^ "(" ^ String.concat ", " (List.map algebraic_params_to_string params) ^ ")\n" ^
-      " EXTENDS " ^ super ^"\n"
+let algebraic_variant_to_string = function
+    VariantEmpty(id) -> id
+  | VariantProduct(id, p_list) ->
+      id ^ "(" ^ String.concat ", " (List.map algebraic_params_to_string p_list) ^ ")"
 
-let program_to_string (expressions, algebraic_types) =
+let algebraic_decls_to_string = function
+    AlgebraicEmpty(id) ->
+      "type " ^ id
+  | AlgebraicProduct(id, p_list) ->
+      "type " ^ id ^ "(" ^ String.concat ", " (List.map algebraic_params_to_string p_list) ^ ")"
+  | AlgebraicSum(id, v_list) ->
+      "type " ^ id ^ "=\n" ^
+      "\t| " ^ String.concat "\n\t| " (List.map algebraic_variant_to_string v_list)
+
+let program_to_string (expressions, algebraic_decls) =
   "START-ALGDECLS\n" ^
-  String.concat "\n" (List.map algebraic_types_to_string algebraic_types) ^
-  "END-ALGDECLS\n" ^
+  String.concat "\n" (List.map algebraic_decls_to_string algebraic_decls) ^
+  "\nEND-ALGDECLS\n" ^
   "START-PROG\n" ^
   String.concat "\n" (List.map expression_to_string expressions) ^
   "\nEND-PROG\n"
