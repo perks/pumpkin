@@ -180,13 +180,13 @@ literal_listing:
 
 exp_listing:
     exp_list_single   { $1 }
-  | exp_listing_multi { $1 }
+  | exp_listing_multi { List.rev $1 }
 
 exp_list_single:
     expression COMMA  { [$1] }
 
 exp_listing_multi:
-    expression COMMA expression { [$1;$3] }
+    expression COMMA expression { [$3;$1] }
   | exp_listing_multi COMMA expression { $3::$1 }
 
 parameters:
