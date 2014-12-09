@@ -1,5 +1,5 @@
 def f(a:Int, b:Int, c:Int):Int => (3)
-val g = f(2)
-val h = g(3)
-
- h(1) >> h()
+val g = (a:Int, b:Int => a+b):Int
+val h = g(2)
+val p = g() >> h()
+val q = p(3)

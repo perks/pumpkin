@@ -24,7 +24,8 @@ type aExpression =
   | AParameter of string * sTypes
   | AFuncDecl of string * aExpression list * aExpression list * sTypes
   | AFuncCall of string * aExpression list * sTypes
-  | AFuncComposition of aExpression list * sTypes
+  | AFuncAnon of aExpression list * aExpression list * sTypes * sTypes
+  | AFuncComposition of aExpression list * aExpression list * sTypes *sTypes
   | AFuncPiping of aExpression list * sTypes
   | ABlock of aExpression list * sTypes
 

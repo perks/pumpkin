@@ -89,13 +89,20 @@ let rec aexpression_to_string = function
     else
       "\n def " ^ id ^ " : " ^ s_type_to_string t ^ " =>\n" ^
       "\t" ^ String.concat "\n\t" (List.map aexpression_to_string e_list) ^ "\n"
+  | AFuncAnon(p_list, e_list, rt, t) -> 
+    if (List.length p_list) <> 0 then
+      "\n(" ^ String.concat ", " (List.map aexpression_to_string (List.rev p_list)) ^ s_type_to_string rt ^ " =>\n" ^
+      "\t" ^ String.concat "\n\t" (List.map aexpression_to_string e_list) ^ ")\n"
+    else
+      "\n ( =>\n" ^
+      "\t" ^ String.concat "\n\t" (List.map aexpression_to_string e_list) ^ ")\n"
   | AFuncCall(id, p_list, t) ->
     if (List.length p_list) <> 0 then
       "\n" ^ id ^ " (" ^ String.concat ", " (List.map aexpression_to_string p_list) ^ ")" ^ "_" ^ s_type_to_string(t) ^ "\n"
     else
       "\n " ^ id ^ "()" ^ "_" ^ s_type_to_string(t)
-  | AFuncComposition(e_list, t) ->
-      "\n" ^ String.concat ">> " (List.map aexpression_to_string e_list) ^ "_" ^ s_type_to_string(t) ^ "\n"
+  | AFuncComposition(p_list, e_list, rt, t) ->
+      "\n" ^ String.concat ">> " (List.map aexpression_to_string e_list) ^ "_" ^ s_type_to_string(rt) ^ "\n"
   | AFuncPiping(e_list, t) ->
       "\n" ^ String.concat "|> " (List.map aexpression_to_string e_list) ^ "_" ^ s_type_to_string(t) ^ "\n"
   | ABlock(e_list, t) ->

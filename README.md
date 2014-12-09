@@ -30,8 +30,9 @@ Tasks
 13. X Maps
 14. X Composition plus piping
 15. X Partial functions
-16. Function (+piping and composition) type checking
+16. Function (+piping and Xcomposition) type checking
 17. Code generation
+18. X Function type inference
 
 Changes
 ======

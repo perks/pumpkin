@@ -35,7 +35,8 @@ let type_of = function
   | AParameter(_, t) -> t
   | AFuncDecl(_, _, _, t) -> t
   | AFuncCall(_, _, t) -> t
-  | AFuncComposition(_, t) -> t
+  | AFuncAnon(_, _, _, t) -> t
+  | AFuncComposition(_, _, _, t) -> t
   | AFuncPiping(_, t) -> t
   | ABlock(_, t) -> t
 
@@ -52,12 +53,31 @@ let aType_to_saType = function
 let get_function_name = function
     AFuncDecl(i, _, _, _) -> i
   | AFuncCall(i, _, t) -> i
+  | AFuncAnon(_, _, _, _) -> ""
+  | AFuncComposition(_, _, _, _) -> ""
   | _ -> raise(Failure("Trying to get func name on non function type"))
 
 let get_function_parameters = function
     AFuncDecl(_, p, _, _) -> p
   | AFuncCall(_, p, _) -> p
+  | AFuncAnon(p, _, _, _) -> p
+  | AFuncComposition(p, _, _, _) -> p
   | _ -> raise(Failure("Trying to get func params on non function type"))
+
+let get_declared_parameters = function
+    AFuncDecl(_, p, _, _) -> p
+  | AFuncCall(i, _, _) -> 
+      let find_func_entry (a, b, c) = if (a = i && c = getCurrentEnvironment) then true else false in
+      let original_function = List.find find_func_entry !functionsTable in
+      (fun (a, b, c) -> b) original_function
+  | AFuncAnon(p, _, _, _) -> p
+  | _ -> raise(Failure("Trying to get func params on non function type"))
+
+let get_func_return_type = function
+    AFuncAnon(_, _, t, _) -> t 
+  | AFuncComposition(_, _, t, _) -> t
+  | AFuncCall(i, _, _) -> (Env.find i symbolTable.(getCurrentEnvironment))
+  | _ -> raise(Failure("Trying to get return type on non anon func"))
 
 let filter_params (op, gp) = 
   let rec sublist i l = 
@@ -69,13 +89,17 @@ let filter_params (op, gp) =
 
 let create_new_func(i, ae, cenv) = 
   if (type_of ae) = Sast.Function then
-    let find_func_entry (a, b, c) = if (a = (get_function_name ae) && c = cenv) then true else false in
-    let original_function = List.find find_func_entry !functionsTable in
-    let original_params = (fun (a, b, c) -> b) original_function in
-    let given_params = get_function_parameters ae in
-    let new_params = filter_params(original_params, given_params) in
-    ignore(functionsTable := (i, new_params, cenv)::!functionsTable);
-    Env.find (get_function_name ae) symbolTable.(cenv)
+    let original_func_name = get_function_name ae in 
+    if original_func_name <> "" then
+      let original_params = get_declared_parameters ae in
+      let given_params = get_function_parameters ae in
+      let new_params = filter_params(original_params, given_params) in
+      ignore(functionsTable := (i, new_params, cenv)::!functionsTable);
+      Env.find (get_function_name ae) symbolTable.(cenv)
+    else 
+      let params = get_function_parameters ae in
+      ignore(functionsTable := (i, params, cenv)::!functionsTable);
+      get_func_return_type ae
   else (type_of ae)
 
 let match_all_types l = 
@@ -267,10 +291,25 @@ let rec annotate_expression (expr : Ast.expression) : Sast.aExpression =
       raise (Failure("Declared anon function type and actual anon function type don't match"))
     else 
       symbolTable.(cenv + 1) <- Env.empty;
-      AFuncDecl("", s_params, [s_e], Sast.Function)
+      AFuncAnon(s_params, [s_e], s_type, Sast.Function)
   | FuncComposition(l) ->
     let s_l =  annotate_expression_list l in
-    AFuncComposition(s_l, Sast.Function)
+    let rec helper l current =
+      match l with
+        [] -> true
+      | h :: t -> 
+        let c_r_type = get_func_return_type current in
+        let temp =  get_declared_parameters h in
+        if (temp = []) then 
+        (if c_r_type = Sast.Unit then helper t h else false) 
+        else if c_r_type = type_of (List.hd temp) then helper t h
+        else false
+    in 
+    if (helper (List.tl s_l) (List.hd s_l)) then 
+      let new_params = get_declared_parameters (List.hd s_l) in 
+      let new_return = get_func_return_type (List.hd (List.rev s_l))in
+      AFuncComposition(new_params, s_l, new_return, Sast.Function)
+    else raise(Failure("Composition type mismatch"))
   | FuncPiping(l) ->
     let s_l = annotate_expression_list l in
     let s_le = annotate_expression (List.hd (List.rev l)) in 
