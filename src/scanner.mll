@@ -3,6 +3,10 @@
     
     let lineno = ref 1
     let indent_stack = Stack.create ()
+    
+    let get_eof () = 
+      let indent_length = Stack.length indent_stack - 1 in 
+      DEDENT_EOF(indent_length)
 }
 
 let alpha = ['a'-'z' 'A'-'Z']
@@ -80,11 +84,7 @@ rule token = parse
     | id as lxm     { ID(lxm) }
     | char as lxm   { CHAR(String.get lxm 1)}
     
-    | eof           
-      {
-        let indent_length = Stack.length indent_stack - 1 in 
-        DEDENT_EOF(indent_length)
-      }
+    | eof { get_eof() }
     | _ as illegal  
       { 
         raise (Utils.IllegalCharacter(illegal, !lineno))
@@ -92,6 +92,7 @@ rule token = parse
 
 and single_comment = parse
     '\n' { token lexbuf }
+    | eof { get_eof() }
     | _ { single_comment lexbuf }
 
 and block_comment = parse
@@ -100,11 +101,7 @@ and block_comment = parse
 
 and indent = parse
     whitespace*return+ { incr lineno; indent lexbuf }
-  | whitespace*eof
-    {
-      let indent_length = Stack.length indent_stack - 1 in 
-      DEDENT_EOF(indent_length)
-    }
+  | whitespace*eof { get_eof() }
   | whitespace* as indt
       {
         let indt_len = (String.length indt) in
