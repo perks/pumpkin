@@ -8,7 +8,7 @@
 %token VAL ASSIGN DEF
 %token IF ELSE
 %token TYPE EXTENDS
-%token MATCH SELECTION
+%token MATCH SELECTION WILDCARD
 %token TINT TUNIT TBOOL TSTRING TCHAR TTUPLE TLIST TFLOAT TMAP
 %token <string> ID
 %token <int> INT
@@ -59,6 +59,7 @@ expression:
   | func_declaration                     { $1 }
   | func_piping                          { $1 }
   | funcs                                { $1 }
+  | WILDCARD                             { Wildcard }
 
 funcs:
     func_composition                     { $1 }
@@ -94,10 +95,14 @@ assignment:
   | VAL ID ASSIGN expression             { Assing($2, $4) }
 
 func_declaration:
-    DEF ID LPAREN parameters RPAREN COLON types DEFARROW TERMINATOR indent_block  { FuncDecl($2, $4, $10, $7) }
-  | DEF ID COLON types DEFARROW TERMINATOR indent_block                           { FuncDecl($2, [], $7, $4) }
-  | DEF ID LPAREN parameters RPAREN COLON types DEFARROW LPAREN expression RPAREN { FuncDecl($2, $4, [$10], $7) }
-  | DEF ID COLON types DEFARROW LPAREN expression RPAREN                          { FuncDecl($2, [], [$7], $4) }
+    DEF ID LPAREN parameters RPAREN COLON types DEFARROW TERMINATOR indent_block { TypeFuncDecl($2, $4, $10, $7) }
+  | DEF ID COLON types DEFARROW TERMINATOR indent_block { TypeFuncDecl($2, [], $7, $4) }
+  | DEF ID LPAREN parameters RPAREN COLON types DEFARROW LPAREN expression RPAREN { TypeFuncDecl($2, $4, [$10], $7) }
+  | DEF ID COLON types DEFARROW LPAREN expression RPAREN { TypeFuncDecl($2, [], [$7], $4) }
+  | DEF ID LPAREN parameters RPAREN DEFARROW TERMINATOR indent_block { FuncDecl($2, $4, $8) }
+  | DEF ID DEFARROW TERMINATOR indent_block { FuncDecl($2, [], $5) }
+  | DEF ID LPAREN parameters RPAREN DEFARROW LPAREN expression RPAREN { FuncDecl($2, $4, [$8]) }
+  | DEF ID DEFARROW LPAREN expression RPAREN { FuncDecl($2, [], [$5]) }
 
 func_calling:
     ID LPAREN literal_listing RPAREN          { FuncCall($1, $3) }
@@ -107,7 +112,7 @@ func_anon:
     LPAREN parameters DEFARROW expression RPAREN COLON types  { FuncAnon($2, $4, $7)}
 
 func_piping:
-    func_piping_list                              { FuncPiping($1) }
+    LPAREN func_piping_list RPAREN                { FuncPiping($2) }
 
 func_composition:
     func_composition_list                         { FuncComposition($1) }
@@ -189,8 +194,10 @@ expression_block:
   | expression_block expression TERMINATOR { $2::$1 }
 
 func_piping_list:
-    expression FPIPE funcs      { List.append [$1] [$3] }
-  | funcs BPIPE expression      { List.append [$3] [$1] }
+    expression FPIPE funcs { [$1;$3] }
+  | funcs BPIPE expression { [$3;$1] }
+  | func_piping_list FPIPE funcs { List.append $1 [$3] }
+  | funcs BPIPE func_piping_list { List.append $3 [$1] }
 
 func_composition_list:
     func_composition_list_tail RCOMPOSE func_calling   { List.append $1 [$3] }

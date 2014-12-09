@@ -37,7 +37,7 @@ let type_of = function
   | AFuncCall(_, _, t) -> t
   | AFuncAnon(_, _, _, t) -> t
   | AFuncComposition(_, _, _, t) -> t
-  | AFuncPiping(_, t) -> t
+  | AFuncPiping(_, _, t) -> t
   | ABlock(_, t) -> t
 
 let aType_to_saType = function
@@ -55,6 +55,7 @@ let get_function_name = function
   | AFuncCall(i, _, t) -> i
   | AFuncAnon(_, _, _, _) -> ""
   | AFuncComposition(_, _, _, _) -> ""
+  | AFuncPiping(_, _, _) -> ""
   | _ -> raise(Failure("Trying to get func name on non function type"))
 
 let get_function_parameters = function
@@ -62,6 +63,7 @@ let get_function_parameters = function
   | AFuncCall(_, p, _) -> p
   | AFuncAnon(p, _, _, _) -> p
   | AFuncComposition(p, _, _, _) -> p
+  | AFuncPiping(_, p, _) -> p
   | _ -> raise(Failure("Trying to get func params on non function type"))
 
 let get_declared_parameters = function
@@ -71,21 +73,22 @@ let get_declared_parameters = function
       let original_function = List.find find_func_entry !functionsTable in
       (fun (a, b, c) -> b) original_function
   | AFuncAnon(p, _, _, _) -> p
+  | AFuncPiping(_, p, _) -> p
   | _ -> raise(Failure("Trying to get func params on non function type"))
 
 let get_func_return_type = function
     AFuncAnon(_, _, t, _) -> t 
   | AFuncComposition(_, _, t, _) -> t
   | AFuncCall(i, _, _) -> (Env.find i symbolTable.(getCurrentEnvironment))
-  | AFuncPiping(_, t) -> t
+  | AFuncPiping(_, _, t) -> t
   | _ -> raise(Failure("Trying to get return type on non function type"))
 
-let filter_params (op, gp) = 
+let filter_params (op, num_gp) = 
   let rec sublist i l = 
     match l with
       [] -> []
     | h :: t -> if (i = 0) then h::t else sublist (i - 1) t     
-  in let new_params = sublist (List.length gp) (List.rev op) in
+  in let new_params = sublist num_gp (List.rev op) in
   List.rev new_params
 
 let assign_func_check(i, ae, cenv) = 
@@ -94,7 +97,7 @@ let assign_func_check(i, ae, cenv) =
     if original_func_name <> "" then
       let original_params = get_declared_parameters ae in
       let given_params = get_function_parameters ae in
-      let new_params = filter_params(original_params, given_params) in
+      let new_params = filter_params(original_params, (List.length given_params)) in
       ignore(functionsTable := (i, new_params, cenv)::!functionsTable);
       Env.find (get_function_name ae) symbolTable.(cenv)
     else 
@@ -149,7 +152,7 @@ let check_call (id, params, cenv) =
   | hd::tl -> if (type_of hd) = type_of (List.hd l2) then match_types tl (List.tl l2) else false 
   in 
   if not(match_types (List.rev params) declared_types) then
-    raise(Failure("Wrong arguments/types for function call"))
+    raise(Failure("Wrong arguments/types for function call " ^ id))
   else if (List.length params) <> (List.length declared_types) then Sast.Function 
   else Env.find id symbolTable.(cenv)
 
@@ -228,10 +231,6 @@ let rec annotate_expression (expr : Ast.expression) : Sast.aExpression =
   | Assing(i, e) ->
     let ae = annotate_expression e in
     let cenv = getCurrentEnvironment in
-    print_string(i);
-    print_string(Utils.aexpression_to_string ae);
-    print_string(Utils.s_type_to_string (type_of ae));
-    print_string("here\n");
     let ft = assign_func_check(i, ae, cenv) in
     symbolTable.(cenv) <- Env.add i ft symbolTable.(cenv);
     ATypeAssign(i, ae, ft)
@@ -316,31 +315,29 @@ let rec annotate_expression (expr : Ast.expression) : Sast.aExpression =
       AFuncComposition(new_params, s_l, new_return, Sast.Function)
     else raise(Failure("Composition type mismatch"))
   | FuncPiping(l) ->
-    print_string("Length");
-    print_string(string_of_int(List.length l));
     let s_l = annotate_expression_list l in
     let cenv = getCurrentEnvironment in
-    let rec comp_checking(l, current, c_type) =
+    let rec comp_checking(l, current, params, c_type) =
       match l with
-        [] -> c_type
+        [] -> (params, c_type)
       | h :: t -> 
-        if (c_type = Sast.Function) then
+        if (type_of h = Sast.Function) then
           let n_type = get_func_return_type h in
           let temp =  get_declared_parameters h in
           if (temp = []) then 
-          (if c_type = Sast.Unit then comp_checking(t, h, c_type) else raise(Failure("Piping mismatch"))) 
+          (if c_type = Sast.Unit then comp_checking(t, h, [], c_type) else raise(Failure("Piping mismatch"))) 
           else if c_type = type_of (List.hd temp) then 
-          (if List.length temp = 1 then comp_checking(t, h, n_type) else comp_checking(t, h, Sast.Function))
+          (if List.length temp = 1 then comp_checking(t, h, [], n_type) 
+          else comp_checking(t, h, filter_params(temp, 1), Sast.Function))
           else raise(Failure("Piping mismatch"))
         else 
           let temp = check_call((get_function_name h), [current], cenv) in
-          comp_checking(t, h, temp)
+          let nparams = filter_params((get_function_parameters h), 1) in
+          print_string(Utils.s_type_to_string temp);
+          comp_checking(t, h, nparams, temp)
     in 
-    let p_type = (comp_checking((List.tl s_l), (List.hd s_l), type_of(List.hd s_l))) in
-    print_string(":)\n");
-    print_string(Utils.s_type_to_string p_type);
-    print_string(":(\n");
-    AFuncPiping(s_l, p_type)
+    let (params, p_type) = (comp_checking((List.tl s_l), (List.hd s_l), [], type_of(List.hd s_l))) in
+    AFuncPiping(s_l, params, p_type)
   | Block(l) ->
     let s_code = annotate_expression_list l and
     le = annotate_expression (List.hd (List.rev l)) in

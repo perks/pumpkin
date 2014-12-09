@@ -104,7 +104,7 @@ let rec aexpression_to_string = function
       "\n " ^ id ^ "()" ^ "_" ^ s_type_to_string(t)
   | AFuncComposition(p_list, e_list, rt, t) ->
       "\n" ^ String.concat ">> " (List.map aexpression_to_string e_list) ^ "_" ^ s_type_to_string(rt) ^ "\n"
-  | AFuncPiping(e_list, t) ->
+  | AFuncPiping(e_list, p_list, t) ->
       "\n" ^ String.concat "|> " (List.map aexpression_to_string e_list) ^ "_" ^ s_type_to_string(t) ^ "\n"
   | ABlock(e_list, t) ->
     "\nBLOCK\n" ^ String.concat "\n" (List.map aexpression_to_string e_list) ^ "_" ^ s_type_to_string(t) ^ "\nENDBLOCK\n"
