@@ -11,7 +11,7 @@ parser.ml parser.mli : parser.mly
 
 scanner.cmo: scanner.ml parser.cmo utils.cmo
 parser.cmo: ast.cmi parser.cmi
-parser.cmi: parser.mli
+parser.cmi: parser.mli ast.cmi
 ast.cmi: ast.mli
 analyzer.cmo: analyzer.ml sast.cmo
 sast.cmo: sast.ml ast.cmi

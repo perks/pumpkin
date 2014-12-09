@@ -344,8 +344,8 @@ let rec annotate_expression (expr : Ast.expression) : Sast.aExpression =
     let b_type = type_of le in
     ABlock(s_code, b_type) 
 
-and annotate_expression_list (expr_list : Ast.expression list) : Sast.aExpression list =
-  List.map (fun expr -> annotate_expression expr) expr_list
+and annotate_expression_list (expressions : Ast.expression list) : Sast.aExpression list =
+  List.map annotate_expression expressions
 
-and annotate_program (expressions , alg_decls) : Sast.aRoot =
-  annotate_expression_list (List.rev expressions)
+and annotate_program (expressions, alg_decls) : Sast.aRoot =
+  annotate_expression_list (expressions)

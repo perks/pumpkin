@@ -8,8 +8,8 @@ all :
 .PHONY : clean
 clean :
 	@make -C $(SRC) clean
-	@rm pmkn
-	rm -f *.diff *.orig *.output
+	@rm -f pmkn
+	rm -f *.diff *.orig *.output tests/*.orig
 
 .PHONY : test
 test :
