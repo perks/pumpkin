@@ -52,11 +52,8 @@ type expression =
   | TypedFuncDecl of string * parameter list * expression list * tTypes
   | FuncDecl of string * parameter list * expression list
   | TypedAnonDecl of parameter list * expression * tTypes
-  | AnonDecl of  parameter list * expression 
-  
-(*
-  | FuncPiping of expression list
-  | FuncComposition of expression list
-*)
+  | AnonDecl of parameter list * expression
+  | FuncPipe of expression * expression
+  | FuncComposition of expression * expression
 
 type root = expression list * algebraic_decl list

@@ -17,7 +17,7 @@ Task Sign Off
 
 Task                | Parser  | Analyzer | CodeGen | Comment |
 ------------------- | ------- | -------- | ------- | ------- |
-Comments            | | NA       | NA      | |
+Comments            | quinton | NA       | NA      | |
 Numerical           | quinton | | | |
 Boolean             | quinton | | | |
 Unit                | quinton | | | |
@@ -31,6 +31,6 @@ Variables           | quinton | | | |
 Control Flow        | quinton | | | |
 Matching            | quinton | | | |
 Functions           | quinton | | | |
-Piping              | | | | |
-Composition         | | | | |
+Piping              | quinton | | | |
+Composition         | quinton | | | |
 Scoping/Indentation | quinton | | | |

@@ -25,10 +25,10 @@
 
 %right DEFARROW
 %left LBRACK RBRACK
-%left BPIPE
 %left FPIPE
-%left FCOMPOSE
-%right RCOMPOSE
+%right BPIPE
+%left RCOMPOSE
+%right LCOMPOSE
 %right ASSIGN
 %left OR
 %left AND
@@ -200,6 +200,8 @@ call:
 funct:
     function_declaration { $1 }
   | function_anon        { $1 }
+  | function_pipe        { $1 }
+  | function_composition { $1 }
 
 function_declaration:
     DEF ID function_parameters COLON types DEFARROW TERMINATOR indent_block { TypedFuncDecl($2, $3, $8, $5) }
@@ -215,41 +217,11 @@ function_anon:
     LPAREN parameter_list DEFARROW expression COLON types RPAREN { TypedAnonDecl($2, $4, $6) }
   | LPAREN parameter_list DEFARROW expression RPAREN             { AnonDecl($2, $4) }
 
-/*  
-  | func_piping                          { $1 }
-  | func_composition                     { $1 }
+function_pipe:
+    expression FPIPE expression { FuncPipe($1, $3) }
+  | expression BPIPE expression { FuncPipe($3, $1) }
 
-literal_listing:
-    literal                                 { [$1] }
-  | literal COMMA literal_listing           { $1::$3 }
+function_composition:
+    expression RCOMPOSE expression { FuncComposition($1, $3) }
+  | expression LCOMPOSE expression { FuncComposition($3, $1) }
 
-func_piping:
-    LPAREN func_piping_list RPAREN                { FuncPiping($2) }
-
-func_composition:
-    func_composition_list                         { FuncComposition($1) }
-
-parameters:
-    ID COLON types                       { [Parameter($1, $3)] }
-  | parameters COMMA ID COLON types      { Parameter($3, $5)::$1 }
-
-func_piping_list:
-    expression FPIPE funcs { [$1;$3] }
-  | funcs BPIPE expression { [$3;$1] }
-  | func_piping_list FPIPE funcs { List.append $1 [$3] }
-  | funcs BPIPE func_piping_list { List.append $3 [$1] }
-
-func_composition_list:
-    func_composition_list_tail RCOMPOSE func_calling   { List.append $1 [$3] }
-  | func_composition_list_tail LCOMPOSE func_calling   { $3::$1 }
-  | func_composition_list_tail RCOMPOSE func_anon      { List.append $1 [$3] }
-  | func_composition_list_tail LCOMPOSE func_anon      { $3::$1 }
-
-func_composition_list_tail:
-    func_calling                                       { [$1] }
-  | func_anon                                          { [$1] }
-  | func_composition_list_tail RCOMPOSE func_calling   { List.append $1 [$3] }
-  | func_composition_list_tail FCOMPOSE func_calling   { $3::$1 }
-  | func_composition_list_tail RCOMPOSE func_anon      { List.append $1 [$3] }
-  | func_composition_list_tail FCOMPOSE func_anon      { $3::$1 }
-*/

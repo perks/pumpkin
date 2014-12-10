@@ -128,20 +128,16 @@ let rec expression_to_string indent_length = function
       let tabs = String.make indent_length '\t' in
       "def " ^ id ^ " (" ^  String.concat ", " (List.map parameters_to_string p_list) ^ ") =>\n" ^
       tabs ^ String.concat ("\n" ^ tabs) (List.map (expression_to_string indent_length) e_list)
-  | TypedAnonDecl (p_list, e, t) -> 
+  | TypedAnonDecl(p_list, e, t) -> 
       "(" ^  String.concat ", " (List.map parameters_to_string p_list) ^ " => " ^ 
       expression_to_string indent_length e ^ " : " ^ type_to_string t ^ ")"
-  | AnonDecl (p_list, e) ->
+  | AnonDecl(p_list, e) ->
       "(" ^  String.concat ", " (List.map parameters_to_string p_list) ^ " => " ^ 
       expression_to_string indent_length e ^ ")"
-(*
-  | FuncPiping(e_list) ->
-      String.concat "|> " (List.map (expression_to_string indent_length) e_list)
-  | FuncComposition(e_list) ->
-      String.concat ">> " (List.map (expression_to_string indent_length) e_list)
-  | FuncAnon(p_list, e, t) ->
-      "(" ^ String.concat ", " (List.map (expression_to_string indent_length) p_list) ^ " => " ^ expression_to_string indent_length e ^
-        " ) : " ^ type_to_string t*)
+  | FuncPipe(e1, e2) ->
+      "(" ^ expression_to_string indent_length e1 ^ " |> " ^ expression_to_string indent_length e2 ^ ")"
+  | FuncComposition    (e1, e2) ->
+      "(" ^ expression_to_string indent_length e1 ^ " >> " ^ expression_to_string indent_length e2 ^ ")"
   | Wildcard -> "_"
 
 let algebraic_variant_to_string = function

@@ -23,11 +23,6 @@ rule token = parse
     whitespace* "//"         { single_comment lexbuf }
   | whitespace* "/*"         { block_comment lexbuf }
   
-  | (return* as returns) "|>" | "|>" (return* as returns) { lineno := !lineno + (String.length returns); FPIPE }
-  | (return* as returns) "<|" | "<|" (return* as returns) { lineno := !lineno + (String.length returns); BPIPE }
-  | (return* as returns) ">>" | ">>" (return* as returns) { lineno := !lineno + (String.length returns); RCOMPOSE }
-  | (return* as returns) "<<" | "<<" (return* as returns) { lineno := !lineno + (String.length returns); LCOMPOSE }
-  
   | return       { incr lineno; indent lexbuf }
   | whitespace   { token lexbuf }
   
@@ -79,6 +74,16 @@ rule token = parse
   | "Map"        { TMAP }
   | "Bool"       { TBOOL }
   
+  | "|>" { FPIPE }
+  | "<|" { BPIPE }
+  | ">>" { RCOMPOSE }
+  | "<<" { LCOMPOSE }
+  
+  | "|>" whitespace* return { incr lineno; FPIPE }
+  | "<|" whitespace* return { incr lineno; BPIPE }
+  | ">>" whitespace* return { incr lineno; RCOMPOSE }
+  | "<<" whitespace* return { incr lineno; LCOMPOSE }
+  
   | "False"       { BOOL(false) }
   | "True"        { BOOL(true) }
   | "()"          { UNIT }
@@ -107,9 +112,13 @@ and block_comment = parse
 
 and indent = parse
     whitespace* return { incr lineno; indent lexbuf }
+  | whitespace* "//"   { incr lineno; single_comment lexbuf }
+  | whitespace* "/*"   { incr lineno; block_comment lexbuf }
+  | whitespace* "|>"   { incr lineno; FPIPE }
+  | whitespace* "<|"   { incr lineno; BPIPE }
+  | whitespace* ">>"   { incr lineno; RCOMPOSE }
+  | whitespace* "<<"   { incr lineno; LCOMPOSE }
   | whitespace* eof    { get_eof() }
-  | whitespace* "//"   { single_comment lexbuf }
-  | whitespace* "/*"   { block_comment lexbuf }
   | whitespace* as indt
       {
         let indt_len = (String.length indt) in
