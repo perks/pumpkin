@@ -2,19 +2,26 @@ type operator =
   Plus | Minus | Times | Divide | Modulo | Eq | Neq | Gt | Lt | Gte | Lte | And | Or | Not
 
 type tTypes =
-	TInt | TUnit | TBool | TString | TChar | TTuple | TList | TFloat
+    TInt 
+  | TUnit 
+  | TBool 
+  | TString 
+  | TChar 
+  | TTuple of tTypes
+  | TList of tTypes
+  | TFloat
+  | TAlgebraic of string
+  | TMap of tTypes * tTypes
 
-type param_decl =
-    NativeParam of string * tTypes
-  | AlgebraicParam of string * string
+type parameter = string * tTypes
 
 type variant_decl = 
     VariantEmpty of string
-  | VariantProduct of string * param_decl list
+  | VariantProduct of string * parameter list
 
 type algebraic_decl = 
     AlgebraicEmpty of string
-  | AlgebraicProduct of string * param_decl list
+  | AlgebraicProduct of string * parameter list
   | AlgebraicSum of string * variant_decl list
 
 type expression =
@@ -24,26 +31,28 @@ type expression =
   | StringLiteral of string
   | CharLiteral of char
   | UnitLiteral
-  | Wildcard
   | IdLiteral of string
-  | Binop of expression * operator * expression
-  | Unop of operator * expression
-  | TypeAssing of string * expression * tTypes
-  | Assing of string * expression
   | TupleLiteral of expression list
-  | TupleAccess of expression * expression
   | ListLiteral of expression list
   | MapLiteral of (expression * expression) list
-  | Access of expression * expression
+  | Wildcard
+  | Binop of expression * operator * expression
+  | Unop of operator * expression
+  | TypeAssign of string * expression * tTypes
+  | Assign of string * expression
+  | Reassign of string * expression
+  | TupleAccess of expression * expression
+  | ListAccess of expression * expression
   | IfBlock of expression * expression list
   | IfElseBlock of expression * expression list * expression list
   | MatchBlock of expression * (expression * expression) list
-  | Parameter of string * tTypes
+  | Call of string * (expression list)
+(*  | Parameter of string * tTypes
   | TypeFuncDecl of string * expression list * expression list * tTypes
   | FuncDecl of string * expression list * expression list
   | FuncCall of string * expression list
   | FuncPiping of expression list
   | FuncComposition of expression list
-  | FuncAnon of expression list * expression * tTypes
+  | FuncAnon of expression list * expression * tTypes *)
 
 type root = expression list * algebraic_decl list

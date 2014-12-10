@@ -19,18 +19,18 @@ Task                | Parser  | Analyzer | CodeGen |
 ------------------- | ------- | -------- | ------- |
 Comments            | quinton | NA       | NA      |
 Numerical           | quinton | | |
-Boolean             | | | |
-Unit                | | | |
-Scoping/Indentation | | | |
-Variables           | | | |
-Char                | | | |
-Strings             | | | |
-Lists               | | | |
-Tupals              | | | |
-Algebraic           | | | |
-Map                 | | | |
-Control Flow        | | | |
-Function            | | | |
+Boolean             | quinton | | |
+Unit                | quinton | | |
+Char                | quinton | | |
+Strings             | quinton | | |
+Lists               | quinton | | |
+Tupals              | quinton | | |
+Algebraic           | quinton | | |
+Map                 | quinton | | |
+Variables           | quinton | | |
+Control Flow        | quinton | | |
+Matching            | quinton | | |
+Functions           | | | |
 Piping              | | | |
 Composition         | | | |
-
+Scoping/Indentation | | | |

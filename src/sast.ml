@@ -1,6 +1,18 @@
 open Ast
 
-type sTypes = Int | Unit | Bool | String | Char | Tuple | List | Float | Function | TAccess | LMAccess | Map
+type sTypes = 
+    Int 
+  | Unit 
+  | Bool 
+  | String 
+  | Char 
+  | Tuple of sTypes
+  | List of sTypes
+  | Float 
+  | Function 
+  | TAccess 
+  | LMAccess 
+  | Map
 
 type aExpression =
     AnIntLiteral of int * sTypes

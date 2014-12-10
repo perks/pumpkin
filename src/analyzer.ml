@@ -39,15 +39,15 @@ let type_of = function
   | AFuncComposition(_, _, _, t) -> t
   | AFuncPiping(_, _, t) -> t
 
-let aType_to_saType = function
+let rec aType_to_saType = function
     TInt -> Int
   | TFloat -> Float
   | TBool -> Bool
   | TString -> String
   | TChar -> Char
   | TUnit -> Unit
-  | TTuple -> Tuple
-  | TList -> List
+  | TTuple(t) -> Tuple(aType_to_saType t)
+  | TList(t) -> List(aType_to_saType t)
 
 let get_function_name = function
     ATypeFuncDecl(i, _, _, _) -> i
@@ -123,7 +123,7 @@ let valid_binop (e1, e2, op) =
     if t1 <> Sast.Int || t1 <> Sast.Float then
       raise(Failure("Operator requires a number"))
   else if op = Gt || op = Lt ||op = Gte ||op = Lte || op = Plus ||op = Times then
-    if t1 <> Sast.Int && t1 <> Sast.Float && t1 <> Sast.String && t1 <> Sast.Tuple && t1 <> Sast.List then
+    if t1 <> Sast.Int && t1 <> Sast.Float && t1 <> Sast.String then
       raise (Failure ("Invalid operator for selected types"))
   else if op = And || op = Or then
     if (type_of e1) <> Sast.Bool then
@@ -172,23 +172,30 @@ let rec annotate_expression (expr : Ast.expression) : Sast.aExpression =
     else raise(Failure("Undeclared variable"))
   | TupleLiteral(l) -> 
     let at_list = annotate_expression_list l in
-    ATupleLiteral(at_list, Sast.Tuple)
+    let t = type_of (List.hd at_list) in
+    ATupleLiteral(at_list, Sast.Tuple(t))
   | TupleAccess(e, index) -> 
     let ae = annotate_expression e and
     ind = annotate_expression index in 
     let ae_t = type_of ae and 
     ind_t = type_of ind in
-    if ae_t <> Sast.Tuple then
-      raise(Failure("Indexing tuple on a non tuple object"))
-    else if ind_t <> Sast.Int then
-      raise(Failure("Invalid type of index (expected int)"))
-    else
-      ATupleAccess(ae, ind, Sast.TAccess)
+    (
+      match ae_t with
+        Sast.Tuple(_) -> 
+          (
+            match ind_t with
+                Sast.Int -> ATupleAccess(ae, ind, Sast.TAccess)
+              | _ -> raise(Failure("Invalid type of index (expected int)"))
+          )
+      | _ -> raise(Failure("Indexing tuple on a non tuple object"))
+    )
   | ListLiteral(l) ->
     let a_list = annotate_expression_list l in
     if not(match_all_types a_list) then
       raise(Failure("List elemets' types must all be the same"))
-    else AListLiteral(a_list, Sast.List)
+    else 
+      let t = type_of (List.hd a_list) in
+      AListLiteral(a_list, Sast.List(t))
   | MapLiteral(elist) ->
     let s_map = List.map (fun (expr1, expr2) -> (annotate_expression expr1, annotate_expression expr2)) elist in
     let key_list = List.map (fun (expr1, expr2) -> expr1) s_map and
@@ -197,14 +204,15 @@ let rec annotate_expression (expr : Ast.expression) : Sast.aExpression =
       raise(Failure("Map element's types or key's types are not consistent"))
     else
       AMapLiteral(s_map, Sast.Map)
-  | Access(e, index) -> 
+  | ListAccess(e, index) -> 
     let ae = annotate_expression e and
     ind = annotate_expression index in 
     let ae_t = type_of ae in
-    if ae_t <> Sast.List then
-      raise(Failure("Indexing list on a non list object"))
-    else
-      ATupleAccess(ae, ind, Sast.LMAccess)
+    (
+      match ae_t with
+          Sast.List(_) -> ATupleAccess(ae, ind, Sast.LMAccess)
+        | _ -> raise(Failure("Indexing list on a non list object"))
+    )
   | Binop(e1, op, e2) ->
     let ae1 = annotate_expression e1 and
         ae2 = annotate_expression e2 in
@@ -216,7 +224,7 @@ let rec annotate_expression (expr : Ast.expression) : Sast.aExpression =
     let et = type_of ae in 
     valid_uniop(ae, op);
     AUnop(op, ae, et)
-  | TypeAssing(i, e, t) ->
+  | TypeAssign(i, e, t) ->
     let ae = annotate_expression e in
     let ae_s_type = type_of ae and 
         t_s_type = aType_to_saType t in
@@ -227,7 +235,7 @@ let rec annotate_expression (expr : Ast.expression) : Sast.aExpression =
       let ft = assign_func_check(i, ae, cenv) in
       symbolTable.(cenv) <- Env.add i ft symbolTable.(cenv);
       ATypeAssign(i, ae, ft)
-  | Assing(i, e) ->
+  | Assign(i, e) ->
     let ae = annotate_expression e in
     let cenv = getCurrentEnvironment in
     let ft = assign_func_check(i, ae, cenv) in
@@ -256,7 +264,7 @@ let rec annotate_expression (expr : Ast.expression) : Sast.aExpression =
     else if le1_s_type <> le2_s_type then
       raise (Failure ("Return type of if and else must match"))
     else AIfElseBlock(ae, a_list1, a_list2, le1_s_type)
-  | Parameter(s, t) -> 
+(*  | Parameter(s, t) -> 
     let s_type = aType_to_saType t in
     let cenv = getCurrentEnvironment in
       symbolTable.(cenv) <- Env.add s s_type symbolTable.(cenv);
@@ -336,7 +344,7 @@ let rec annotate_expression (expr : Ast.expression) : Sast.aExpression =
           comp_checking(t, h, nparams, temp)
     in 
     let (params, p_type) = (comp_checking((List.tl s_l), (List.hd s_l), [], type_of(List.hd s_l))) in
-    AFuncPiping(s_l, params, p_type)
+    AFuncPiping(s_l, params, p_type)*)
 
 and annotate_expression_list (expressions : Ast.expression list) : Sast.aExpression list =
   List.map annotate_expression expressions

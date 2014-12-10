@@ -1,10 +1,9 @@
 if True :
     if True :
         if False :
-            a
+            1
         else :
-            val v = 1
             if True :
-                b
+                2
             else :
-                c
+                3

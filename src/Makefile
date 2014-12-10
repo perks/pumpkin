@@ -9,21 +9,21 @@ scanner.ml : scanner.mll
 parser.ml parser.mli : parser.mly
 	ocamlyacc -v parser.mly
 
-analyzer.cmo : utils.cmo sast.cmo ast.cmi
-analyzer.cmx : utils.cmx sast.cmx ast.cmi
+analyzer.cmo : sast.cmo ast.cmi
+analyzer.cmx : sast.cmx ast.cmi
 codegen.cmo : sast.cmo ast.cmi
 codegen.cmx : sast.cmx ast.cmi
 exceptions.cmo :
 exceptions.cmx :
 interpret.cmo : sast.cmo
 interpret.cmx : sast.cmx
-parser.cmo : exceptions.cmo ast.cmi parser.cmi
-parser.cmx : exceptions.cmx ast.cmi parser.cmi
+parser.cmo : ast.cmi parser.cmi
+parser.cmx : ast.cmi parser.cmi
 processor.cmo : scanner.cmo parser.cmi
 processor.cmx : scanner.cmx parser.cmx
-pumpkin.cmo : utils.cmo processor.cmo exceptions.cmo codegen.cmo \
+pumpkin.cmo : utils.cmo processor.cmo parser.cmi exceptions.cmo codegen.cmo \
     analyzer.cmo
-pumpkin.cmx : utils.cmx processor.cmx exceptions.cmx codegen.cmx \
+pumpkin.cmx : utils.cmx processor.cmx parser.cmx exceptions.cmx codegen.cmx \
     analyzer.cmx
 sast.cmo : ast.cmi
 sast.cmx : ast.cmi

@@ -12,21 +12,21 @@
 let alpha = ['a'-'z' 'A'-'Z']
 let digit = ['0'-'9']
 let id  = alpha (alpha | digit | '_')*
-let string = '"' [^ '"' '\\']*('\\' '.' [^ '"' '\\']*)* '"'
+let string = '"' [^ '"' '\\' '\n' '\r' '\t']* ('\\' [^ '\n' '\r' '\t'] [^ '"' '\\']*)* '"'
 let char = ''' ( alpha | digit ) '''
 let float = digit+ ['.'] digit+
 let int = digit+
 let whitespace = [' ' '\t']
-let return = ['\r' '\n']
+let return = '\n' | "\r\n"
 
 rule token = parse
-      "//"           { single_comment lexbuf }
+      "//"         { single_comment lexbuf }
     | "/*"         { block_comment lexbuf }
     | (return* as returns) "|>" | "|>" (return* as returns) { lineno := !lineno + (String.length returns); FPIPE }
     | (return* as returns) "<|" | "<|" (return* as returns) { lineno := !lineno + (String.length returns); BPIPE }
     | (return* as returns) ">>" | ">>" (return* as returns) { lineno := !lineno + (String.length returns); RCOMPOSE }
     | (return* as returns) "<<" | "<<" (return* as returns) { lineno := !lineno + (String.length returns); LCOMPOSE }
-    | return+ { incr lineno; indent lexbuf }
+    | return       { incr lineno; indent lexbuf }
     | whitespace   { token lexbuf }
     | '(' { LPAREN }
     | ')' { RPAREN }
@@ -74,10 +74,11 @@ rule token = parse
     | "Tuple"      { TTUPLE }
     | "List"       { TLIST }
     | "Map"        { TMAP }
+    | "Bool"       { TBOOL }
     
     | "False"       { BOOL(false) }
     | "True"        { BOOL(true) }
-    | "^"           { UNIT }
+    | "()"           { UNIT }
     | int as lxm    { INT(int_of_string lxm) }
     | float as lxm  { FLOAT(float_of_string lxm) }
     | string as lxm { STRING(lxm) }
@@ -85,6 +86,7 @@ rule token = parse
     | char as lxm   { CHAR(String.get lxm 1)}
     
     | eof { get_eof() }
+    | '"' { raise (Exceptions.UnmatchedQuotation(!lineno)) }
     | _ as illegal  
       { 
         raise (Exceptions.IllegalCharacter(illegal, !lineno))
@@ -101,8 +103,8 @@ and block_comment = parse
     | _ { block_comment lexbuf }
 
 and indent = parse
-    whitespace*(return+ as returns) { lineno := !lineno + (String.length returns); indent lexbuf }
-  | whitespace*eof { get_eof() }
+    whitespace* return { incr lineno; indent lexbuf }
+  | whitespace* eof { get_eof() }
   | whitespace* as indt
       {
         let indt_len = (String.length indt) in

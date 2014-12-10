@@ -45,6 +45,8 @@ let _ =
             "In \"" ^ filename ^ "\", Illegal Character, '" ^
             Char.escaped c ^ "', line " ^ string_of_int ln ^ "\n"
           )
+      | Exceptions.UnmatchedQuotation(ln) ->
+          print_string("Unmatched Quotation, line " ^ string_of_int ln ^ "\n")
       | Exceptions.IndentationError(ln) ->
           print_string("Indentation Error, line " ^ string_of_int ln ^ "\n")
       | Parsing.Parse_error ->

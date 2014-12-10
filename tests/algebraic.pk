@@ -1,0 +1,13 @@
+type Nil
+
+type Product(a : Int, b : Int)
+
+type Operation =
+    | Plus
+    | Minus
+
+type Expression =
+    | Literal(a : Int)
+    | Binop(e1 : Expression, op : Operation, e1 : Expression)
+
+val b1 : Expression = Binop(Literal(1), Plus(), Literal(2))

@@ -9,7 +9,7 @@ for test in tests:
     print
     call (['./pmkn', '-t', test])
     print
-    print "Raw :"
+    print "Ast :"
     print
-    call (['./pmkn', '-r', test])
+    call (['./pmkn', '-a', test])
     print
