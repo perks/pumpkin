@@ -27,6 +27,5 @@ type aExpression =
   | AFuncAnon of aExpression list * aExpression list * sTypes * sTypes
   | AFuncComposition of aExpression list * aExpression list * sTypes * sTypes
   | AFuncPiping of aExpression list * aExpression list * sTypes
-  | ABlock of aExpression list * sTypes
 
 type aRoot = aExpression list

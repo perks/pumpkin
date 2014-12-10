@@ -15,13 +15,14 @@ always be up to date and free of merge conflits
 Task Sign Off
 ======
 
-Task                | Parser | Analyzer | CodeGen |
-------------------- | ------ |--------- | ------- |
-Comments            | | | |
-Numerical           | | | |
+Task                | Parser  | Analyzer | CodeGen |
+------------------- | ------- | -------- | ------- |
+Comments            | quinton | NA       | NA      |
+Numerical           | quinton | | |
 Boolean             | | | |
 Unit                | | | |
 Scoping/Indentation | | | |
+Variables           | | | |
 Char                | | | |
 Strings             | | | |
 Lists               | | | |

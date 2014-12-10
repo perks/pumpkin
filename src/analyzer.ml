@@ -38,7 +38,6 @@ let type_of = function
   | AFuncAnon(_, _, _, t) -> t
   | AFuncComposition(_, _, _, t) -> t
   | AFuncPiping(_, _, t) -> t
-  | ABlock(_, t) -> t
 
 let aType_to_saType = function
     TInt -> Int
@@ -338,11 +337,6 @@ let rec annotate_expression (expr : Ast.expression) : Sast.aExpression =
     in 
     let (params, p_type) = (comp_checking((List.tl s_l), (List.hd s_l), [], type_of(List.hd s_l))) in
     AFuncPiping(s_l, params, p_type)
-  | Block(l) ->
-    let s_code = annotate_expression_list l and
-    le = annotate_expression (List.hd (List.rev l)) in
-    let b_type = type_of le in
-    ABlock(s_code, b_type) 
 
 and annotate_expression_list (expressions : Ast.expression list) : Sast.aExpression list =
   List.map annotate_expression expressions

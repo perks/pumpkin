@@ -22,10 +22,10 @@ let return = ['\r' '\n']
 rule token = parse
       "//"           { single_comment lexbuf }
     | "/*"         { block_comment lexbuf }
-    | return* "|>" | "|>" return*{ FPIPE }
-    | return* "<|" | "<|" return*{ BPIPE }
-    | return* ">>" | ">>" return*{ RCOMPOSE }
-    | return* "<<" | "<<" return*{ LCOMPOSE }
+    | (return* as returns) "|>" | "|>" (return* as returns) { lineno := !lineno + (String.length returns); FPIPE }
+    | (return* as returns) "<|" | "<|" (return* as returns) { lineno := !lineno + (String.length returns); BPIPE }
+    | (return* as returns) ">>" | ">>" (return* as returns) { lineno := !lineno + (String.length returns); RCOMPOSE }
+    | (return* as returns) "<<" | "<<" (return* as returns) { lineno := !lineno + (String.length returns); LCOMPOSE }
     | return+ { incr lineno; indent lexbuf }
     | whitespace   { token lexbuf }
     | '(' { LPAREN }
@@ -91,16 +91,17 @@ rule token = parse
       }
 
 and single_comment = parse
-    '\n' { token lexbuf }
+    '\n' { incr lineno; token lexbuf }
     | eof { get_eof() }
     | _ { single_comment lexbuf }
 
 and block_comment = parse
-    "*/" { token lexbuf }
+      "\n" { incr lineno; token lexbuf }
+    | "*/" { token lexbuf }
     | _ { block_comment lexbuf }
 
 and indent = parse
-    whitespace*return+ { incr lineno; indent lexbuf }
+    whitespace*(return+ as returns) { lineno := !lineno + (String.length returns); indent lexbuf }
   | whitespace*eof { get_eof() }
   | whitespace* as indt
       {

@@ -9,18 +9,26 @@ scanner.ml : scanner.mll
 parser.ml parser.mli : parser.mly
 	ocamlyacc -v parser.mly
 
-scanner.cmo: scanner.ml parser.cmo utils.cmo
-parser.cmo: ast.cmi parser.cmi
-parser.cmi: parser.mli ast.cmi
-ast.cmi: ast.mli
-analyzer.cmo: analyzer.ml sast.cmo
-sast.cmo: sast.ml ast.cmi
-pumpkin.cmo: pumpkin.ml\
-	parser.cmo scanner.cmo utils.cmo processor.cmo analyzer.cmo codegen.cmo
-interpret.cmo: interpret.ml sast.cmo
-utils.cmo: utils.ml ast.cmi parser.cmi sast.cmo
-codegen.cmo: sast.cmo ast.cmi
-processor.cmo: processor.ml parser.cmo scanner.cmo
+analyzer.cmo : utils.cmo sast.cmo ast.cmi
+analyzer.cmx : utils.cmx sast.cmx ast.cmi
+codegen.cmo : sast.cmo ast.cmi
+codegen.cmx : sast.cmx ast.cmi
+interpret.cmo : sast.cmo
+interpret.cmx : sast.cmx
+parser.cmo : ast.cmi parser.cmi
+parser.cmx : ast.cmi parser.cmi
+processor.cmo : scanner.cmo parser.cmi
+processor.cmx : scanner.cmx parser.cmx
+pumpkin.cmo : utils.cmo processor.cmo codegen.cmo analyzer.cmo
+pumpkin.cmx : utils.cmx processor.cmx codegen.cmx analyzer.cmx
+sast.cmo : ast.cmi
+sast.cmx : ast.cmi
+scanner.cmo : utils.cmo parser.cmi
+scanner.cmx : utils.cmx parser.cmx
+utils.cmo : sast.cmo parser.cmi ast.cmi
+utils.cmx : sast.cmx parser.cmx ast.cmi
+ast.cmi :
+parser.cmi : ast.cmi
 
 %.cmo : %.ml
 	ocamlc -c $<

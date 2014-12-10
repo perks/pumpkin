@@ -1,4 +1,4 @@
-type action = Tokens | Raw | Ast | Sast | Interpret | Compile
+type action = Tokens | Ast | Sast | Interpret | Compile
 
 let _ =
   if Array.length Sys.argv < 2 then
@@ -6,14 +6,13 @@ let _ =
       "Usage: pmkn [required-option] <source file>\n" ^
         "required-option:\n" ^
         "\t-t: Prints token stream\n" ^
-        "\t-r: Prints raw output from parser\n" ^
-        "\t-a: Pretty prints Ast\n" ^
+        "\t-a: Pretty prints Ast as a program\n" ^
+        "\t-s: Prints Sast\n" ^
         "\t-i: Runs interpreter\n" ^
         "\t-c: Compiles to Java\n"
     )
   else
     let action = List.assoc Sys.argv.(1) [ ("-t", Tokens);
-                                           ("-r", Raw);
                                            ("-a", Ast);
                                            ("-s", Sast);
                                            ("-i", Interpret);
@@ -26,10 +25,9 @@ let _ =
       match action with
           Tokens ->
             print_string (String.concat " " (List.map Utils.token_to_string token_list) ^ "\n")
-        | Raw ->
+        | Ast ->
             let program = (Processor.parser token_list) in
             print_string (Utils.program_to_string program)
-        | Ast -> print_string("\nAst\n")
         | Sast ->
           let program = Processor.parser token_list in
           let sast_output = Analyzer.annotate_program program in

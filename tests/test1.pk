@@ -1,7 +1,0 @@
-type operation =
-    | Plus
-    | Minus
-
-type expression =
-    | Literal(a : Int)
-    | Binop(e1 : expression, op : operation, e1 : expression)

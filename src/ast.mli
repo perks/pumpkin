@@ -35,7 +35,6 @@ type expression =
   | ListLiteral of expression list
   | MapLiteral of (expression * expression) list
   | Access of expression * expression
-  | Block of expression list
   | IfBlock of expression * expression list
   | IfElseBlock of expression * expression list * expression list
   | MatchBlock of expression * (expression * expression) list

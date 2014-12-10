@@ -49,7 +49,6 @@ root:
 
 expression:
     LPAREN expression RPAREN             { $2 }
-  | indent_block                         { Block($1) }
   | controlflow                          { $1 }
   | match_statement                      { $1 }
   | assignment                           { $1 }
@@ -68,6 +67,10 @@ funcs:
 
 indent_block:
     INDENT expression_block DEDENT { List.rev $2 }
+
+expression_block:
+    expression TERMINATOR                  { [$1] }
+  | expression_block expression TERMINATOR { $2::$1 }
 
 controlflow:
     if_statement indent_block  { IfBlock($1, $2) }
@@ -188,10 +191,6 @@ exp_listing_multi:
 parameters:
     ID COLON types                       { [Parameter($1, $3)] }
   | parameters COMMA ID COLON types      { Parameter($3, $5)::$1 }
-
-expression_block:
-    expression TERMINATOR                  { [$1] }
-  | expression_block expression TERMINATOR { $2::$1 }
 
 func_piping_list:
     expression FPIPE funcs { [$1;$3] }
