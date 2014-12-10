@@ -15,22 +15,22 @@ always be up to date and free of merge conflits
 Task Sign Off
 ======
 
-Task                | Parser  | Analyzer | CodeGen |
-------------------- | ------- | -------- | ------- |
-Comments            | quinton | NA       | NA      |
-Numerical           | quinton | | |
-Boolean             | quinton | | |
-Unit                | quinton | | |
-Char                | quinton | | |
-Strings             | quinton | | |
-Lists               | quinton | | |
-Tupals              | quinton | | |
-Algebraic           | quinton | | |
-Map                 | quinton | | |
-Variables           | quinton | | |
-Control Flow        | quinton | | |
-Matching            | quinton | | |
-Functions           | | | |
-Piping              | | | |
-Composition         | | | |
-Scoping/Indentation | | | |
+Task                | Parser  | Analyzer | CodeGen | Comment |
+------------------- | ------- | -------- | ------- | ------- |
+Comments            | | NA       | NA      | |
+Numerical           | quinton | | | |
+Boolean             | quinton | | | |
+Unit                | quinton | | | |
+Char                | quinton | | | |
+Strings             | quinton | | | |
+Lists               | quinton | | | |
+Tupals              | quinton | | | |
+Algebraic           | quinton | | | |
+Map                 | quinton | | | |
+Variables           | quinton | | | |
+Control Flow        | quinton | | | |
+Matching            | quinton | | | |
+Functions           | quinton | | | |
+Piping              | | | | |
+Composition         | | | | |
+Scoping/Indentation | quinton | | | |

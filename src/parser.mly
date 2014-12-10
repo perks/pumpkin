@@ -5,9 +5,10 @@
 %token FPIPE BPIPE RCOMPOSE LCOMPOSE
 %token PLUS MINUS TIMES DIVIDE MODULO EQ NEQ GT LT GTE LTE AND OR NOT
 %token UMINUS UPLUS
+%token CONS
 %token VAL ASSIGN DEF
 %token IF ELSE
-%token TYPE EXTENDS
+%token TYPE
 %token MATCH SELECTION WILDCARD
 %token TINT TUNIT TBOOL TSTRING TCHAR TTUPLE TLIST TFLOAT TMAP
 %token <string> ID
@@ -22,7 +23,7 @@
 %token EOF
 %token <int> DEDENT_EOF
 
-%nonassoc MATCH DEFARROW
+%right DEFARROW
 %left LBRACK RBRACK
 %left BPIPE
 %left FPIPE
@@ -35,6 +36,7 @@
 %left LT GT LTE GTE
 %left PLUS MINUS
 %left TIMES DIVIDE MODULO
+%right CONS
 %right UMINUS UPLUS
 %right NOT
 %left TUPLEACC ACCESSOR
@@ -57,9 +59,7 @@ expression:
   | unop                                 { $1 }
   | literal                              { $1 }
   | call                                 { $1 }
-/*  | func_declaration                     { $1 }
-  | func_piping                          { $1 }
-  | funcs                                { $1 }*/
+  | funct                                { $1 }
   | WILDCARD                             { Wildcard }
 
 indent_block:
@@ -95,7 +95,7 @@ match_item:
   | SELECTION expression DEFARROW TERMINATOR INDENT expression TERMINATOR DEDENT TERMINATOR { ($2, $6) }
 
 assignment:
-    VAL ID COLON types ASSIGN expression { TypeAssign($2, $6, $4) }
+    VAL ID COLON types ASSIGN expression { TypedAssign($2, $6, $4) }
   | VAL ID ASSIGN expression             { Assign($2, $4) }
   | ID ASSIGN expression                 { Reassign($1, $3) }
 
@@ -109,7 +109,12 @@ types:
   | TTUPLE LBRACK types RBRACK           { TTuple($3) }
   | TLIST LBRACK types RBRACK            { TList($3) }
   | TMAP LBRACK types COMMA types RBRACK { TMap($3, $5) }
+  | LPAREN funct_type RPAREN             { $2 }
   | ID                                   { TAlgebraic($1) }
+
+funct_type:
+    types DEFARROW types      { TFunction($1, $3) }
+  | types DEFARROW funct_type { TFunction($1, $3) }
 
 binop:
     expression PLUS   expression         { Binop($1, Plus, $3) }
@@ -125,6 +130,7 @@ binop:
   | expression GTE    expression         { Binop($1, Gte, $3) }
   | expression AND    expression         { Binop($1, And, $3) }
   | expression OR     expression         { Binop($1, Or, $3) }
+  | expression CONS   expression         { Binop($1, Cons, $3) }
 
 unop:
     MINUS expression %prec UMINUS        { Unop(Minus, $2) }
@@ -141,8 +147,10 @@ literal:
   | LPAREN tupal_elements RPAREN         { TupleLiteral(List.rev $2) }
   | expression TUPLEACC expression       { TupleAccess($1, $3) }
   | LBRACK expression_list RBRACK        { ListLiteral($2) }
+  | LBRACK RBRACK                        { ListLiteral([]) }
   | expression LBRACK expression RBRACK  { ListAccess($1, $3) }
   | LPAREN map_list RPAREN               { MapLiteral($2) }
+  | expression ACCESSOR ID               { AlgebricAccess($1, $3)}
   | ID                                   { IdLiteral($1) }
 
 map_list:
@@ -167,7 +175,7 @@ tupal_elements_head:
 
 algebraic_decl:
     TYPE ID                                              { AlgebraicEmpty($2) }
-  | TYPE ID LPAREN parameters_list RPAREN                { AlgebraicProduct($2, List.rev $4) }
+  | TYPE ID LPAREN parameter_list RPAREN                 { AlgebraicProduct($2, List.rev $4) }
   | TYPE ID ASSIGN TERMINATOR INDENT variant_list DEDENT { AlgebraicSum($2, List.rev $6) }
 
 variant_list:
@@ -176,11 +184,11 @@ variant_list:
 
 variant:
     ID                               { VariantEmpty($1) }
-  | ID LPAREN parameters_list RPAREN { VariantProduct($1, List.rev $3) }
+  | ID LPAREN parameter_list RPAREN  { VariantProduct($1, List.rev $3) }
 
-parameters_list:
+parameter_list:
     parameter                       { [$1] }
-  | parameters_list COMMA parameter { $3::$1 }
+  | parameter_list COMMA parameter { $3::$1 }
 
 parameter:
     ID COLON types { $1, $3 }
@@ -189,31 +197,31 @@ call:
     ID UNIT                          { Call($1, [UnitLiteral]) }
   | ID LPAREN expression_list RPAREN { Call($1, List.rev $3) }
 
-/*funcs:
-    func_composition                     { $1 }
-  | func_calling                         { $1 }
-  | func_anon                            { $1 }
+funct:
+    function_declaration { $1 }
+  | function_anon        { $1 }
 
-func_declaration:
-    DEF ID LPAREN parameters RPAREN COLON types DEFARROW TERMINATOR indent_block { TypeFuncDecl($2, $4, $10, $7) }
-  | DEF ID COLON types DEFARROW TERMINATOR indent_block { TypeFuncDecl($2, [], $7, $4) }
-  | DEF ID LPAREN parameters RPAREN COLON types DEFARROW LPAREN expression RPAREN { TypeFuncDecl($2, $4, [$10], $7) }
-  | DEF ID COLON types DEFARROW LPAREN expression RPAREN { TypeFuncDecl($2, [], [$7], $4) }
-  | DEF ID LPAREN parameters RPAREN DEFARROW TERMINATOR indent_block { FuncDecl($2, $4, $8) }
-  | DEF ID DEFARROW TERMINATOR indent_block { FuncDecl($2, [], $5) }
-  | DEF ID LPAREN parameters RPAREN DEFARROW LPAREN expression RPAREN { FuncDecl($2, $4, [$8]) }
-  | DEF ID DEFARROW LPAREN expression RPAREN { FuncDecl($2, [], [$5]) }
+function_declaration:
+    DEF ID function_parameters COLON types DEFARROW TERMINATOR indent_block { TypedFuncDecl($2, $3, $8, $5) }
+  | DEF ID function_parameters COLON types DEFARROW expression              { TypedFuncDecl($2, $3, [$7], $5)}
+  | DEF ID function_parameters DEFARROW TERMINATOR indent_block             { FuncDecl($2, $3, $6) }
+  | DEF ID function_parameters DEFARROW expression                          { FuncDecl($2, $3, [$5]) }
 
-func_calling:
-    ID LPAREN literal_listing RPAREN          { FuncCall($1, $3) }
-  | ID LPAREN RPAREN                          { FuncCall($1, []) }
+function_parameters:
+    /* nothing */                { ["()", TUnit] }
+  | LPAREN parameter_list RPAREN { $2 }
+
+function_anon:
+    LPAREN parameter_list DEFARROW expression COLON types RPAREN { TypedAnonDecl($2, $4, $6) }
+  | LPAREN parameter_list DEFARROW expression RPAREN             { AnonDecl($2, $4) }
+
+/*  
+  | func_piping                          { $1 }
+  | func_composition                     { $1 }
 
 literal_listing:
     literal                                 { [$1] }
   | literal COMMA literal_listing           { $1::$3 }
-
-func_anon:
-    LPAREN parameters DEFARROW expression RPAREN COLON types  { FuncAnon($2, $4, $7)}
 
 func_piping:
     LPAREN func_piping_list RPAREN                { FuncPiping($2) }

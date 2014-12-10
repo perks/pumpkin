@@ -10,4 +10,6 @@ type Expression =
     | Literal(a : Int)
     | Binop(e1 : Expression, op : Operation, e1 : Expression)
 
-val b1 : Expression = Binop(Literal(1), Plus(), Literal(2))
+val b1 : Operation = Binop(Literal(1), Plus(), Literal(2)).op
+
+val e1 = b1.e1

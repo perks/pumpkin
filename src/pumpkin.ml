@@ -57,5 +57,6 @@ let _ =
                 "Indentation Error" 
               else 
                 "Syntax Error"
-            ) ^ ", line " ^ string_of_int !Processor.line_number ^ "\n"
+            ) ^ ", line " ^ string_of_int !Processor.line_number ^ 
+            ", token " ^ Utils.token_to_string !Processor.last_token ^ "\n"
           )

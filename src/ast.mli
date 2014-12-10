@@ -1,5 +1,5 @@
 type operator =
-  Plus | Minus | Times | Divide | Modulo | Eq | Neq | Gt | Lt | Gte | Lte | And | Or | Not
+  Plus | Minus | Times | Divide | Modulo | Eq | Neq | Gt | Lt | Gte | Lte | And | Or | Not | Cons
 
 type tTypes =
     TInt 
@@ -12,6 +12,7 @@ type tTypes =
   | TFloat
   | TAlgebraic of string
   | TMap of tTypes * tTypes
+  | TFunction of tTypes * tTypes
 
 type parameter = string * tTypes
 
@@ -38,21 +39,24 @@ type expression =
   | Wildcard
   | Binop of expression * operator * expression
   | Unop of operator * expression
-  | TypeAssign of string * expression * tTypes
+  | TypedAssign of string * expression * tTypes
   | Assign of string * expression
   | Reassign of string * expression
   | TupleAccess of expression * expression
   | ListAccess of expression * expression
+  | AlgebricAccess of expression * string
   | IfBlock of expression * expression list
   | IfElseBlock of expression * expression list * expression list
   | MatchBlock of expression * (expression * expression) list
   | Call of string * (expression list)
-(*  | Parameter of string * tTypes
-  | TypeFuncDecl of string * expression list * expression list * tTypes
-  | FuncDecl of string * expression list * expression list
-  | FuncCall of string * expression list
+  | TypedFuncDecl of string * parameter list * expression list * tTypes
+  | FuncDecl of string * parameter list * expression list
+  | TypedAnonDecl of parameter list * expression * tTypes
+  | AnonDecl of  parameter list * expression 
+  
+(*
   | FuncPiping of expression list
   | FuncComposition of expression list
-  | FuncAnon of expression list * expression * tTypes *)
+*)
 
 type root = expression list * algebraic_decl list

@@ -17,6 +17,7 @@ let operation_to_string = function
   | And -> "and"
   | Or -> "or"
   | Not -> "not"
+  | Cons -> "::"
 
 (* Ast printer *)
 let rec type_to_string = function
@@ -30,30 +31,36 @@ let rec type_to_string = function
   | TTuple(t)  -> "Tuple[" ^ type_to_string t ^ "]"
   | TList(t)-> "List[" ^ type_to_string t ^ "]"
   | TMap(t1, t2) -> "Map[" ^ type_to_string t1 ^ ", " ^ type_to_string t2 ^ "]"
+  | TFunction(t1, t2) -> "(" ^ type_to_string t1 ^ " => " ^ type_to_string t2 ^ ")"
+
+let parameters_to_string (id, t) = id ^ ": " ^ type_to_string t
 
 let rec expression_to_string indent_length = function
     IntLiteral(i) -> string_of_int(i)
   | FloatLiteral(f) -> string_of_float(f)
   | BoolLiteral(b) ->
-    if b then "True"
-    else "False"
+      if b then "True"
+      else "False"
   | StringLiteral(s) -> s
   | CharLiteral(c) -> "'" ^ Char.escaped c ^ "'"
   | UnitLiteral -> "()"
   | IdLiteral(id) -> id
+  | AlgebricAccess(e, prop) -> 
+      expression_to_string indent_length e ^ "." ^ prop
   | Binop(e1, op, e2) ->
-    "(" ^
-    expression_to_string indent_length e1 ^ " " ^
-    operation_to_string op ^ " " ^
-    expression_to_string indent_length e2 ^
-    ")"
+      "(" ^
+      expression_to_string indent_length e1 ^ " " ^
+      operation_to_string op ^ " " ^
+      expression_to_string indent_length e2 ^
+      ")"
   | Unop(op, e) ->
+    "(" ^ operation_to_string op ^
     (
       match op with
-          Not -> operation_to_string op ^ " " ^expression_to_string indent_length e
-        | _ -> "(" ^ operation_to_string op ^ expression_to_string indent_length e ^ ")"
-    )
-  | TypeAssign(id, e, t) ->
+          Not ->  " "
+        | _   ->  ""
+    ) ^ expression_to_string indent_length e ^ ")"
+  | TypedAssign(id, e, t) ->
     "val " ^ id ^ ": " ^ type_to_string t ^ " = " ^ expression_to_string indent_length e
   | Assign(id, e) ->
     "val " ^ id ^ " = " ^ expression_to_string indent_length e
@@ -68,42 +75,42 @@ let rec expression_to_string indent_length = function
   | ListAccess(e, e_acc) ->
     expression_to_string indent_length e ^ "[" ^ expression_to_string indent_length e_acc ^ "]"
   | MapLiteral(map_list) ->
-    let map_expression_tupal_to_string (e1, e2) =
-      "(" ^ expression_to_string indent_length e1 ^ " -> " ^ expression_to_string indent_length e2 ^ ")"
-    in
-    "Map(" ^ String.concat ", " (List.map map_expression_tupal_to_string map_list) ^ ")"
+      let map_expression_tupal_to_string (e1, e2) =
+        "(" ^ expression_to_string indent_length e1 ^ " -> " ^ expression_to_string indent_length e2 ^ ")"
+      in
+      "Map(" ^ String.concat ", " (List.map map_expression_tupal_to_string map_list) ^ ")"
   | IfBlock(e, e_list) ->
-    let indent_length = indent_length + 1 in
-    let tabs = String.make indent_length '\t' in
-    "if " ^ expression_to_string indent_length e ^ " :\n" ^
-    tabs ^ String.concat ("\n" ^ tabs) (List.map (expression_to_string indent_length) e_list)
+      let indent_length = indent_length + 1 in
+      let tabs = String.make indent_length '\t' in
+      "if " ^ expression_to_string indent_length e ^ " :\n" ^
+      tabs ^ String.concat ("\n" ^ tabs) (List.map (expression_to_string indent_length) e_list)
   | IfElseBlock(e, e_list1, e_list2) ->
-    let else_indent_length = indent_length and
-    indent_length = indent_length + 1 in
-    let else_tabs = String.make else_indent_length '\t'
-    and tabs = String.make indent_length '\t' in
-    "if " ^ expression_to_string indent_length e ^ " :\n" ^
-    tabs ^ String.concat ("\n" ^ tabs) (List.map (expression_to_string indent_length) e_list1) ^ "\n" ^
-    else_tabs ^"else :\n" ^
-    tabs ^ String.concat ("\n" ^ tabs) (List.map (expression_to_string indent_length) e_list2)
+      let else_indent_length = indent_length and
+      indent_length = indent_length + 1 in
+      let else_tabs = String.make else_indent_length '\t'
+      and tabs = String.make indent_length '\t' in
+      "if " ^ expression_to_string indent_length e ^ " :\n" ^
+      tabs ^ String.concat ("\n" ^ tabs) (List.map (expression_to_string indent_length) e_list1) ^ "\n" ^
+      else_tabs ^"else :\n" ^
+      tabs ^ String.concat ("\n" ^ tabs) (List.map (expression_to_string indent_length) e_list2)
   | MatchBlock(e, match_list) ->
-    let indent_length = indent_length + 1 in
-    let tabs = String.make indent_length '\t' in
-    let match_expression_tupal_to_string (e1, e2) =
-      expression_to_string indent_length e1 ^ " => " ^ 
-      (
-        match e2 with
-            IfBlock(_, _)
-          | IfElseBlock(_,_,_)
-          | MatchBlock(_,_) ->
-              let indent_length = indent_length + 1 in
-              let tabs = String.make indent_length '\t' in
-              "\n" ^ tabs ^ expression_to_string indent_length e2
-          | _ -> expression_to_string indent_length e2
-      )
-    in
-    "match " ^ expression_to_string indent_length e ^ " :\n" ^
-    tabs ^ "| " ^ String.concat ("\n" ^ tabs ^ "| ") (List.map match_expression_tupal_to_string match_list)
+      let indent_length = indent_length + 1 in
+      let tabs = String.make indent_length '\t' in
+      let match_expression_tupal_to_string (e1, e2) =
+        expression_to_string indent_length e1 ^ " => " ^ 
+        (
+          match e2 with
+              IfBlock(_, _)
+            | IfElseBlock(_,_,_)
+            | MatchBlock(_,_) ->
+                let indent_length = indent_length + 1 in
+                let tabs = String.make indent_length '\t' in
+                "\n" ^ tabs ^ expression_to_string indent_length e2
+            | _ -> expression_to_string indent_length e2
+        )
+      in
+      "match " ^ expression_to_string indent_length e ^ " :\n" ^
+      tabs ^ "| " ^ String.concat ("\n" ^ tabs ^ "| ") (List.map match_expression_tupal_to_string match_list)
   | Call(id, e_list) ->
       id ^ 
       ( 
@@ -111,31 +118,23 @@ let rec expression_to_string indent_length = function
            UnitLiteral::[] -> "()"
          | _ -> "(" ^ String.concat ", " (List.map (expression_to_string indent_length) e_list) ^ ")"
       )
-(*  | Parameter(id, t) ->
-    id ^ " : " ^ type_to_string t
-  | TypeFuncDecl(id, p_list, e_list, t) ->
-    let indent_length = indent_length + 1 in
-    let tabs = String.make indent_length '\t' in
-    if (List.length p_list) <> 0 then
-      "def " ^ id ^ " (" ^ String.concat ", " (List.map (expression_to_string indent_length) p_list) ^ ") : " ^ type_to_string t ^ " =>\n" ^
+  | TypedFuncDecl(id, p_list, e_list, t) ->
+      let indent_length = indent_length + 1 in
+      let tabs = String.make indent_length '\t' in
+      "def " ^ id ^ " (" ^  String.concat ", " (List.map parameters_to_string p_list) ^ ") : " ^ type_to_string t ^ " =>\n" ^
       tabs ^ String.concat ("\n" ^ tabs) (List.map (expression_to_string indent_length) e_list)
-    else
-      "def " ^ id ^ " : " ^ type_to_string t ^ " =>\n" ^
+  | FuncDecl(id, p_list, e_list) ->
+      let indent_length = indent_length + 1 in
+      let tabs = String.make indent_length '\t' in
+      "def " ^ id ^ " (" ^  String.concat ", " (List.map parameters_to_string p_list) ^ ") =>\n" ^
       tabs ^ String.concat ("\n" ^ tabs) (List.map (expression_to_string indent_length) e_list)
-  | FuncDecl (id, p_list, e_list) ->
-    let indent_length = indent_length + 1 in
-    let tabs = String.make indent_length '\t' in
-    if (List.length p_list) <> 0 then
-      "def " ^ id ^ " (" ^ String.concat ", " (List.map (expression_to_string indent_length) p_list) ^ ") =>\n" ^
-      tabs ^ String.concat ("\n" ^ tabs) (List.map (expression_to_string indent_length) e_list)
-    else
-      "def " ^ id ^ " =>\n" ^
-      tabs ^ String.concat ("\n" ^ tabs) (List.map (expression_to_string indent_length) e_list)
-  | FuncCall(id, p_list) ->
-    if (List.length p_list) <> 0 then
-      id ^ " (" ^ String.concat ", " (List.map (expression_to_string indent_length) p_list) ^ ")"
-    else
-      id ^ "()"
+  | TypedAnonDecl (p_list, e, t) -> 
+      "(" ^  String.concat ", " (List.map parameters_to_string p_list) ^ " => " ^ 
+      expression_to_string indent_length e ^ " : " ^ type_to_string t ^ ")"
+  | AnonDecl (p_list, e) ->
+      "(" ^  String.concat ", " (List.map parameters_to_string p_list) ^ " => " ^ 
+      expression_to_string indent_length e ^ ")"
+(*
   | FuncPiping(e_list) ->
       String.concat "|> " (List.map (expression_to_string indent_length) e_list)
   | FuncComposition(e_list) ->
@@ -145,18 +144,16 @@ let rec expression_to_string indent_length = function
         " ) : " ^ type_to_string t*)
   | Wildcard -> "_"
 
-let algebraic_params_to_string (id, t) = id ^ ": " ^ type_to_string t
-
 let algebraic_variant_to_string = function
     VariantEmpty(id) -> id
   | VariantProduct(id, p_list) ->
-      id ^ "(" ^ String.concat ", " (List.map algebraic_params_to_string p_list) ^ ")"
+      id ^ "(" ^ String.concat ", " (List.map parameters_to_string p_list) ^ ")"
 
 let algebraic_decls_to_string = function
     AlgebraicEmpty(id) ->
       "type " ^ id
   | AlgebraicProduct(id, p_list) ->
-      "type " ^ id ^ "(" ^ String.concat ", " (List.map algebraic_params_to_string p_list) ^ ")"
+      "type " ^ id ^ "(" ^ String.concat ", " (List.map parameters_to_string p_list) ^ ")"
   | AlgebraicSum(id, v_list) ->
       "type " ^ id ^ "=\n" ^
       "\t| " ^ String.concat "\n\t| " (List.map algebraic_variant_to_string v_list)
@@ -193,10 +190,11 @@ let token_to_string = function
   | TBOOL -> "TBOOL" | TSTRING -> "TSTRING"
   | TCHAR -> "TCHAR" | TTUPLE -> "TTUPLE"
   | TLIST -> "TLIST"| TFLOAT -> "TFLOAT"
-  | TYPE -> "TYPE" | EXTENDS -> "EXTENDS"
+  | TYPE -> "TYPE"
   | TMAP -> "TMAP"
   | UNIT -> "UNIT"
   | MATCH -> "MATCH" | SELECTION -> "SELECTION" | WILDCARD -> "WILDCARD"
+  | CONS -> "CONS"
   | EOF -> "EOF" 
   | ID(s) -> "ID(" ^ s ^ ")"
   | INT(i) -> "INT(" ^ string_of_int i ^ ")"

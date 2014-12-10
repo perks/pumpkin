@@ -224,7 +224,7 @@ let rec annotate_expression (expr : Ast.expression) : Sast.aExpression =
     let et = type_of ae in 
     valid_uniop(ae, op);
     AUnop(op, ae, et)
-  | TypeAssign(i, e, t) ->
+  | TypedAssign(i, e, t) ->
     let ae = annotate_expression e in
     let ae_s_type = type_of ae and 
         t_s_type = aType_to_saType t in

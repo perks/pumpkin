@@ -1,0 +1,24 @@
+def last (a : List[Int], length : Int) : Int =>
+//Test*/
+    if length > 0 :
+        a[length-1]
+    else:
+        0
+/* 
+
+            */
+def nop => ()
+
+def set (i : Int) : Int => i
+
+def foo =>
+    if True :
+        1
+    else :
+        3
+
+val x = (a : Int, b : Int => a + b : Int)
+(a : Int, b : Int => a + b)
+
+def fst ( a: (x => y => z) ) => ()
+
