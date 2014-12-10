@@ -24,7 +24,7 @@ let _ =
       let token_list = Processor.get_token_list lexbuf in
       match action with
           Tokens ->
-            print_string (String.concat " " (List.map Utils.token_to_string token_list) ^ "\n")
+            print_string (Utils.token_list_to_string token_list)
         | Ast ->
             let program = (Processor.parser token_list) in
             print_string (Utils.program_to_string program)
@@ -39,11 +39,21 @@ let _ =
             print_string (Codegen.gen_program sast_output)
 
     with
-        Utils.IllegalCharacter(c, ln) ->
+        Exceptions.IllegalCharacter(c, ln) ->
           print_string
           (
             "In \"" ^ filename ^ "\", Illegal Character, '" ^
             Char.escaped c ^ "', line " ^ string_of_int ln ^ "\n"
           )
-      | Utils.IndentationError(ln) ->
-        print_string("Indentation Error, line " ^ string_of_int ln ^ "\n")
+      | Exceptions.IndentationError(ln) ->
+          print_string("Indentation Error, line " ^ string_of_int ln ^ "\n")
+      | Parsing.Parse_error ->
+          print_string
+          (
+            (
+              if !Processor.last_token = Parser.INDENT then 
+                "Indentation Error" 
+              else 
+                "Syntax Error"
+            ) ^ ", line " ^ string_of_int !Processor.line_number ^ "\n"
+          )

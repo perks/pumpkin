@@ -87,7 +87,7 @@ rule token = parse
     | eof { get_eof() }
     | _ as illegal  
       { 
-        raise (Utils.IllegalCharacter(illegal, !lineno))
+        raise (Exceptions.IllegalCharacter(illegal, !lineno))
       }
 
 and single_comment = parse
@@ -126,7 +126,7 @@ and indent = parse
                 else inc
             in helper 0
           in 
-          if count = - 1 then raise (Utils.IndentationError !lineno)
+          if count = - 1 then raise (Exceptions.IndentationError !lineno)
           else DEDENT_COUNT(count)
       }
 

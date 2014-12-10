@@ -3,6 +3,7 @@ if True :
         if False :
             a
         else :
+            val v = 1
             if True :
                 b
             else :

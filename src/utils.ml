@@ -178,6 +178,14 @@ let token_to_string = function
   | CHAR(c) -> "CHAR(" ^ Char.escaped c ^ ")"
   | DEDENT_EOF(i) -> "DEDENT_EOF(" ^ string_of_int i ^ ")"
 
+let token_list_to_string token_list =
+  let rec helper last_line_number = function
+      (token, line)::tail ->
+        (if line != last_line_number then "\n" ^ string_of_int line ^ ". " else " ") ^
+        token_to_string token ^ helper line tail
+    | [] -> "\n"
+  in helper 0 token_list
+
 (* sast printer*)
 
 let s_type_to_string = function
@@ -269,8 +277,3 @@ let rec aexpression_to_string = function
 
 let s_program_to_string (aRoot : Sast.aExpression list) =
   "START SAST\n" ^ String.concat "\n" (List.map aexpression_to_string aRoot) ^ "\nEND SAST\n"
-
-
-(* Compiler Exception *)
-exception IllegalCharacter of char * int
-exception IndentationError of int
