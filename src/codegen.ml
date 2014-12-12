@@ -100,6 +100,31 @@ let rec expression_to_string = function
         ");"
       else
         id ^ "();"
+  | AFuncAnon(p_list, e_list, rt, t) ->
+      if rt = Unit then 
+        if (List.length p_list) <> 0 then
+          "\nfunction(" ^  
+          String.concat ", " (List.map expression_to_string (List.rev p_list)) ^ ")" ^
+          " \n{\n" ^ String.concat "\n\t" (List.map expression_to_string e_list) ^
+          "\n};\n"
+        else 
+         "\nfunction() {" ^
+         "\n" ^ String.concat "\n\t" (List.map expression_to_string e_list) ^
+         "\n};\n"
+      else
+        if (List.length p_list) <> 0 then
+          "\nfunction(" ^
+          String.concat ", " (List.map expression_to_string (List.rev p_list)) ^ ")" ^
+          "\n{\n\t" ^ String.concat "\n\t" (List.map expression_to_string
+          (List.tl (flip_last e_list))) ^
+          "\n\treturn " ^ expression_to_string (List.hd (flip_last e_list)) ^
+          "\n};\n"
+        else
+          "\nfunction() {" ^
+          "\n\t" ^ String.concat "\n\t" (List.map expression_to_string (List.tl (flip_last e_list))) ^
+          "\nt\treturn " ^ expression_to_string (List.hd (flip_last e_list)) ^
+          "\n};\n"
+
 
 
 let gen_program (root : Sast.aExpression list) = 
