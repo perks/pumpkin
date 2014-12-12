@@ -1,20 +1,24 @@
 open Ast
 open Sast
 
+let flip_last = fun l ->
+  let r = List.rev l
+  in (List.hd r) :: (List.rev (List.tl r))
+
 let operation_to_string = function
-    Plus -> " + "
-  | Minus -> " - "
-  | Times -> " * "
-  | Divide -> " / "
-  | Modulo -> " % "
-  | Eq -> " === "
-  | Neq -> " !== "
-  | Gt -> " > "
-  | Lt -> " < "
-  | Gte -> " >= "
-  | Lte -> " <= "
-  | And -> " && "
-  | Or -> " || "
+    Plus -> "+"
+  | Minus -> "-"
+  | Times -> "*"
+  | Divide -> "/"
+  | Modulo -> "%"
+  | Eq -> "==="
+  | Neq -> "!=="
+  | Gt -> ">"
+  | Lt -> "<"
+  | Gte -> ">="
+  | Lte -> "<="
+  | And -> "&&"
+  | Or -> "||"
   | Not -> "!"
 
 
@@ -38,16 +42,31 @@ let rec expression_to_string = function
       "\t" ^ String.concat "\n\t" (List.map expression_to_string e_list) ^
       "\n}\n"
   | AParameter(id, t) -> id
-  | ATypeFuncDecl(id, p_list, e_list, _) ->
-      if (List.length p_list) <> 0 then
-        "\nfunction " ^ id ^ "(" ^  
-        String.concat ", " (List.map expression_to_string (List.rev p_list)) ^ ")" ^
-        " \n{\n" ^ String.concat "\n\t" (List.map expression_to_string e_list) ^
-        "\n};\n"
-     else 
-       "\nfunction " ^ id ^ "() {" ^
-       "\n\t" ^ String.concat "\n\t" (List.map expression_to_string e_list) ^
-       "\n};\n"
+  | ATypeFuncDecl(id, p_list, e_list, t) ->
+      if t = Unit then
+        if (List.length p_list) <> 0 then
+          "\nfunction " ^ id ^ "(" ^  
+          String.concat ", " (List.map expression_to_string (List.rev p_list)) ^ ")" ^
+          " \n{\n\t" ^ String.concat "\n\t" (List.map expression_to_string e_list) ^
+          "\n};\n"
+        else 
+         "\nfunction " ^ id ^ "() {" ^
+         "\n\t" ^ String.concat "\n\t" (List.map expression_to_string e_list) ^
+         "\n};\n"
+      else 
+        if (List.length p_list) <> 0 then
+          "\nfunction " ^ id ^ "(" ^
+          String.concat ", " (List.map expression_to_string (List.rev p_list)) ^ ")" ^
+          "\n{\n\t" ^ String.concat "\n\t" (List.map expression_to_string
+          (List.tl (flip_last e_list))) ^
+          "\n\treturn " ^ expression_to_string (List.hd (flip_last e_list)) ^
+          "\n};\n"
+        else
+          "\nfunction " ^ id ^ "() {" ^
+          "\n\t" ^ String.concat "\n\t" (List.map expression_to_string (List.tl (flip_last e_list))) ^
+          "\nt\treturn " ^ expression_to_string (List.hd (flip_last e_list)) ^
+          "\n};\n"
+
   | AFuncCall(id, p_list, _) ->
       if (List.length p_list) <> 0 then
         id ^ "(" ^ 
