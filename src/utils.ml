@@ -2,6 +2,7 @@ open Ast
 open Sast
 open Parser
 
+(* Ast Printer *)
 let operation_to_string = function
     Plus -> "+"
   | Minus -> "-"
@@ -19,7 +20,6 @@ let operation_to_string = function
   | Not -> "not"
   | Cons -> "::"
 
-(* Ast printer *)
 let rec type_to_string = function
     TInt -> "Int"
   | TUnit -> "Unit"
@@ -128,10 +128,10 @@ let rec expression_to_string indent_length = function
       let tabs = String.make indent_length '\t' in
       "def " ^ id ^ " (" ^  String.concat ", " (List.map parameters_to_string p_list) ^ ") =>\n" ^
       tabs ^ String.concat ("\n" ^ tabs) (List.map (expression_to_string indent_length) e_list)
-  | TypedAnonDecl(p_list, e, t) -> 
+  | TypedFuncAnon(p_list, e, t) -> 
       "(" ^  String.concat ", " (List.map parameters_to_string p_list) ^ " => " ^ 
       expression_to_string indent_length e ^ " : " ^ type_to_string t ^ ")"
-  | AnonDecl(p_list, e) ->
+  | FuncAnon(p_list, e) ->
       "(" ^  String.concat ", " (List.map parameters_to_string p_list) ^ " => " ^ 
       expression_to_string indent_length e ^ ")"
   | FuncPipe(e1, e2) ->
@@ -210,9 +210,43 @@ let token_list_to_string token_list =
     | [] -> "\n"
   in helper 0 token_list
 
-(* sast printer*)
+(* Analyzer Utils *)
 
-let rec s_type_to_string = function
+(* Sast Printer*)
+
+let rec a_type_to_string = function
+    Int -> "Int"
+  | Unit -> "Unit"
+  | Bool -> "Bool"
+  | String -> "String"
+  | Char -> "Char"
+  | Tuple(t) -> "Tuple[" ^ a_type_to_string t ^ "]"
+  | List(t) -> "List[" ^ a_type_to_string t ^ "]"
+  | Algebraic(id) -> "Algebraic[" ^ id ^ "]"
+  | Variant(id, t) -> "Variant[" ^ id ^ "]->" ^ a_type_to_string t
+  | Float -> "Float"
+  | Function(t1, t2) -> "(" ^ a_type_to_string t1 ^ " => " ^ a_type_to_string t2 ^ ")"
+  | Map(t1, t2) -> "Map[" ^ a_type_to_string t1 ^ ", "^ a_type_to_string t1 ^ "]"
+
+let a_param_list_to_string (id, t) = id ^ ": " ^ a_type_to_string t
+
+let a_algebraic_variant_to_string = function
+    AVariantEmpty(t) -> a_type_to_string t
+  | AVariantProduct(t, p_list) ->
+      a_type_to_string t ^ "(" ^ String.concat ", " (List.map a_param_list_to_string p_list) ^ ")"
+
+let a_algebraic_to_string = function
+    AAlgebraicEmpty(t) -> a_type_to_string t
+  | AAlgebraicProduct(t, p_list) -> 
+      a_type_to_string t ^ "(" ^  String.concat ", " (List.map a_param_list_to_string p_list) ^ ")"
+  | AAlgebraicSum(t, v_list) ->
+      a_type_to_string t  ^ "=\n" ^
+      "\t| " ^ String.concat "\n\t| " (List.map a_algebraic_variant_to_string v_list)
+
+let s_program_to_string (a_expressions, algebraic_types) = 
+  String.concat "\n" (List.map a_algebraic_to_string algebraic_types) ^ "\n"
+
+(* let rec s_type_to_string = function
     Int -> "INT"
   | Unit -> "UNIT"
   | Bool -> "BOOL"
@@ -227,7 +261,7 @@ let rec s_type_to_string = function
   | LMAccess -> "LMACCESS"
 
 let rec aexpression_to_string = function
-    AnIntLiteral(i, t) -> string_of_int(i) ^ "_" ^ s_type_to_string(t)
+    AIntLiteral(i, t) -> string_of_int(i) ^ "_" ^ s_type_to_string(t)
   | AFloatLiteral(f, t) -> string_of_float(f) ^ "_" ^ s_type_to_string(t)
   | ABinop(e1, op, e2, t) ->
     "( " ^ aexpression_to_string(e1) ^ " " ^
@@ -298,6 +332,4 @@ let rec aexpression_to_string = function
       "\n" ^ String.concat ">> " (List.map aexpression_to_string e_list) ^ "_" ^ s_type_to_string(rt) ^ "\n"
   | AFuncPiping(e_list, p_list, t) ->
       "\n" ^ String.concat "|> " (List.map aexpression_to_string e_list) ^ "_" ^ s_type_to_string(t) ^ "\n"
-
-let s_program_to_string (aRoot : Sast.aExpression list) =
-  "START SAST\n" ^ String.concat "\n" (List.map aexpression_to_string aRoot) ^ "\nEND SAST\n"
+*)

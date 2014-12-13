@@ -1,353 +1,206 @@
-open Ast
 open Sast
+open Ast
+open Utils
 
 module Env = Map.Make(String)
 
-let symbolTable = Array.make 10 Env.empty
-let functionsTable = ref([])
+let type_env_ref = ref(Env.empty)
 
-let getCurrentEnvironment = 
-  let rec helper l current  =
-  match l with
-       [] -> current
-    |  hd::tl -> if Env.is_empty hd then current else helper tl (current + 1)
-  in helper (Array.to_list symbolTable) 0
+let env_to_string id t =
+  print_string(id ^ " -> " ^ a_type_to_string t ^ "\n")
 
-let type_of = function
-    AnIntLiteral(_, t) -> t
-  | AFloatLiteral(_, t) -> t
-  | ABoolLiteral(_, t) -> t
-  | AStringLiteral(_, t) -> t
-  | ACharLiteral(_, t) -> t
-  | AUnit(t) -> t
-  | AIdLiteral(_, t) -> t
-  | ABinop(_, _, _, t) -> t
-  | AUnop(_, _, t) -> t
-  | ATypeAssign(_, _, t) -> t
-  | ATupleLiteral(_, t) -> t
-  | ATupleAccess(_, _, t) -> t
-  | AListLiteral(_, t) -> t
-  | AListAccess(_, _, t) -> t
-  | AMapLiteral(_, t) -> t
-  | AIfBlock(_, _, t) -> t
-  | AIfElseBlock(_, _, _, t) -> t
-  | AStringChars(_, t) -> t
-  | AParameter(_, t) -> t
-  | ATypeFuncDecl(_, _, _, t) -> t
-  | AFuncCall(_, _, t) -> t
-  | AFuncAnon(_, _, _, t) -> t
-  | AFuncComposition(_, _, _, t) -> t
-  | AFuncPiping(_, _, t) -> t
-
-let rec aType_to_saType = function
+let rec aType_to_sType = function
     TInt -> Int
   | TFloat -> Float
   | TBool -> Bool
   | TString -> String
   | TChar -> Char
   | TUnit -> Unit
-  | TTuple(t) -> Tuple(aType_to_saType t)
-  | TList(t) -> List(aType_to_saType t)
+  | TTuple(t) -> Tuple(aType_to_sType t)
+  | TList(t) -> List(aType_to_sType t)
+  | TMap(t1, t2) -> Map(aType_to_sType t1, aType_to_sType t2)
+  | TFunction(t1, t2) -> Function(aType_to_sType t1, aType_to_sType t2)
+  | TAlgebraic(id) ->
+      let type_env = !type_env_ref in
+      if Env.mem id type_env then
+        Env.find id type_env
+      else
+        raise (Exceptions.TypeNotFound(id))
 
-let get_function_name = function
-    ATypeFuncDecl(i, _, _, _) -> i
-  | AFuncCall(i, _, t) -> i
-  | AFuncAnon(_, _, _, _) -> ""
-  | AFuncComposition(_, _, _, _) -> ""
-  | AFuncPiping(_, _, _) -> ""
-  | _ -> raise(Failure("Trying to get func name on non function type"))
-
-let get_function_parameters = function
-    ATypeFuncDecl(_, p, _, _) -> p
-  | AFuncCall(_, p, _) -> p
-  | AFuncAnon(p, _, _, _) -> p
-  | AFuncComposition(p, _, _, _) -> p
-  | AFuncPiping(_, p, _) -> p
-  | _ -> raise(Failure("Trying to get func params on non function type"))
-
-let get_declared_parameters = function
-    ATypeFuncDecl(_, p, _, _) -> p
-  | AFuncCall(i, _, _) -> 
-      let find_func_entry (a, b, c) = if (a = i && c = getCurrentEnvironment) then true else false in
-      let original_function = List.find find_func_entry !functionsTable in
-      (fun (a, b, c) -> b) original_function
-  | AFuncAnon(p, _, _, _) -> p
-  | AFuncPiping(_, p, _) -> p
-  | _ -> raise(Failure("Trying to get func params on non function type"))
-
-let get_func_return_type = function
-    AFuncAnon(_, _, t, _) -> t 
-  | AFuncComposition(_, _, t, _) -> t
-  | AFuncCall(i, _, _) -> (Env.find i symbolTable.(getCurrentEnvironment))
+let rec type_of = function
+    AIntLiteral(_) -> Int
+  | AFloatLiteral(_) -> Float
+  | ABoolLiteral(_) -> Bool
+  | AStringLiteral(_) -> String
+  | ACharLiteral(_) -> Char
+  | AUnitLiteral -> Unit
+  | ATupleLiteral(_, t) -> t
+  | AListLiteral(_, t) -> t
+  | AMapLiteral(_, t) -> t
+  | AWildcard(t) -> t
+  | AIdLiteral(_, t) -> t
+  | ABinop(_, _, _, t) -> t
+  | AUnop(_, _, t) -> t
+  | AAssign(_, _, t) -> t
+  | AReassign(_, _, t) -> t
+  | ATupleAccess(_, _, t) -> t
+  | AListAccess(_, _, t) -> t
+  | AAlgebricAccess(_, _, t) -> t
+  | AIfBlock(_, _, t) -> t
+  | AIfElseBlock(_, _, _, t) -> t
+  | AMatchBlock(_, _, t) -> t
+  | ACall(_, _, t) -> t
+  | AFuncDecl(_, _, _, t) -> t
+  | AFuncAnon(_, _, t) -> t
+  | AFuncComposition (_, _, t) -> t
   | AFuncPiping(_, _, t) -> t
-  | _ -> raise(Failure("Trying to get return type on non function type"))
 
-let filter_params (op, num_gp) = 
-  let rec sublist i l = 
-    match l with
-      [] -> []
-    | h :: t -> if (i = 0) then h::t else sublist (i - 1) t     
-  in let new_params = sublist num_gp (List.rev op) in
-  List.rev new_params
+let annotate_parameter (id, t) = (id, aType_to_sType t)
 
-let assign_func_check(i, ae, cenv) = 
-  if (type_of ae) = Sast.Function then
-    let original_func_name = get_function_name ae in 
-    if original_func_name <> "" then
-      let original_params = get_declared_parameters ae in
-      let given_params = get_function_parameters ae in
-      let new_params = filter_params(original_params, (List.length given_params)) in
-      ignore(functionsTable := (i, new_params, cenv)::!functionsTable);
-      Env.find (get_function_name ae) symbolTable.(cenv)
-    else 
-      let params = get_function_parameters ae in
-      ignore(functionsTable := (i, params, cenv)::!functionsTable);
-      get_func_return_type ae
-  else (type_of ae)
-
-let match_all_types l = 
-  let temp_types = List.map type_of l in 
-  let check_types rest lis = 
-    if List.mem lis rest then rest 
-    else lis::rest 
-  in
-  let unique = List.fold_left check_types [] temp_types in 
-  if List.length unique <> 1 then false
-  else true
-
-let valid_binop (e1, e2, op) = 
-  let t1 = (type_of e1) in
-  if (type_of e1) <> (type_of e2) then
-    raise (Failure ("Type Mismatch"))
-  else if (op = Minus || op = Divide || op = Modulo) then
-    if t1 <> Sast.Int || t1 <> Sast.Float then
-      raise(Failure("Operator requires a number"))
-  else if op = Gt || op = Lt ||op = Gte ||op = Lte || op = Plus ||op = Times then
-    if t1 <> Sast.Int && t1 <> Sast.Float && t1 <> Sast.String then
-      raise (Failure ("Invalid operator for selected types"))
-  else if op = And || op = Or then
-    if (type_of e1) <> Sast.Bool then
-      raise (Failure ("Operator requires Bool type"))
-  else if op = Not then
-    raise(Failure("Invalid Binop"))
-
-let valid_uniop (e, op) = 
-  let t = (type_of e) in
-  if (op = Minus || op = Plus) then
-    if t <> Sast.Int then
-      raise(Failure("Unary plus or minus requires a number"))
-  else if (op = Not) then
-    if t <> Sast.Bool then
-      raise(Failure("Not requires a Bool type"))
-  else raise(Failure("Invalid unary operator"))
-
-let check_call (id, params, cenv) =
-  let find_func_entry (a, b, c) = if (a = id && c = cenv) then true else false in
-  let func_entry = List.find find_func_entry !functionsTable in
-  let declared_types = (fun (a, b, c) -> b) func_entry in
-  let rec match_types l1 l2 =
-  match l1 with
-    [] -> true
-  | hd::tl -> if (type_of hd) = type_of (List.hd l2) then match_types tl (List.tl l2) else false 
-  in 
-  if not(match_types (List.rev params) declared_types) then
-    raise(Failure("Wrong arguments/types for function call " ^ id))
-  else if (List.length params) <> (List.length declared_types) then Sast.Function 
-  else Env.find id symbolTable.(cenv)
-
-
-let rec annotate_expression (expr : Ast.expression) : Sast.aExpression =
-  match expr with
-    IntLiteral(n) -> AnIntLiteral(n, Sast.Int)
-  | FloatLiteral(f) -> AFloatLiteral(f, Sast.Float)
-  | BoolLiteral(b) -> ABoolLiteral(b, Sast.Bool)
-  | StringLiteral(s) -> AStringLiteral(s, Sast.String)
-  | CharLiteral(c) -> ACharLiteral(c, Sast.Char)
-  | UnitLiteral -> AUnit(Sast.Unit)
-  | IdLiteral(id) -> 
-    let cenv = getCurrentEnvironment in
-    if Env.mem id symbolTable.(cenv) then
-      let s_type = Env.find id symbolTable.(cenv) in
-      AIdLiteral(id, s_type)
-    else raise(Failure("Undeclared variable"))
-  | TupleLiteral(l) -> 
-    let at_list = annotate_expression_list l in
-    let t = type_of (List.hd at_list) in
-    ATupleLiteral(at_list, Sast.Tuple(t))
-  | TupleAccess(e, index) -> 
-    let ae = annotate_expression e and
-    ind = annotate_expression index in 
-    let ae_t = type_of ae and 
-    ind_t = type_of ind in
-    (
-      match ae_t with
-        Sast.Tuple(_) -> 
-          (
-            match ind_t with
-                Sast.Int -> ATupleAccess(ae, ind, Sast.TAccess)
-              | _ -> raise(Failure("Invalid type of index (expected int)"))
-          )
-      | _ -> raise(Failure("Indexing tuple on a non tuple object"))
-    )
-  | ListLiteral(l) ->
-    let a_list = annotate_expression_list l in
-    if not(match_all_types a_list) then
-      raise(Failure("List elemets' types must all be the same"))
-    else 
-      let t = type_of (List.hd a_list) in
-      AListLiteral(a_list, Sast.List(t))
-  | MapLiteral(elist) ->
-    let s_map = List.map (fun (expr1, expr2) -> (annotate_expression expr1, annotate_expression expr2)) elist in
-    let key_list = List.map (fun (expr1, expr2) -> expr1) s_map and
-    value_list = List.map (fun (expr1, expr2) -> expr2) s_map in
-    if not(match_all_types key_list && match_all_types value_list) then
-      raise(Failure("Map element's types or key's types are not consistent"))
+let annotate_variant_types base_type variant =
+  let add_record id t =
+    let type_env = !type_env_ref in
+    if Env.mem id type_env then
+      raise (Exceptions.NameCollision(id))
     else
-      AMapLiteral(s_map, Sast.Map)
-  | ListAccess(e, index) -> 
-    let ae = annotate_expression e and
-    ind = annotate_expression index in 
-    let ae_t = type_of ae in
-    (
-      match ae_t with
-          Sast.List(_) -> ATupleAccess(ae, ind, Sast.LMAccess)
-        | _ -> raise(Failure("Indexing list on a non list object"))
-    )
-  | Binop(e1, op, e2) ->
-    let ae1 = annotate_expression e1 and
-        ae2 = annotate_expression e2 in
-    valid_binop (ae1, ae2, op);
-    let et = type_of ae1 in 
-    ABinop(ae1, op, ae2, et)
-  | Unop(op, e) ->
-    let ae = annotate_expression e in
-    let et = type_of ae in 
-    valid_uniop(ae, op);
-    AUnop(op, ae, et)
-  | TypedAssign(i, e, t) ->
-    let ae = annotate_expression e in
-    let ae_s_type = type_of ae and 
-        t_s_type = aType_to_saType t in
-    if ae_s_type <> t_s_type then
-      raise (Failure ("Type Mismatch"))
-    else 
-      let cenv = getCurrentEnvironment in
-      let ft = assign_func_check(i, ae, cenv) in
-      symbolTable.(cenv) <- Env.add i ft symbolTable.(cenv);
-      ATypeAssign(i, ae, ft)
-  | Assign(i, e) ->
-    let ae = annotate_expression e in
-    let cenv = getCurrentEnvironment in
-    let ft = assign_func_check(i, ae, cenv) in
-    symbolTable.(cenv) <- Env.add i ft symbolTable.(cenv);
-    ATypeAssign(i, ae, ft)
-  | IfBlock(e1, l) -> 
-    let a_list = annotate_expression_list l in
-    let ae = annotate_expression e1 and
-    le = annotate_expression (List.hd (List.rev l)) in
-    let ae_s_type = type_of ae and
-    le_s_type = type_of le in
-    if ae_s_type <> Sast.Bool then
-      raise (Failure ("If requires a boolean expression"))
-    else AIfBlock(ae, a_list, le_s_type)
-  | IfElseBlock(e1, l1, l2) ->
-    let ae = annotate_expression e1 in
-    let a_list1 = annotate_expression_list l1 and
-    a_list2 = annotate_expression_list l2 in
-    let le1 = annotate_expression (List.hd (List.rev l1)) and
-    le2 = annotate_expression (List.hd (List.rev l2)) in
-    let ae_s_type = type_of ae in
-    let le1_s_type = type_of le1 and
-    le2_s_type = type_of le2 in
-    if ae_s_type <> Sast.Bool then
-      raise (Failure ("If requires a boolean expression"))
-    else if le1_s_type <> le2_s_type then
-      raise (Failure ("Return type of if and else must match"))
-    else AIfElseBlock(ae, a_list1, a_list2, le1_s_type)
-(*  | Parameter(s, t) -> 
-    let s_type = aType_to_saType t in
-    let cenv = getCurrentEnvironment in
-      symbolTable.(cenv) <- Env.add s s_type symbolTable.(cenv);
-      AParameter(s, s_type)
-  | TypeFuncDecl(id, params, code, t) ->
-    let cenv = getCurrentEnvironment in
-      symbolTable.(cenv) <- Env.add id (aType_to_saType t) symbolTable.(cenv);
-      symbolTable.(cenv + 1) <- symbolTable.(cenv);
-    let s_params = annotate_expression_list params in 
-    let s_code = annotate_expression_list code in
-    let s_type = aType_to_saType t in 
-    let le = annotate_expression (List.hd (List.rev code)) in 
-    let le_s_type = type_of le in
-    if le_s_type <> s_type then
-      raise (Failure("Declared function type and actual function type don't match"))
-    else 
-      symbolTable.(cenv + 1) <- Env.empty;
-      ignore(functionsTable := (id, s_params, cenv)::!functionsTable);
-      ATypeFuncDecl(id, s_params, s_code, s_type)
-  | FuncCall(id, params) -> 
-    let cenv = getCurrentEnvironment in
-    if Env.mem id symbolTable.(cenv) then
-      let s_params = annotate_expression_list params in
-      let s_type = check_call(id, s_params, cenv) in
-        AFuncCall(id, s_params, s_type)
-    else raise(Failure("Undeclared function"))
-  | FuncAnon(params, e , t) ->
-    let cenv = getCurrentEnvironment in
-      symbolTable.(cenv + 1) <- symbolTable.(cenv);
-    let s_params = annotate_expression_list params and 
-    s_e = annotate_expression e in
-    let s_e_type = type_of s_e in
-    let s_type = aType_to_saType t in 
-    if s_e_type <> s_type then
-      raise (Failure("Declared anon function type and actual anon function type don't match"))
-    else 
-      symbolTable.(cenv + 1) <- Env.empty;
-      AFuncAnon(s_params, [s_e], s_type, Sast.Function)
-  | FuncComposition(l) ->
-    let s_l =  annotate_expression_list l in
-    let rec comp_checking l current =
-      match l with
-        [] -> true
-      | h :: t -> 
-        let c_r_type = get_func_return_type current in
-        let temp =  get_declared_parameters h in
-        if (temp = []) then 
-        (if c_r_type = Sast.Unit then comp_checking t h else false) 
-        else if c_r_type = type_of (List.hd temp) then comp_checking t h
-        else false
-    in 
-    if (comp_checking (List.tl s_l) (List.hd s_l)) then 
-      let new_params = get_declared_parameters (List.hd s_l) in 
-      let new_return = get_func_return_type (List.hd (List.rev s_l))in
-      AFuncComposition(new_params, s_l, new_return, Sast.Function)
-    else raise(Failure("Composition type mismatch"))
-  | FuncPiping(l) ->
-    let s_l = annotate_expression_list l in
-    let cenv = getCurrentEnvironment in
-    let rec comp_checking(l, current, params, c_type) =
-      match l with
-        [] -> (params, c_type)
-      | h :: t -> 
-        if (type_of h = Sast.Function) then
-          let n_type = get_func_return_type h in
-          let temp =  get_declared_parameters h in
-          if (temp = []) then 
-          (if c_type = Sast.Unit then comp_checking(t, h, [], c_type) else raise(Failure("Piping mismatch"))) 
-          else if c_type = type_of (List.hd temp) then 
-          (if List.length temp = 1 then comp_checking(t, h, [], n_type) 
-          else comp_checking(t, h, filter_params(temp, 1), Sast.Function))
-          else raise(Failure("Piping mismatch"))
-        else 
-          let temp = check_call((get_function_name h), [current], cenv) in
-          let nparams = filter_params((get_function_parameters h), 1) in
-          print_string(Utils.s_type_to_string temp);
-          comp_checking(t, h, nparams, temp)
-    in 
-    let (params, p_type) = (comp_checking((List.tl s_l), (List.hd s_l), [], type_of(List.hd s_l))) in
-    AFuncPiping(s_l, params, p_type)*)
+      type_env_ref := (Env.add id t type_env)
+  in
+  match variant with
+      VariantEmpty(id) -> 
+        let t = Variant(id, base_type) in
+        add_record id t;
+        AVariantEmpty(t)
+    | VariantProduct(id, p_list) ->
+        let t = Variant(id, base_type) in
+        add_record id t;
+        AVariantProduct(t, List.map annotate_parameter p_list)
 
-and annotate_expression_list (expressions : Ast.expression list) : Sast.aExpression list =
-  List.map annotate_expression expressions
+let annotate_algebraic_types alg_decl = 
+  let add_record id t =
+    let type_env = !type_env_ref in
+    if Env.mem id type_env then
+      raise (Exceptions.NameCollision(id))
+    else
+      type_env_ref := (Env.add id t type_env);
+  in
+  match alg_decl with
+    AlgebraicEmpty(id) ->
+      let t = Algebraic(id) in
+      add_record id t;
+      AAlgebraicEmpty(t)
+  | AlgebraicProduct(id, p_list) -> 
+      let t = Algebraic(id) in
+      add_record id t;
+      AAlgebraicProduct(t, List.map annotate_parameter p_list)
+  | AlgebraicSum(id, v_list) -> 
+      let t = Algebraic(id) in
+      add_record id t;
+      AAlgebraicSum(t, List.map (annotate_variant_types t) v_list)
 
-and annotate_program (expressions, alg_decls) : Sast.aRoot =
-  annotate_expression_list (expressions)
+let rec match_expression_list_type = function (* does not deal with algebraic properly *)
+    fst::snd::tail ->
+      if type_of fst <> type_of snd then
+        false
+      else
+        match_expression_list_type (snd::tail)
+  | _ -> true
+
+let rec annotate_expression env = function
+    IntLiteral(n) -> AIntLiteral(n), env
+  | FloatLiteral(f) -> AFloatLiteral(f), env
+  | BoolLiteral(b) -> ABoolLiteral(b), env
+  | StringLiteral(s) -> AStringLiteral(s), env
+  | CharLiteral(c) -> ACharLiteral(c), env
+  | UnitLiteral -> AUnitLiteral, env
+  | IdLiteral(id) ->
+      if Env.mem id env then
+        let t = Env.find id env in
+        AIdLiteral(id, t), env
+      else
+        raise (Exceptions.IDNotFound id)
+  | TupleLiteral(e_list) ->
+      let a_e_list, env = annotate_expression_list env e_list in
+      if match_expression_list_type a_e_list then
+        let t = type_of (List.hd a_e_list) in
+        ATupleLiteral(a_e_list, t), env
+      else
+        raise Exceptions.TypeMismatch
+  | TypedAssign(id, e, t) ->
+      if Env.mem id env then
+        raise (Exceptions.NameCollision(id))
+      else
+        let a_e, env = annotate_expression env e in
+        let t_a_e = type_of a_e in
+        let a_t = aType_to_sType t in
+        if t_a_e <> a_t then
+          raise (Exceptions.TypeMismatch)
+        else
+          let env = Env.add id t_a_e env in
+          AAssign(id, a_e, t_a_e), env
+  | Assign(id, e) ->
+      if Env.mem id env then
+        raise (Exceptions.NameCollision(id))
+      else
+        let a_e, env = annotate_expression env e in
+        let t_a_e = type_of a_e in
+        let env = Env.add id t_a_e env in
+        AAssign(id, a_e, t_a_e), env
+
+(*
+  | ListLiteral of expression list
+  | MapLiteral of (expression * expression) list
+  | Wildcard
+  | Binop of expression * operator * expression
+  | Unop of operator * expression
+  
+  | Reassign of string * expression
+  | TupleAccess of expression * expression
+  | ListAccess of expression * expression
+  | AlgebricAccess of expression * string
+  | IfBlock of expression * expression list
+  | IfElseBlock of expression * expression list * expression list
+  | MatchBlock of expression * (expression * expression) list
+  | Call of string * (expression list)
+  | TypedFuncDecl of string * parameter list * expression list * tTypes
+  | FuncDecl of string * parameter list * expression list
+  | TypedFuncAnon of parameter list * expression * tTypes
+  | FuncAnon of parameter list * expression
+  | FuncPipe of expression * expression
+  | FuncComposition of expression * expression
+  
+  
+  | AListLiteral of aExpression list * sTypes
+  | AMapLiteral of (aExpression * aExpression) list * sTypes
+  | AWildcard
+  | ABinop of aExpression * operator * aExpression * sTypes
+  | AUnop of operator * aExpression * sTypes
+  | AReassign of string * aExpression * sTypes
+  | ATupleAccess of aExpression * aExpression * sTypes
+  | AListAccess of aExpression * aExpression * sTypes
+  | AAlgebricAccess of aExpression * string * sTypes
+  | AIfBlock of aExpression * aExpression list * sTypes
+  | AIfElseBlock of aExpression * aExpression list * aExpression list * sTypes
+  | AMatchBlock of aExpression * (aExpression * aExpression) list * sTypes
+  | ACall of string * (aExpression list) * sTypes
+  | AFuncDecl of string * aParameter list * aExpression list * sTypes
+  | AFuncAnon of aParameter list * aParameter list * sTypes
+  | AFuncComposition of aExpression * aExpression * sTypes
+  | AFuncPiping of aExpression * aExpression * sTypes
+*)
+
+and annotate_expression_list env e_list =
+  let env_ref = ref(env) in
+  let rec helper = function
+      head::tail ->
+        let a_head, env = annotate_expression env head in
+        env_ref := env;
+        a_head::(helper tail)
+    | [] -> []
+  in (helper e_list), !env_ref
+
+let annotate_program (expression_list, alg_decl_list) : Sast.aRoot =
+  let a_alg_structures = List.map annotate_algebraic_types alg_decl_list in
+  let env = Env.empty in
+  let a_expression_list, env = annotate_expression_list env expression_list in
+  Env.iter env_to_string env;
+  a_expression_list, a_alg_structures

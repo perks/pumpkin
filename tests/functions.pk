@@ -22,3 +22,6 @@ val x = (a : Int, b : Int => a + b : Int)
 
 def fst ( a: (x => y => z) ) => ()
 
+def add (a : Int) =>
+    (b : Int => a + b)
+

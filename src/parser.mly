@@ -214,8 +214,8 @@ function_parameters:
   | LPAREN parameter_list RPAREN { $2 }
 
 function_anon:
-    LPAREN parameter_list DEFARROW expression COLON types RPAREN { TypedAnonDecl($2, $4, $6) }
-  | LPAREN parameter_list DEFARROW expression RPAREN             { AnonDecl($2, $4) }
+    LPAREN parameter_list DEFARROW expression COLON types RPAREN { TypedFuncAnon($2, $4, $6) }
+  | LPAREN parameter_list DEFARROW expression RPAREN             { FuncAnon($2, $4) }
 
 function_pipe:
     expression FPIPE expression { FuncPipe($1, $3) }

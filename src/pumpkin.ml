@@ -22,19 +22,19 @@ let _ =
     try
       let lexbuf = Lexing.from_channel file_in in
       let token_list = Processor.get_token_list lexbuf in
-      let program = (Processor.parser token_list) in
+      let program = Processor.parser token_list in
       match action with
           Tokens ->
             print_string (Utils.token_list_to_string token_list)
         | Ast ->
             print_string (Utils.program_to_string program)
         | Sast ->
-          let sast_output = Analyzer.annotate_program program in
+            let sast_output = Analyzer.annotate_program program in
             print_string (Utils.s_program_to_string sast_output)
         | Interpret -> print_string("\nInterpret\n")
-        | Compile -> 
-          let sast_output = Analyzer.annotate_program program in
-            print_string (Codegen.gen_program sast_output)
+        | Compile -> ()
+          (* let sast_output = Analyzer.annotate_program program in
+            print_string (Codegen.gen_program sast_output) *)
 
     with
         Exceptions.IllegalCharacter(c, ln) ->

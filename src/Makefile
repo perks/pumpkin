@@ -1,4 +1,4 @@
-OBJS = utils.cmo exceptions.cmo codegen.cmo scanner.cmo parser.cmo analyzer.cmo processor.cmo pumpkin.cmo
+OBJS = utils.cmo exceptions.cmo scanner.cmo parser.cmo analyzer.cmo processor.cmo pumpkin.cmo
 
 pmkn : $(OBJS)
 	ocamlc -o pmkn $(OBJS)
@@ -9,10 +9,8 @@ scanner.ml : scanner.mll
 parser.ml parser.mli : parser.mly
 	ocamlyacc -v parser.mly
 
-analyzer.cmo : sast.cmo ast.cmi
-analyzer.cmx : sast.cmx ast.cmi
-codegen.cmo : sast.cmo ast.cmi
-codegen.cmx : sast.cmx ast.cmi
+analyzer.cmo : sast.cmo ast.cmi utils.cmo
+analyzer.cmx : sast.cmx ast.cmi utils.cmi
 exceptions.cmo :
 exceptions.cmx :
 interpret.cmo : sast.cmo
@@ -21,9 +19,9 @@ parser.cmo : ast.cmi parser.cmi
 parser.cmx : ast.cmi parser.cmi
 processor.cmo : scanner.cmo parser.cmi
 processor.cmx : scanner.cmx parser.cmx
-pumpkin.cmo : utils.cmo processor.cmo parser.cmi exceptions.cmo codegen.cmo \
+pumpkin.cmo : utils.cmo processor.cmo parser.cmi exceptions.cmo \
     analyzer.cmo
-pumpkin.cmx : utils.cmx processor.cmx parser.cmx exceptions.cmx codegen.cmx \
+pumpkin.cmx : utils.cmx processor.cmx parser.cmx exceptions.cmx \
     analyzer.cmx
 sast.cmo : ast.cmi
 sast.cmx : ast.cmi

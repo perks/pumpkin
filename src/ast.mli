@@ -16,14 +16,14 @@ type tTypes =
 
 type parameter = string * tTypes
 
-type variant_decl = 
+type variant = 
     VariantEmpty of string
   | VariantProduct of string * parameter list
 
-type algebraic_decl = 
+type algebraic = 
     AlgebraicEmpty of string
   | AlgebraicProduct of string * parameter list
-  | AlgebraicSum of string * variant_decl list
+  | AlgebraicSum of string * variant list
 
 type expression =
     IntLiteral of int
@@ -51,9 +51,9 @@ type expression =
   | Call of string * (expression list)
   | TypedFuncDecl of string * parameter list * expression list * tTypes
   | FuncDecl of string * parameter list * expression list
-  | TypedAnonDecl of parameter list * expression * tTypes
-  | AnonDecl of parameter list * expression
+  | TypedFuncAnon of parameter list * expression * tTypes
+  | FuncAnon of parameter list * expression
   | FuncPipe of expression * expression
   | FuncComposition of expression * expression
 
-type root = expression list * algebraic_decl list
+type root = expression list * algebraic list

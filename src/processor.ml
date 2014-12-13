@@ -53,7 +53,7 @@ let parser token_list =
           last_token := head;
           token_list := tail;
           head
-      | [] -> raise (Failure "EOF missing")
+      | [] -> raise (Exceptions.MissingEOF)
   in
   let program = Parser.root tokenizer (Lexing.from_string "") in
   List.rev (fst program), List.rev (snd program)

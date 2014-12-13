@@ -19,7 +19,7 @@ let operation_to_string = function
 
 
 let rec expression_to_string = function
-    AnIntLiteral(i, _) -> string_of_int(i)
+    AIntLiteral(i, _) -> string_of_int(i)
   | AFloatLiteral(f, _) -> string_of_float(f)
   | ABoolLiteral(b, _) -> if b then "true" else "false"
   | AStringLiteral(s, _) -> s
