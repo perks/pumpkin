@@ -1,2 +1,4 @@
 val x = 1
 val y : Bool = True
+x + 2
+y || False

@@ -7,7 +7,7 @@ let operation_to_string = function
     Plus -> "+"
   | Minus -> "-"
   | Times -> "*"
-  | Divide -> "%"
+  | Divide -> "/"
   | Modulo -> "%"
   | Eq -> "is"
   | Neq -> "!="
@@ -243,19 +243,6 @@ let a_algebraic_to_string = function
       a_type_to_string t  ^ "=\n" ^
       "\t| " ^ String.concat "\n\t| " (List.map a_algebraic_variant_to_string v_list)
 
-let s_program_to_string (a_expressions, algebraic_types) = 
-  String.concat "\n" (List.map a_algebraic_to_string algebraic_types) ^ "\n"
-
-let rec s_type_to_string = function
-    Int -> "INT"
-  | Unit -> "UNIT"
-  | Bool -> "BOOL"
-  | String -> "STRING"
-  | Char -> "CHAR"
-  | Tuple(t) -> "TUPLE[" ^ String.concat ", " (List.map s_type_to_string t) ^ "]"
-  | List(t) -> "LIST[" ^ s_type_to_string t ^ "]"
-  | Float -> "FLOAT"
-
 let rec aexpression_to_string = function
     AIntLiteral(i) -> string_of_int(i)
   | AFloatLiteral(f) -> string_of_float(f)
@@ -263,33 +250,35 @@ let rec aexpression_to_string = function
     "( " ^ aexpression_to_string(e1) ^ " " ^
     operation_to_string(op) ^ " " ^
     aexpression_to_string(e2) ^ " " ^
-    ")" ^ "_" ^ s_type_to_string(t)
+    ")" ^ "_" ^ a_type_to_string(t)
   | AUnop(op, e1, t) ->
     operation_to_string(op) ^ " " ^
     aexpression_to_string(e1) ^ "_" ^
-    s_type_to_string(t)
+    a_type_to_string(t)
   | ABoolLiteral(b) ->
-    if b then "TRUE"
-    else "FALSE"
+    if b then "true"
+    else "false"
   | AStringLiteral(s) -> s
   | ACharLiteral(c) -> Char.escaped c
-  | AUnitLiteral -> "UNIT"
-  | AIdLiteral(id, t) -> id ^ "_" ^ s_type_to_string(t)
+  | AUnitLiteral -> "Unit"
+  | AIdLiteral(id, t) -> id ^ "_" ^ a_type_to_string(t)
   | AAssign(id, e, t) ->
-    "TASSIGN(" ^ "_" ^ s_type_to_string t ^ ") " ^
+    "Assign(" ^ "_" ^ a_type_to_string t ^ ") " ^
     id ^ " = " ^
     aexpression_to_string e
   | ATupleLiteral(e_list, t) ->
-    "(" ^ String.concat ", " (List.map aexpression_to_string e_list) ^ ")" ^ "_" ^ s_type_to_string(t)
+    "Tuple(" ^ String.concat ", " (List.map aexpression_to_string e_list) ^ ")" ^ "_" ^ a_type_to_string(t)
   | ATupleAccess(e, e_acc, t)  ->
-    "(" ^ aexpression_to_string e ^ ")TUPLEACC(" ^ aexpression_to_string e_acc ^ ")" ^ "_" ^ s_type_to_string(t)
+    "(" ^ aexpression_to_string e ^ ")TupleAccess(" ^ aexpression_to_string e_acc ^ ")" ^ "_" ^ a_type_to_string(t)
   | AListLiteral(e_list, t) ->
-    "LIST(" ^ String.concat ", " (List.map aexpression_to_string e_list) ^ ")" ^ "_" ^ s_type_to_string(t)
+    "List(" ^ String.concat ", " (List.map aexpression_to_string e_list) ^ ")" ^ "_" ^ a_type_to_string(t)
   | AListAccess(e_list, i, t) ->
-    "LISTACCESS" ^ " " ^ aexpression_to_string i ^ "_" ^ s_type_to_string(t)
+    "ListAccess" ^ " " ^ aexpression_to_string i ^ "_" ^ a_type_to_string(t)
 
-let sa_program_to_string (a_expressions, algebraic_types) = 
+let a_program_to_string (a_expressions, algebraic_types) = 
+  String.concat "\n" (List.map a_algebraic_to_string algebraic_types) ^ "\n" ^
   String.concat "\n" (List.map aexpression_to_string a_expressions) ^ "\n"
+
 
 (* 
 

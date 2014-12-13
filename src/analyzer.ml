@@ -55,6 +55,48 @@ let rec type_of = function
   | AFuncComposition (_, _, t) -> t
   | AFuncPiping(_, _, t) -> t
 
+(* Auxiliary functions for type checks *)
+
+let valid_binop (t1, t2, op) =
+  if op = Cons then 
+    match t2 with
+    List(t) -> 
+    if t = Unit then List(t1) 
+    else if t<>t1 then raise(Exceptions.InvalidOperation(operation_to_string op))
+    else t    
+    | _ -> raise(Exceptions.InvalidOperation(operation_to_string op))
+  else
+  match t1 with
+  Int | Float ->
+  if t1 <> t2 then raise(Exceptions.TypeMismatch)
+  else if op = And || op = Or || op = Cons then 
+    raise(Exceptions.InvalidOperation(operation_to_string op))
+  else if op = Eq || op = Neq || op = Gt || op = Lt || op = Gte || op = Lte then Bool
+  else t1
+  | String | Char -> 
+  if op = Plus then if t2 <> String && t2 <> Char then raise(Exceptions.TypeMismatch) else String
+  else if t1 <> t2 then raise(Exceptions.TypeMismatch)
+  else if op = Minus || op = Divide || op = Modulo || op = And || op = Or || op = Cons then
+    raise(Exceptions.InvalidOperation(operation_to_string op))
+  else if op = Eq || op = Neq || op = Gt || op = Lt || op = Gte || op = Lte then Bool
+  else t1
+  | Bool ->
+  if t1 <> t2 then raise(Exceptions.TypeMismatch)
+  else if op <> Eq && op <> Neq && op <> And && op <> Or then
+    raise(Exceptions.InvalidOperation(operation_to_string op))
+  else t1
+  | _ -> raise(Exceptions.UnimplementedOperation(operation_to_string op, a_type_to_string t1))
+
+let valid_unop (op, t) =
+  match t with
+  Int | Float ->
+  if op = Not then 
+    raise(Exceptions.InvalidOperation(operation_to_string op))
+  | Bool ->
+  if op <> Not then
+    raise(Exceptions.InvalidOperation(operation_to_string op))
+  | _ -> raise(Exceptions.UnimplementedOperation(operation_to_string op, a_type_to_string t))
+
 let annotate_parameter (id, t) = (id, aType_to_sType t)
 
 let annotate_variant_types base_type variant =
@@ -125,8 +167,11 @@ let rec annotate_expression env = function
   | ListLiteral(e_list) ->
       let a_e_list, env = annotate_expression_list env e_list in
       if match_expression_list_type a_e_list then
-        let t = type_of (List.hd a_e_list) in
-        AListLiteral(a_e_list, t), env
+        if List.length a_e_list = 0 then
+          AListLiteral(a_e_list, List(Unit)), env
+        else
+          let t = type_of (List.hd a_e_list) in
+          AListLiteral(a_e_list, List(t)), env
       else
         raise Exceptions.TypeMismatch
   | TypedAssign(id, e, t) ->
@@ -149,17 +194,31 @@ let rec annotate_expression env = function
         let t_a_e = type_of a_e in
         let env = Env.add id t_a_e env in
         AAssign(id, a_e, t_a_e), env
+  | Binop(e1, op, e2) ->
+    let ae1, env = annotate_expression env e1 in
+    let ae2, env = annotate_expression env e2 in
+    let t = valid_binop((type_of ae1), (type_of ae2), op) in
+    ABinop(ae1, op, ae2, t), env
+  | Unop(op, e) ->
+    let ae, env = annotate_expression env e in
+    let et = type_of ae in 
+    valid_unop(op, et);
+    AUnop(op, ae, et), env
+  | ListAccess(e, index) -> 
+    let ae, env = annotate_expression env e in
+    let ind, env = annotate_expression env index in
+    let ind_t = type_of ind in
+    if ind_t <> Int then raise(Exceptions.TypeMismatch) else
+    let ae_t = type_of ae in
+    (
+      match ae_t with
+          Sast.List(t) -> AListAccess(ae, ind, t), env
+        | _ -> raise(Failure("Indexing list on a non list object"))
+    )
+
 
 (*
-  | ListLiteral of expression list
-  | MapLiteral of (expression * expression) list
-  | Wildcard
-  | Binop of expression * operator * expression
-  | Unop of operator * expression
-  
   | Reassign of string * expression
-  | TupleAccess of expression * expression
-  | ListAccess of expression * expression
   | AlgebricAccess of expression * string
   | IfBlock of expression * expression list
   | IfElseBlock of expression * expression list * expression list
@@ -173,11 +232,8 @@ let rec annotate_expression env = function
   | FuncComposition of expression * expression
   
   
-  | AListLiteral of aExpression list * sTypes
   | AMapLiteral of (aExpression * aExpression) list * sTypes
   | AWildcard
-  | ABinop of aExpression * operator * aExpression * sTypes
-  | AUnop of operator * aExpression * sTypes
   | AReassign of string * aExpression * sTypes
   | ATupleAccess of aExpression * aExpression * sTypes
   | AListAccess of aExpression * aExpression * sTypes
@@ -196,7 +252,7 @@ and annotate_expression_list env e_list =
   let env_ref = ref(env) in
   let rec helper = function
       head::tail ->
-        let a_head, env = annotate_expression env head in
+        let a_head, env = annotate_expression !env_ref head in
         env_ref := env;
         a_head::(helper tail)
     | [] -> []
