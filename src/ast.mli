@@ -7,7 +7,7 @@ type tTypes =
   | TBool 
   | TString 
   | TChar 
-  | TTuple of tTypes
+  | TTuple of tTypes list
   | TList of tTypes
   | TFloat
   | TAlgebraic of string

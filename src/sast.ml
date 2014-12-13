@@ -6,7 +6,7 @@ type sTypes =
   | Bool 
   | String 
   | Char 
-  | Tuple of sTypes
+  | Tuple of sTypes list
   | List of sTypes
   | Algebraic of string
   | Variant of string * sTypes

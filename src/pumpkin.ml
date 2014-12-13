@@ -30,7 +30,7 @@ let _ =
             print_string (Utils.program_to_string program)
         | Sast ->
             let sast_output = Analyzer.annotate_program program in
-            print_string (Utils.s_program_to_string sast_output)
+            print_string (Utils.sa_program_to_string sast_output)
         | Interpret -> print_string("\nInterpret\n")
         | Compile -> ()
           (* let sast_output = Analyzer.annotate_program program in

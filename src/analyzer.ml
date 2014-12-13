@@ -16,7 +16,7 @@ let rec aType_to_sType = function
   | TString -> String
   | TChar -> Char
   | TUnit -> Unit
-  | TTuple(t) -> Tuple(aType_to_sType t)
+  | TTuple(t) -> Tuple((List.map aType_to_sType t))
   | TList(t) -> List(aType_to_sType t)
   | TMap(t1, t2) -> Map(aType_to_sType t1, aType_to_sType t2)
   | TFunction(t1, t2) -> Function(aType_to_sType t1, aType_to_sType t2)
@@ -119,10 +119,14 @@ let rec annotate_expression env = function
       else
         raise (Exceptions.IDNotFound id)
   | TupleLiteral(e_list) ->
+    let a_e_list, env = annotate_expression_list env e_list in
+    let t = List.map type_of a_e_list in
+    ATupleLiteral(a_e_list, Tuple(t)), env
+  | ListLiteral(e_list) ->
       let a_e_list, env = annotate_expression_list env e_list in
       if match_expression_list_type a_e_list then
         let t = type_of (List.hd a_e_list) in
-        ATupleLiteral(a_e_list, t), env
+        AListLiteral(a_e_list, t), env
       else
         raise Exceptions.TypeMismatch
   | TypedAssign(id, e, t) ->

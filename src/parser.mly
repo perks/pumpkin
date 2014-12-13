@@ -106,7 +106,7 @@ types:
   | TSTRING                              { TString }
   | TCHAR                                { TChar }
   | TUNIT                                { TUnit }
-  | TTUPLE LBRACK types RBRACK           { TTuple($3) }
+  | TTUPLE LBRACK type_list RBRACK       { TTuple($3) }
   | TLIST LBRACK types RBRACK            { TList($3) }
   | TMAP LBRACK types COMMA types RBRACK { TMap($3, $5) }
   | LPAREN funct_type RPAREN             { $2 }
@@ -192,6 +192,10 @@ parameter_list:
 
 parameter:
     ID COLON types { $1, $3 }
+
+type_list:
+    types                       { [$1] }
+  | type_list COMMA types       { $3::$1 }
 
 call:
     ID UNIT                          { Call($1, [UnitLiteral]) }
