@@ -293,6 +293,13 @@ let rec aexpression_to_string = function
     "Else\n" ^
     "\t" ^ String.concat "\n\t" (List.map aexpression_to_string e_list2) ^ "_" ^ a_type_to_string(t) ^ "\n" ^
     "EndIf\n"
+  | AFuncDecl(id, p_list, e_list, t) ->
+    if (List.length p_list) <> 0 then
+      "\n def " ^ id ^ " (" ^ String.concat ", " (List.map a_param_list_to_string p_list) ^ ") : " ^ a_type_to_string t ^ " =>\n" ^
+      "\t" ^ String.concat "\n\t" (List.map aexpression_to_string e_list) ^ "\n"
+    else
+      "\n def " ^ id ^ " : " ^ a_type_to_string t ^ " =>\n" ^
+      "\t" ^ String.concat "\n\t" (List.map aexpression_to_string e_list) ^ "\n"
 
 let a_program_to_string (a_expressions, algebraic_types) = 
   String.concat "\n" (List.map a_algebraic_to_string algebraic_types) ^ "\n" ^
@@ -302,12 +309,6 @@ let a_program_to_string (a_expressions, algebraic_types) =
 (* 
 
 let rec aexpression_to_string = function
-  | AMapLiteral(map_list, t) ->
-    let map_expression_tupal_to_string (e1, e2) =
-      "(" ^ aexpression_to_string e1 ^ " -> " ^ aexpression_to_string e2 ^ ")"
-    in
-    "MAP(" ^ String.concat ", " (List.map map_expression_tupal_to_string map_list) ^ ")" ^ "_" ^ s_type_to_string(t)
-  
   | AStringChars(s, t) -> s ^ "_" ^ s_type_to_string(t)
   | AParameter(id, t) ->
     id ^ " : " ^ s_type_to_string t

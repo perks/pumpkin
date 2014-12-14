@@ -5,6 +5,7 @@ open Utils
 module Env = Map.Make(String)
 
 let type_env_ref = ref(Env.empty)
+let parameter_table = ref([])
 
 let env_to_string id t =
   print_string(id ^ " -> " ^ a_type_to_string t ^ "\n")
@@ -70,6 +71,7 @@ let rec evaluate_index = function
         Plus -> evaluate_index e1
       | _ -> raise(Exceptions.InvalidIndexing("Invalid operation in index")))
   | AIntLiteral(n) -> n
+  | AIdLiteral(_, _) -> raise(Exceptions.InvalidIndexing("Cannot use variables for tuple index"))
   | _ -> raise(Exceptions.InvalidIndexing("Invalid expression in index"))
 
 let valid_binop (t1, t2, op) =
@@ -294,11 +296,26 @@ let rec annotate_expression env = function
     else if le1_s_type <> le2_s_type then
       raise (Exceptions.TypeMismatch)
     else AIfElseBlock(ae, a_list1, a_list2, le1_s_type), env
+  | TypedFuncDecl(id, params, code, t) ->
+    if Env.mem id env then
+        raise (Exceptions.NameCollision(id))
+    else
+    let env = Env.add id (aType_to_sType t) env in
+    let s_params = List.map annotate_parameter params in
+    let tempEnv =  List.fold_left (fun cenv p -> (Env.add (fst p) (snd p) cenv)) env s_params in
+    let s_code, tempEnv = annotate_expression_list tempEnv code in
+    let le, tempEnv = annotate_expression tempEnv (List.hd (List.rev code)) in
+    let le_s_type = type_of le in
+    let s_type = aType_to_sType t in 
+    if le_s_type <> s_type then
+      raise (Exceptions.TypeMismatch)
+    else 
+      ignore(parameter_table := (id, s_params, env)::!parameter_table);
+      AFuncDecl(id, s_params, s_code, s_type), env
+
 
 (*
   | AlgebricAccess of expression * string
-  | IfBlock of expression * expression list
-  | IfElseBlock of expression * expression list * expression list
   | MatchBlock of expression * (expression * expression) list
   | Call of string * (expression list)
   | TypedFuncDecl of string * parameter list * expression list * tTypes
