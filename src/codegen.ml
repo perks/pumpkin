@@ -73,6 +73,12 @@ let rec aexpression_to_js = function
       aexpression_to_js e ^ ";"
   | AReassign(id, e, t) ->
       id ^ " = " ^ aexpression_to_js e ^ ";"
+  | AMapLiteral(map_list, t) ->
+      let map_expression_tupal_to_string (e1, e2) =
+        (aexpression_to_js e1) ^ ": " ^ (aexpression_to_js e2)
+      in "{" ^ String.concat ", " (List.map map_expression_tupal_to_string
+      map_list) ^ "};"
+
   | AListLiteral(e_list, t) ->
       "[" ^ String.concat ", " (List.map aexpression_to_js e_list) ^ "];"
   | AListAccess(id, indx, t) ->
