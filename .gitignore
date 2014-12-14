@@ -15,4 +15,4 @@ scanner.ml
 parser.ml
 parser.mli
 pmkn
-tests/test-gabi.pk
+gabi-tests.sh

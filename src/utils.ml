@@ -266,6 +266,10 @@ let rec aexpression_to_string = function
     "Assign(" ^ "_" ^ a_type_to_string t ^ ") " ^
     id ^ " = " ^
     aexpression_to_string e
+  | AReassign(id, e, t) -> 
+    "Reassign(" ^ "_" ^ a_type_to_string t ^ ") " ^
+    id ^ " = " ^
+    aexpression_to_string e
   | ATupleLiteral(e_list, t) ->
     "Tuple(" ^ String.concat ", " (List.map aexpression_to_string e_list) ^ ")" ^ "_" ^ a_type_to_string(t)
   | ATupleAccess(e, e_acc, t)  ->

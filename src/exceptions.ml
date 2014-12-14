@@ -13,3 +13,5 @@ exception IDNotFound of string
 exception TypeMismatch
 exception InvalidOperation of string
 exception UnimplementedOperation of string * string
+exception InvalidIndexing of string
+exception ArrayOutOfBounds

@@ -56,6 +56,21 @@ let rec type_of = function
   | AFuncPiping(_, _, t) -> t
 
 (* Auxiliary functions for type checks *)
+let rec evaluate_index = function
+    ABinop(e1, op, e2, Int) -> 
+      (match op with
+        Plus -> (evaluate_index e1) + (evaluate_index e2)
+      | Minus -> (evaluate_index e1) - (evaluate_index e2)
+      | Times -> (evaluate_index e1) * (evaluate_index e2)
+      | Divide -> (evaluate_index e1) / (evaluate_index e2)
+      | Modulo -> (evaluate_index e1) mod (evaluate_index e2)
+      | _ -> raise(Exceptions.InvalidIndexing("Invalid operation in index")))
+  | AUnop(op, e1, Int) -> 
+      (match op with
+        Plus -> evaluate_index e1
+      | _ -> raise(Exceptions.InvalidIndexing("Invalid operation in index")))
+  | AIntLiteral(n) -> n
+  | _ -> raise(Exceptions.InvalidIndexing("Invalid expression in index"))
 
 let valid_binop (t1, t2, op) =
   if op = Cons then 
@@ -194,6 +209,14 @@ let rec annotate_expression env = function
         let t_a_e = type_of a_e in
         let env = Env.add id t_a_e env in
         AAssign(id, a_e, t_a_e), env
+  | Reassign(id, e) ->
+    if Env.mem id env then
+      let t = Env.find id env in
+      let a_e, env = annotate_expression env e in 
+      let t_a_e = type_of a_e in
+      if t = t_a_e then AReassign(id, a_e, t), env
+      else raise(Exceptions.TypeMismatch) 
+    else raise(Exceptions.IDNotFound(id))
   | Binop(e1, op, e2) ->
     let ae1, env = annotate_expression env e1 in
     let ae2, env = annotate_expression env e2 in
@@ -207,18 +230,37 @@ let rec annotate_expression env = function
   | ListAccess(e, index) -> 
     let ae, env = annotate_expression env e in
     let ind, env = annotate_expression env index in
-    let ind_t = type_of ind in
-    if ind_t <> Int then raise(Exceptions.TypeMismatch) else
+    let ae_t = type_of ae and 
+    ind_t = type_of ind in
+    (
+      match ae_t with
+          List(t) ->
+          (
+            match ind_t with
+                Int -> AListAccess(ae, ind, t), env
+              | _ -> raise(Exceptions.InvalidIndexing(a_type_to_string ind_t))
+          )
+        | _ -> raise(Exceptions.InvalidIndexing(a_type_to_string ae_t))
+    )
+  | TupleAccess(e, index) -> 
+    let ae, env = annotate_expression env e in
+    let ind, env = annotate_expression env index in 
     let ae_t = type_of ae in
     (
       match ae_t with
-          Sast.List(t) -> AListAccess(ae, ind, t), env
-        | _ -> raise(Failure("Indexing list on a non list object"))
+        Sast.Tuple(t) -> 
+          let ind_n = evaluate_index(ind) in 
+          if ind_n > 0 then 
+            if ind_n > (List.length t) then raise(Exceptions.ArrayOutOfBounds)
+            else 
+            let param_type = List.nth t ind_n in
+            ATupleAccess(ae, ind, param_type), env
+          else raise(Exceptions.InvalidIndexing("Negative index"))
+        | _ -> raise(Exceptions.InvalidIndexing(a_type_to_string ae_t))
     )
 
 
 (*
-  | Reassign of string * expression
   | AlgebricAccess of expression * string
   | IfBlock of expression * expression list
   | IfElseBlock of expression * expression list * expression list
