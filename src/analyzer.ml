@@ -307,7 +307,7 @@ let rec annotate_expression env = function
     let le, tempEnv = annotate_expression tempEnv (List.hd (List.rev code)) in
     let le_s_type = type_of le in
     let s_type = aType_to_sType t in 
-    if le_s_type <> s_type then
+    if le_s_type <> s_type && s_type <> Unit then
       raise (Exceptions.TypeMismatch)
     else 
       ignore(parameter_table := (id, s_params, env)::!parameter_table);
@@ -318,7 +318,6 @@ let rec annotate_expression env = function
   | AlgebricAccess of expression * string
   | MatchBlock of expression * (expression * expression) list
   | Call of string * (expression list)
-  | TypedFuncDecl of string * parameter list * expression list * tTypes
   | FuncDecl of string * parameter list * expression list
   | TypedFuncAnon of parameter list * expression * tTypes
   | FuncAnon of parameter list * expression
@@ -332,7 +331,6 @@ let rec annotate_expression env = function
   | AIfElseBlock of aExpression * aExpression list * aExpression list * sTypes
   | AMatchBlock of aExpression * (aExpression * aExpression) list * sTypes
   | ACall of string * (aExpression list) * sTypes
-  | AFuncDecl of string * aParameter list * aExpression list * sTypes
   | AFuncAnon of aParameter list * aParameter list * sTypes
   | AFuncComposition of aExpression * aExpression * sTypes
   | AFuncPiping of aExpression * aExpression * sTypes
