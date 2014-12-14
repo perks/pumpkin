@@ -189,6 +189,19 @@ let rec annotate_expression env = function
           AListLiteral(a_e_list, List(t)), env
       else
         raise Exceptions.TypeMismatch
+  | MapLiteral(elist) ->
+    let helper(expr1, expr2) = 
+      let key, env = annotate_expression env expr1 in 
+      let value, env = annotate_expression env expr2 in
+        (key, value)
+    in
+    let s_map = List.map helper (List.rev elist) in
+    let key_list = List.map (fun (expr1, expr2) -> expr1) s_map and
+    value_list = List.map (fun (expr1, expr2) -> expr2) s_map in
+    if not(match_expression_list_type key_list && match_expression_list_type value_list) then
+      raise(Exceptions.TypeMismatch)
+    else
+      AMapLiteral(s_map, Map((type_of (List.hd key_list)), (type_of (List.hd value_list)))), env
   | TypedAssign(id, e, t) ->
       if Env.mem id env then
         raise (Exceptions.NameCollision(id))
@@ -258,7 +271,29 @@ let rec annotate_expression env = function
           else raise(Exceptions.InvalidIndexing("Negative index"))
         | _ -> raise(Exceptions.InvalidIndexing(a_type_to_string ae_t))
     )
-
+  | IfBlock(e, e_list) -> 
+    let a_list, env = annotate_expression_list env e_list in
+    let ae, env = annotate_expression env e in
+    let lexp, env = annotate_expression env (List.hd (List.rev e_list)) in
+    let ae_s_type = type_of ae and
+    le_s_type = type_of lexp in
+    if ae_s_type = Bool then
+      AIfBlock(ae, a_list, le_s_type), env
+    else raise(Exceptions.IfRequiresBool(a_type_to_string ae_s_type))
+  | IfElseBlock(e1, l1, l2) ->
+    let le1, tempEnv = annotate_expression env (List.hd (List.rev l1)) in
+    let le2, tempEnv = annotate_expression env (List.hd (List.rev l2)) in
+    let ae, env = annotate_expression env e1 in
+    let a_list1, env = annotate_expression_list env l1 in
+    let a_list2, env = annotate_expression_list env l2 in
+    let ae_s_type = type_of ae in
+    let le1_s_type = type_of le1 and
+    le2_s_type = type_of le2 in
+    if ae_s_type <> Sast.Bool then
+      raise (Exceptions.IfRequiresBool(a_type_to_string ae_s_type))
+    else if le1_s_type <> le2_s_type then
+      raise (Exceptions.TypeMismatch)
+    else AIfElseBlock(ae, a_list1, a_list2, le1_s_type), env
 
 (*
   | AlgebricAccess of expression * string
@@ -274,11 +309,7 @@ let rec annotate_expression env = function
   | FuncComposition of expression * expression
   
   
-  | AMapLiteral of (aExpression * aExpression) list * sTypes
   | AWildcard
-  | AReassign of string * aExpression * sTypes
-  | ATupleAccess of aExpression * aExpression * sTypes
-  | AListAccess of aExpression * aExpression * sTypes
   | AAlgebricAccess of aExpression * string * sTypes
   | AIfBlock of aExpression * aExpression list * sTypes
   | AIfElseBlock of aExpression * aExpression list * aExpression list * sTypes
