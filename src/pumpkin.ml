@@ -32,9 +32,9 @@ let _ =
             let sast_output = Analyzer.annotate_program program in
             print_string (Utils.a_program_to_string sast_output)
         | Interpret -> print_string("\nInterpret\n")
-        | Compile -> ()
-          (* let sast_output = Analyzer.annotate_program program in
-            print_string (Codegen.gen_program sast_output) *)
+        | Compile ->
+           let sast_output = Analyzer.annotate_program program in
+            print_string (Codegen.pumpkin_to_js sast_output) 
 
     with
         Exceptions.IllegalCharacter(c, ln) ->
