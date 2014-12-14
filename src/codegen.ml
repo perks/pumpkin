@@ -44,6 +44,8 @@ let operation_to_string = function
   | Or -> "||"
   | Not -> "!"
 
+let param_list_to_js (id, t) = id
+
 let rec aexpression_to_js = function
     AIntLiteral(i) -> string_of_int(i)
   | AFloatLiteral(f) -> string_of_float(f)
@@ -94,6 +96,30 @@ let rec aexpression_to_js = function
       "else {" ^
       "\n\t" ^ String.concat "\n\t" (List.map aexpression_to_js e_list2) ^
       "\n}\n"
+  | AFuncDecl(id, p_list, e_list, t) ->
+      if t = Unit then
+        if (List.length p_list) <> 0 then
+          "\nfunction " ^ id ^ "(" ^  
+          String.concat ", " (List.map param_list_to_js (List.rev p_list)) ^ ")" ^
+          " \n{\n" ^ String.concat "\n\t" (List.map aexpression_to_js e_list) ^
+          "\n};\n"
+        else 
+         "\nfunction " ^ id ^ "() {" ^
+         "\n" ^ String.concat "\n\t" (List.map aexpression_to_js e_list) ^
+         "\n};\n"
+      else 
+        if (List.length p_list) <> 0 then
+          "\nfunction " ^ id ^ "(" ^
+          String.concat ", " (List.map param_list_to_js (List.rev p_list)) ^ ")" ^
+          "\n{\n\t" ^ String.concat "\n\t" (List.map aexpression_to_js
+          (List.tl (flip_last e_list))) ^
+          "\n\treturn " ^ aexpression_to_js (List.hd (flip_last e_list)) ^
+          "\n};\n"
+        else
+          "\nfunction " ^ id ^ "() {" ^
+          "\n\t" ^ String.concat "\n\t" (List.map aexpression_to_js (List.tl (flip_last e_list))) ^
+          "\nt\treturn " ^ aexpression_to_js (List.hd (flip_last e_list)) ^
+          "\n};\n"
 let pumpkin_to_js (a_expressions, algebraic_types) =
   String.concat "\n" (List.map aexpression_to_js a_expressions)
 
@@ -114,29 +140,6 @@ let pumpkin_to_js (a_expressions, algebraic_types) =
       (*expression_to_string e ^ ";"*)
   (*| AParameter(id, t) -> id*)
   (*| ATypeFuncDecl(id, p_list, e_list, t) ->*)
-      (*if t = Unit then*)
-        (*if (List.length p_list) <> 0 then*)
-          (*"\nfunction " ^ id ^ "(" ^  *)
-          (*String.concat ", " (List.map expression_to_string (List.rev p_list)) ^ ")" ^*)
-          (*" \n{\n" ^ String.concat "\n\t" (List.map expression_to_string e_list) ^*)
-          (*"\n};\n"*)
-        (*else *)
-         (*"\nfunction " ^ id ^ "() {" ^*)
-         (*"\n" ^ String.concat "\n\t" (List.map expression_to_string e_list) ^*)
-         (*"\n};\n"*)
-      (*else *)
-        (*if (List.length p_list) <> 0 then*)
-          (*"\nfunction " ^ id ^ "(" ^*)
-          (*String.concat ", " (List.map expression_to_string (List.rev p_list)) ^ ")" ^*)
-          (*"\n{\n\t" ^ String.concat "\n\t" (List.map expression_to_string*)
-          (*(List.tl (flip_last e_list))) ^*)
-          (*"\n\treturn " ^ expression_to_string (List.hd (flip_last e_list)) ^*)
-          (*"\n};\n"*)
-        (*else*)
-          (*"\nfunction " ^ id ^ "() {" ^*)
-          (*"\n\t" ^ String.concat "\n\t" (List.map expression_to_string (List.tl (flip_last e_list))) ^*)
-          (*"\nt\treturn " ^ expression_to_string (List.hd (flip_last e_list)) ^*)
-          (*"\n};\n"*)
 
   (*| AFuncCall(id, p_list, _) ->*)
       (*if (List.length p_list) <> 0 then*)
