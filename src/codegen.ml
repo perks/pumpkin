@@ -27,7 +27,6 @@ let flip_last = fun l ->
 let sanitize str =
   implode ( strip_semicolon ( explode ( str) ) )
 
-
 let operation_to_string = function
     Plus -> "+"
   | Minus -> "-"
@@ -98,7 +97,7 @@ let rec aexpression_to_js = function
       "\n}\n"
   | AFuncDecl(id, p_list, e_list, t) ->
       if t = Unit then
-        if (List.length p_list) <> 0 then
+        if (param_list_to_js(List.hd p_list)) <> "()" then
           "\nfunction " ^ id ^ "(" ^  
           String.concat ", " (List.map param_list_to_js (List.rev p_list)) ^ ")" ^
           " \n{\n" ^ String.concat "\n\t" (List.map aexpression_to_js e_list) ^
@@ -108,7 +107,7 @@ let rec aexpression_to_js = function
          "\n" ^ String.concat "\n\t" (List.map aexpression_to_js e_list) ^
          "\n};\n"
       else 
-        if (List.length p_list) <> 0 then
+        if (param_list_to_js(List.hd p_list)) <> "()" then
           "\nfunction " ^ id ^ "(" ^
           String.concat ", " (List.map param_list_to_js (List.rev p_list)) ^ ")" ^
           "\n{\n\t" ^ String.concat "\n\t" (List.map aexpression_to_js
@@ -118,7 +117,28 @@ let rec aexpression_to_js = function
         else
           "\nfunction " ^ id ^ "() {" ^
           "\n\t" ^ String.concat "\n\t" (List.map aexpression_to_js (List.tl (flip_last e_list))) ^
-          "\nt\treturn " ^ aexpression_to_js (List.hd (flip_last e_list)) ^
+          "\n\t\treturn " ^ aexpression_to_js (List.hd (flip_last e_list)) ^
+          "\n};\n"
+  | AFuncAnon(p_list, exp, t) ->
+      if t = Unit then 
+        if (param_list_to_js(List.hd p_list)) <> "()" then
+          "\nfunction(" ^  
+          String.concat ", " (List.map param_list_to_js (List.rev p_list)) ^ ")" ^
+          " \n{\n\t" ^ aexpression_to_js exp ^
+          "\n};\n"
+        else 
+         "\nfunction() {" ^
+         "\n\t" ^ aexpression_to_js exp ^
+         "\n};\n"
+      else
+        if (param_list_to_js(List.hd p_list)) <> "()" then
+          "\nfunction(" ^
+          String.concat ", " (List.map param_list_to_js (List.rev p_list)) ^ ")" ^
+          "\n{\n\treturn " ^ aexpression_to_js exp ^
+          "\n};\n"
+        else
+          "\nfunction() {" ^
+          "\n\treturn " ^ aexpression_to_js exp ^
           "\n};\n"
 let pumpkin_to_js (a_expressions, algebraic_types) =
   String.concat "\n" (List.map aexpression_to_js a_expressions)
@@ -148,30 +168,6 @@ let pumpkin_to_js (a_expressions, algebraic_types) =
         (*");"*)
       (*else*)
         (*id ^ "();"*)
-  (*| AFuncAnon(p_list, e_list, rt, t) ->*)
-      (*if rt = Unit then *)
-        (*if (List.length p_list) <> 0 then*)
-          (*"\nfunction(" ^  *)
-          (*String.concat ", " (List.map expression_to_string (List.rev p_list)) ^ ")" ^*)
-          (*" \n{\n" ^ String.concat "\n\t" (List.map expression_to_string e_list) ^*)
-          (*"\n};\n"*)
-        (*else *)
-         (*"\nfunction() {" ^*)
-         (*"\n" ^ String.concat "\n\t" (List.map expression_to_string e_list) ^*)
-         (*"\n};\n"*)
-      (*else*)
-        (*if (List.length p_list) <> 0 then*)
-          (*"\nfunction(" ^*)
-          (*String.concat ", " (List.map expression_to_string (List.rev p_list)) ^ ")" ^*)
-          (*"\n{\n\t" ^ String.concat "\n\t" (List.map expression_to_string*)
-          (*(List.tl (flip_last e_list))) ^*)
-          (*"\n\treturn " ^ expression_to_string (List.hd (flip_last e_list)) ^*)
-          (*"\n};\n"*)
-        (*else*)
-          (*"\nfunction() {" ^*)
-          (*"\n\t" ^ String.concat "\n\t" (List.map expression_to_string (List.tl (flip_last e_list))) ^*)
-          (*"\nt\treturn " ^ expression_to_string (List.hd (flip_last e_list)) ^*)
-          (*"\n};\n"*)
 
 
 
