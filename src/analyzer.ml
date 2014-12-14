@@ -314,79 +314,49 @@ let rec annotate_expression env = function
   | TypedFuncDecl(id, params, code, t) ->
     if Env.mem id env then
         raise (Exceptions.NameCollision(id))
-    else if (List.length params) <> 0 then
-      let env = Env.add id (aType_to_sType t) env in
-      let s_params = List.map annotate_parameter params in
-      let param_types = List.map (fun (i, t) -> t) s_params in
-      let tempEnv =  List.fold_left (fun cenv p -> (Env.add (fst p) (snd p) cenv)) env s_params in
-      let s_code, tempEnv = annotate_expression_list tempEnv code in
-      let le, tempEnv = annotate_expression tempEnv (List.hd (List.rev code)) in
-      let le_s_type = type_of le in
-      let s_type = aType_to_sType t in 
-      if le_s_type <> s_type && s_type <> Unit then
-        raise (Exceptions.TypeMismatch)
-      else 
-        AFuncDecl(id, s_params, s_code, Function(param_types, s_type)), env
+    else
+    let env = Env.add id (aType_to_sType t) env in
+    let s_params = List.map annotate_parameter params in
+    let param_types = List.map (fun (i, t) -> t) s_params in
+    let tempEnv =  List.fold_left (fun cenv p -> (Env.add (fst p) (snd p) cenv)) env s_params in
+    let s_code, tempEnv = annotate_expression_list tempEnv code in
+    let le, tempEnv = annotate_expression tempEnv (List.hd (List.rev code)) in
+    let le_s_type = type_of le in
+    let s_type = aType_to_sType t in 
+    if le_s_type <> s_type && s_type <> Unit then
+      raise (Exceptions.TypeMismatch)
     else 
-      let env = Env.add id (aType_to_sType t) env in
-      let s_code, tempEnv = annotate_expression_list env code in
-      let le, tempEnv = annotate_expression tempEnv (List.hd (List.rev code)) in
-      let le_s_type = type_of le in
-      let s_type = aType_to_sType t in 
-      if le_s_type <> s_type && s_type <> Unit then
-        raise (Exceptions.TypeMismatch)
-      else 
-        AFuncDecl(id, [], s_code, Function([], s_type)), env
+      AFuncDecl(id, s_params, s_code, Function(param_types, s_type)), env
   | FuncDecl(id, params, code) -> 
     if Env.mem id env then
         raise (Exceptions.NameCollision(id))
-    else if (List.length params) <> 0 then
-      let s_params = List.map annotate_parameter params in
-      let param_types = List.map (fun (i, t) -> t) s_params in
-      let tempEnv =  List.fold_left (fun cenv p -> (Env.add (fst p) (snd p) cenv)) env s_params in
-      let s_code, tempEnv = annotate_expression_list tempEnv code in
-      let le, tempEnv = annotate_expression tempEnv (List.hd (List.rev code)) in
-      let le_s_type = type_of le in
-      let env = Env.add id le_s_type env in
-      AFuncDecl(id, s_params, s_code, Function(param_types, le_s_type)), env
-    else 
-      let s_code, tempEnv = annotate_expression_list env code in
-      let le, tempEnv = annotate_expression tempEnv (List.hd (List.rev code)) in
-      let le_s_type = type_of le in
-      let env = Env.add id le_s_type env in
-      AFuncDecl(id, [], s_code, Function([], le_s_type)), env
+    else
+    let s_params = List.map annotate_parameter params in
+    let param_types = List.map (fun (i, t) -> t) s_params in
+    let tempEnv =  List.fold_left (fun cenv p -> (Env.add (fst p) (snd p) cenv)) env s_params in
+    let s_code, tempEnv = annotate_expression_list tempEnv code in
+    let le, tempEnv = annotate_expression tempEnv (List.hd (List.rev code)) in
+    let le_s_type = type_of le in
+    let env = Env.add id le_s_type env in
+    AFuncDecl(id, s_params, s_code, Function(param_types, le_s_type)), env
   | TypedFuncAnon(params, exp, t) ->
-    if (List.length params) <> 0 then
-      let s_params = List.map annotate_parameter params in
-      let param_types = List.map (fun (i, t) -> t) s_params in
-      let tempEnv =  List.fold_left (fun cenv p -> (Env.add (fst p) (snd p) cenv)) env s_params in
-      let s_e, tempEnv = annotate_expression tempEnv exp in
-      let s_e_type = type_of s_e in
-      let s_type = aType_to_sType t in 
-      if s_e_type <> s_type && s_type <> Unit then
-        raise (Exceptions.TypeMismatch)
-      else 
-        AFuncAnon(s_params, s_e, Function(param_types, s_type)), env
+    let s_params = List.map annotate_parameter params in
+    let param_types = List.map (fun (i, t) -> t) s_params in
+    let tempEnv =  List.fold_left (fun cenv p -> (Env.add (fst p) (snd p) cenv)) env s_params in
+    let s_e, tempEnv = annotate_expression tempEnv exp in
+    let s_e_type = type_of s_e in
+    let s_type = aType_to_sType t in 
+    if s_e_type <> s_type && s_type <> Unit then
+      raise (Exceptions.TypeMismatch)
     else 
-      let s_e, tempEnv = annotate_expression env exp in
-      let s_e_type = type_of s_e in
-      let s_type = aType_to_sType t in 
-      if s_e_type <> s_type && s_type <> Unit then
-        raise (Exceptions.TypeMismatch)
-      else 
-        AFuncAnon([], s_e, Function([], s_type)), env
+      AFuncAnon(s_params, s_e, Function(param_types, s_type)), env
   | FuncAnon(params, exp) ->
-    if (List.length params) <> 0 then
-      let s_params = List.map annotate_parameter params in
-      let param_types = List.map (fun (i, t) -> t) s_params in
-      let tempEnv =  List.fold_left (fun cenv p -> (Env.add (fst p) (snd p) cenv)) env s_params in
-      let s_e, tempEnv = annotate_expression tempEnv exp in
-      let s_e_type = type_of s_e in
-      AFuncAnon(s_params, s_e, Function(param_types, s_e_type)), env
-    else 
-      let s_e, tempEnv = annotate_expression env exp in
-      let s_e_type = type_of s_e in
-      AFuncAnon([], s_e, Function([], s_e_type)), env
+    let s_params = List.map annotate_parameter params in
+    let param_types = List.map (fun (i, t) -> t) s_params in
+    let tempEnv =  List.fold_left (fun cenv p -> (Env.add (fst p) (snd p) cenv)) env s_params in
+    let s_e, tempEnv = annotate_expression tempEnv exp in
+    let s_e_type = type_of s_e in
+    AFuncAnon(s_params, s_e, Function(param_types, s_e_type)), env
   | Call(id, params) -> 
     if Env.mem id env then
       let t = Env.find id env in
