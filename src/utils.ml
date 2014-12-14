@@ -272,12 +272,12 @@ let rec aexpression_to_string = function
     aexpression_to_string e
   | ATupleLiteral(e_list, t) ->
     "Tuple(" ^ String.concat ", " (List.map aexpression_to_string e_list) ^ ")" ^ "_" ^ a_type_to_string(t)
-  | ATupleAccess(e, e_acc, t)  ->
-    "(" ^ aexpression_to_string e ^ ")TupleAccess(" ^ aexpression_to_string e_acc ^ ")" ^ "_" ^ a_type_to_string(t)
+  | ATupleAccess(id, indx, t)  ->
+    "TupleAccess " ^ aexpression_to_string id ^ "(" ^ aexpression_to_string indx ^ ")" ^ "_" ^ a_type_to_string(t)
   | AListLiteral(e_list, t) ->
     "List(" ^ String.concat ", " (List.map aexpression_to_string e_list) ^ ")" ^ "_" ^ a_type_to_string(t)
-  | AListAccess(e_list, i, t) ->
-    "ListAccess" ^ " " ^ aexpression_to_string i ^ "_" ^ a_type_to_string(t)
+  | AListAccess(id, indx, t) ->
+    "ListAccess " ^ " " ^ aexpression_to_string id ^ "( " ^ aexpression_to_string indx ^ ")_" ^ a_type_to_string(t)
   | AMapLiteral(map_list, t) ->
     let map_expression_tupal_to_string (e1, e2) =
       "(" ^ aexpression_to_string e1 ^ " -> " ^ aexpression_to_string e2 ^ ")"
