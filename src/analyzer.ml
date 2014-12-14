@@ -356,8 +356,6 @@ let rec annotate_expression env = function
   
   | AWildcard
   | AAlgebricAccess of aExpression * string * sTypes
-  | AIfBlock of aExpression * aExpression list * sTypes
-  | AIfElseBlock of aExpression * aExpression list * aExpression list * sTypes
   | AMatchBlock of aExpression * (aExpression * aExpression) list * sTypes
   | ACall of string * (aExpression list) * sTypes
   | AFuncComposition of aExpression * aExpression * sTypes

@@ -300,6 +300,13 @@ let rec aexpression_to_string = function
     else
       "\n def " ^ id ^ " : " ^ a_type_to_string t ^ " =>\n" ^
       "\t" ^ String.concat "\n\t" (List.map aexpression_to_string e_list) ^ "\n"
+  | AFuncAnon(p_list, exp, t) -> 
+    if (List.length p_list) <> 0 then
+      "\n(" ^ String.concat ", " (List.map a_param_list_to_string (List.rev p_list)) ^ a_type_to_string t ^ " =>\n" ^
+      "\t" ^ aexpression_to_string exp ^ ")\n"
+    else
+      "\n ( =>\n" ^
+      "\t" ^ aexpression_to_string exp ^ ")\n"
 
 let a_program_to_string (a_expressions, algebraic_types) = 
   String.concat "\n" (List.map a_algebraic_to_string algebraic_types) ^ "\n" ^
@@ -310,22 +317,7 @@ let a_program_to_string (a_expressions, algebraic_types) =
 
 let rec aexpression_to_string = function
   | AStringChars(s, t) -> s ^ "_" ^ s_type_to_string(t)
-  | AParameter(id, t) ->
-    id ^ " : " ^ s_type_to_string t
-  | ATypeFuncDecl(id, p_list, e_list, t) ->
-    if (List.length p_list) <> 0 then
-      "\n def " ^ id ^ " (" ^ String.concat ", " (List.map aexpression_to_string (List.rev p_list)) ^ ") : " ^ s_type_to_string t ^ " =>\n" ^
-      "\t" ^ String.concat "\n\t" (List.map aexpression_to_string e_list) ^ "\n"
-    else
-      "\n def " ^ id ^ " : " ^ s_type_to_string t ^ " =>\n" ^
-      "\t" ^ String.concat "\n\t" (List.map aexpression_to_string e_list) ^ "\n"
-  | AFuncAnon(p_list, e_list, rt, t) -> 
-    if (List.length p_list) <> 0 then
-      "\n(" ^ String.concat ", " (List.map aexpression_to_string (List.rev p_list)) ^ s_type_to_string rt ^ " =>\n" ^
-      "\t" ^ String.concat "\n\t" (List.map aexpression_to_string e_list) ^ ")\n"
-    else
-      "\n ( =>\n" ^
-      "\t" ^ String.concat "\n\t" (List.map aexpression_to_string e_list) ^ ")\n"
+  
   | AFuncCall(id, p_list, t) ->
     if (List.length p_list) <> 0 then
       "\n" ^ id ^ " (" ^ String.concat ", " (List.map aexpression_to_string p_list) ^ ")" ^ "_" ^ s_type_to_string(t) ^ "\n"
