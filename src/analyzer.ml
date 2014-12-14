@@ -20,7 +20,7 @@ let rec aType_to_sType = function
   | TTuple(t) -> Tuple((List.map aType_to_sType t))
   | TList(t) -> List(aType_to_sType t)
   | TMap(t1, t2) -> Map(aType_to_sType t1, aType_to_sType t2)
-  | TFunction(t1, t2) -> Function(aType_to_sType t1, aType_to_sType t2)
+  | TFunction(t1, t2) -> Function(List.map aType_to_sType t1, aType_to_sType t2)
   | TAlgebraic(id) ->
       let type_env = !type_env_ref in
       if Env.mem id type_env then
@@ -302,6 +302,7 @@ let rec annotate_expression env = function
     else
     let env = Env.add id (aType_to_sType t) env in
     let s_params = List.map annotate_parameter params in
+    let param_types = List.map (fun (i, t) -> t) s_params in
     let tempEnv =  List.fold_left (fun cenv p -> (Env.add (fst p) (snd p) cenv)) env s_params in
     let s_code, tempEnv = annotate_expression_list tempEnv code in
     let le, tempEnv = annotate_expression tempEnv (List.hd (List.rev code)) in
@@ -311,16 +312,44 @@ let rec annotate_expression env = function
       raise (Exceptions.TypeMismatch)
     else 
       ignore(parameter_table := (id, s_params, env)::!parameter_table);
-      AFuncDecl(id, s_params, s_code, s_type), env
+      AFuncDecl(id, s_params, s_code, Function(param_types, s_type)), env
+  | FuncDecl(id, params, code) -> 
+    if Env.mem id env then
+        raise (Exceptions.NameCollision(id))
+    else
+    let s_params = List.map annotate_parameter params in
+    let param_types = List.map (fun (i, t) -> t) s_params in
+    let tempEnv =  List.fold_left (fun cenv p -> (Env.add (fst p) (snd p) cenv)) env s_params in
+    let s_code, tempEnv = annotate_expression_list tempEnv code in
+    let le, tempEnv = annotate_expression tempEnv (List.hd (List.rev code)) in
+    let le_s_type = type_of le in
+    let env = Env.add id le_s_type env in
+    ignore(parameter_table := (id, s_params, env)::!parameter_table);
+    AFuncDecl(id, s_params, s_code, Function(param_types, le_s_type)), env
+  | TypedFuncAnon(params, exp, t) ->
+    let s_params = List.map annotate_parameter params in
+    let param_types = List.map (fun (i, t) -> t) s_params in
+    let tempEnv =  List.fold_left (fun cenv p -> (Env.add (fst p) (snd p) cenv)) env s_params in
+    let s_e, tempEnv = annotate_expression tempEnv exp in
+    let s_e_type = type_of s_e in
+    let s_type = aType_to_sType t in 
+    if s_e_type <> s_type && s_type <> Unit then
+      raise (Exceptions.TypeMismatch)
+    else 
+      AFuncAnon(s_params, s_e, Function(param_types, s_type)), env
+  | FuncAnon(params, exp) ->
+    let s_params = List.map annotate_parameter params in
+    let param_types = List.map (fun (i, t) -> t) s_params in
+    let tempEnv =  List.fold_left (fun cenv p -> (Env.add (fst p) (snd p) cenv)) env s_params in
+    let s_e, tempEnv = annotate_expression tempEnv exp in
+    let s_e_type = type_of s_e in
+    AFuncAnon(s_params, s_e, Function(param_types, s_e_type)), env
 
 
 (*
   | AlgebricAccess of expression * string
   | MatchBlock of expression * (expression * expression) list
   | Call of string * (expression list)
-  | FuncDecl of string * parameter list * expression list
-  | TypedFuncAnon of parameter list * expression * tTypes
-  | FuncAnon of parameter list * expression
   | FuncPipe of expression * expression
   | FuncComposition of expression * expression
   
@@ -331,7 +360,6 @@ let rec annotate_expression env = function
   | AIfElseBlock of aExpression * aExpression list * aExpression list * sTypes
   | AMatchBlock of aExpression * (aExpression * aExpression) list * sTypes
   | ACall of string * (aExpression list) * sTypes
-  | AFuncAnon of aParameter list * aParameter list * sTypes
   | AFuncComposition of aExpression * aExpression * sTypes
   | AFuncPiping of aExpression * aExpression * sTypes
 *)

@@ -12,7 +12,7 @@ type tTypes =
   | TFloat
   | TAlgebraic of string
   | TMap of tTypes * tTypes
-  | TFunction of tTypes * tTypes
+  | TFunction of tTypes list * tTypes
 
 type parameter = string * tTypes
 

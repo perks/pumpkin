@@ -31,7 +31,7 @@ let rec type_to_string = function
   | TTuple(t)  -> "Tuple[" ^ String.concat ", " (List.map type_to_string t) ^ "]"
   | TList(t)-> "List[" ^ type_to_string t ^ "]"
   | TMap(t1, t2) -> "Map[" ^ type_to_string t1 ^ ", " ^ type_to_string t2 ^ "]"
-  | TFunction(t1, t2) -> "(" ^ type_to_string t1 ^ " => " ^ type_to_string t2 ^ ")"
+  | TFunction(t1, t2) -> "(" ^ String.concat ", " (List.map type_to_string t1) ^ " => " ^ type_to_string t2 ^ ")"
 
 let parameters_to_string (id, t) = id ^ ": " ^ type_to_string t
 
@@ -225,7 +225,7 @@ let rec a_type_to_string = function
   | Algebraic(id) -> "Algebraic[" ^ id ^ "]"
   | Variant(id, t) -> "Variant[" ^ id ^ "]->" ^ a_type_to_string t
   | Float -> "Float"
-  | Function(t1, t2) -> "(" ^ a_type_to_string t1 ^ " => " ^ a_type_to_string t2 ^ ")"
+  | Function(t1, t2) -> "(" ^ String.concat ", " (List.map a_type_to_string t1)^ " => " ^ a_type_to_string t2 ^ ")"
   | Map(t1, t2) -> "Map[" ^ a_type_to_string t1 ^ ", "^ a_type_to_string t1 ^ "]"
 
 let a_param_list_to_string (id, t) = id ^ ": " ^ a_type_to_string t

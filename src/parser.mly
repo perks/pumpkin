@@ -113,8 +113,8 @@ types:
   | ID                                   { TAlgebraic($1) }
 
 funct_type:
-    types DEFARROW types      { TFunction($1, $3) }
-  | types DEFARROW funct_type { TFunction($1, $3) }
+    type_list DEFARROW types      { TFunction($1, $3) }
+  | type_list DEFARROW funct_type { TFunction($1, $3) }
 
 binop:
     expression PLUS   expression         { Binop($1, Plus, $3) }

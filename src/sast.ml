@@ -11,7 +11,7 @@ type sTypes =
   | Algebraic of string
   | Variant of string * sTypes
   | Float 
-  | Function of sTypes * sTypes
+  | Function of sTypes list * sTypes
   | Map of sTypes * sTypes
   
 and aParameter = string * sTypes
@@ -49,7 +49,7 @@ and aExpression =
   | AMatchBlock of aExpression * (aExpression * aExpression) list * sTypes
   | ACall of string * (aExpression list) * sTypes
   | AFuncDecl of string * aParameter list * aExpression list * sTypes
-  | AFuncAnon of aParameter list * aParameter list * sTypes
+  | AFuncAnon of aParameter list * aExpression * sTypes
   | AFuncComposition of aExpression * aExpression * sTypes
   | AFuncPiping of aExpression * aExpression * sTypes
 
