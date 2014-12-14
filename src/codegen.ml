@@ -57,8 +57,8 @@ let rec aexpression_to_js = function
         operation_to_string op ^ " " ^
         sanitize(aexpression_to_js e2) ^ ";"
   | AUnop(op, e1, t) ->
-      operation_to_string(op) ^ " " ^
-      aexpression_to_js(e1)
+     "(" ^  operation_to_string(op) ^ " " ^
+      aexpression_to_js(e1) ^ ")"
       (* Unops won't be bythemselves as a single expression
        * so no semicolon *)
   | ABoolLiteral(b) ->
@@ -75,8 +75,19 @@ let rec aexpression_to_js = function
       id ^ " = " ^ aexpression_to_js e ^ ";"
   | AListLiteral(e_list, t) ->
       "[" ^ String.concat ", " (List.map aexpression_to_js e_list) ^ "];"
-
-
+  | AListAccess(id, indx, t) ->
+      sanitize(aexpression_to_js id) ^ "[" ^ sanitize(aexpression_to_js indx) ^ "];"
+  | AIfBlock(e, e_list, _) ->
+      "\nif(" ^ sanitize(aexpression_to_js e) ^ ") {" ^
+      "\n" ^ String.concat "\n\t" (List.map aexpression_to_js e_list) ^
+      "\n}\n"
+  | AIfElseBlock(e, e_list1, e_list2, _) -> 
+      "\nif(" ^ sanitize(aexpression_to_js e) ^ ") {" ^
+      "\n\t" ^ String.concat "\n\t" (List.map aexpression_to_js e_list1) ^
+      "\n}\n" ^
+      "else {" ^
+      "\n\t" ^ String.concat "\n\t" (List.map aexpression_to_js e_list2) ^
+      "\n}\n"
 let pumpkin_to_js (a_expressions, algebraic_types) =
   String.concat "\n" (List.map aexpression_to_js a_expressions)
 
@@ -95,17 +106,6 @@ let pumpkin_to_js (a_expressions, algebraic_types) =
       (*"var " ^ id ^*)
       (*" = " ^*)
       (*expression_to_string e ^ ";"*)
-  (*| AIfBlock(e, e_list, _) ->*)
-      (*implode(strip_semicolon (explode("\nif(" ^ expression_to_string e ^ ") {"))) ^*)
-      (*"\n" ^ String.concat "\n\t" (List.map expression_to_string e_list) ^*)
-      (*"\n}\n"*)
-  (*| AIfElseBlock(e, e_list1, e_list2, _) -> *)
-      (*implode(strip_semicolon (explode("\nif(" ^ expression_to_string e ^ ") {"))) ^*)
-      (*"\n\t" ^ String.concat "\n\t" (List.map expression_to_string e_list1) ^*)
-      (*"\n}\n" ^*)
-      (*"else {" ^*)
-      (*"\n\t" ^ String.concat "\n\t" (List.map expression_to_string e_list2) ^*)
-      (*"\n}\n"*)
   (*| AParameter(id, t) -> id*)
   (*| ATypeFuncDecl(id, p_list, e_list, t) ->*)
       (*if t = Unit then*)
