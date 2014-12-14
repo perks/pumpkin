@@ -5,10 +5,25 @@ open Utils
 module Env = Map.Make(String)
 
 let type_env_ref = ref(Env.empty)
-let parameter_table = ref([])
 
 let env_to_string id t =
   print_string(id ^ " -> " ^ a_type_to_string t ^ "\n")
+
+let get_func_return_type = function
+  Function(_, t) -> t 
+  | _ -> raise(Exceptions.TypeMismatch)
+
+let get_func_params = function
+  Function(t, _) -> t 
+  | _ -> raise(Exceptions.TypeMismatch) 
+
+let filter_params (op, num_gp) = 
+  let rec sublist i l = 
+    match l with
+      [] -> []
+    | h :: t -> if (i = 0) then h::t else sublist (i - 1) t     
+  in let new_params = sublist num_gp (List.rev op) in
+  List.rev new_params
 
 let rec aType_to_sType = function
     TInt -> Int
@@ -311,7 +326,6 @@ let rec annotate_expression env = function
     if le_s_type <> s_type && s_type <> Unit then
       raise (Exceptions.TypeMismatch)
     else 
-      ignore(parameter_table := (id, s_params, env)::!parameter_table);
       AFuncDecl(id, s_params, s_code, Function(param_types, s_type)), env
   | FuncDecl(id, params, code) -> 
     if Env.mem id env then
@@ -324,7 +338,6 @@ let rec annotate_expression env = function
     let le, tempEnv = annotate_expression tempEnv (List.hd (List.rev code)) in
     let le_s_type = type_of le in
     let env = Env.add id le_s_type env in
-    ignore(parameter_table := (id, s_params, env)::!parameter_table);
     AFuncDecl(id, s_params, s_code, Function(param_types, le_s_type)), env
   | TypedFuncAnon(params, exp, t) ->
     let s_params = List.map annotate_parameter params in
@@ -344,7 +357,27 @@ let rec annotate_expression env = function
     let s_e, tempEnv = annotate_expression tempEnv exp in
     let s_e_type = type_of s_e in
     AFuncAnon(s_params, s_e, Function(param_types, s_e_type)), env
+  | Call(id, params) -> 
+    if Env.mem id env then
+      let t = Env.find id env in
+      let o_params = get_func_params t in
+      let n_params = List.length o_params in
+      let s_params, tempEnv = annotate_expression_list env params in
+      let sn_params = List.length s_params in
+      let rec match_types l1 l2 =
+      match l1 with
+        [] -> true
+      | hd::tl -> if (type_of hd) = (List.hd l2) then match_types tl (List.tl l2) else false 
+      in 
+      let s_type = 
+        if not(match_types (List.rev s_params) o_params) then
+          raise(Exceptions.WrongParameterType(id))
+        else if sn_params <> n_params then Function((filter_params (o_params, sn_params)), get_func_return_type t) 
+        else get_func_return_type t in
+      ACall(id, s_params, s_type), env
+    else raise(Exceptions.IDNotFound(id))
 
+  
 
 (*
   | AlgebricAccess of expression * string
