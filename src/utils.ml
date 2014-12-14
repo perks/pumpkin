@@ -307,6 +307,11 @@ let rec aexpression_to_string = function
     else
       "\n ( =>\n" ^
       "\t" ^ aexpression_to_string exp ^ ")\n"
+  | ACall(id, params, s_type) ->
+    if (List.length params) <> 0 then
+      "\n" ^ id ^ " (" ^ String.concat ", " (List.map aexpression_to_string params) ^ ")" ^ "_" ^ a_type_to_string(s_type) ^ "\n"
+    else
+      "\n " ^ id ^ "()" ^ "_" ^ a_type_to_string(s_type)
 
 let a_program_to_string (a_expressions, algebraic_types) = 
   String.concat "\n" (List.map a_algebraic_to_string algebraic_types) ^ "\n" ^
