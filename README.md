@@ -18,16 +18,16 @@ Task Sign Off
 Task                | Parser  | Analyzer | CodeGen | Comment |
 ------------------- | ------- | -------- | ------- | ------- |
 Comments            | quinton | NA       | NA      | |
-Numerical           | quinton | | chris | |
-Boolean             | quinton | | chris | |
-Unit                | quinton | | chris | |
-Char                | quinton | | chris | |
-Strings             | quinton | | chris | |
-Lists               | quinton | | | waiting on frontend, will use native javascript arrays wraped in object prototypes |
+Numerical           | quinton | | chris |:heavy_check_mark: |
+Boolean             | quinton | | chris | :heavy_check_mark:|
+Unit                | quinton | | chris | :heavy_check_mark:|
+Char                | quinton | | chris | :heavy_check_mark:|
+Strings             | quinton | | chris |:heavy_check_mark: |
+Lists               | quinton | | | :heavy_check_mark: |
 Tupals              | quinton | | | waiting on frontend, will use object prototypes |
 Algebraic           | quinton | | | i have become death|
 Map                 | quinton | | | will use standard js dicts|
-Variables           | quinton | | chris | |
+Variables           | quinton | | chris | :heavy_check_mark: |
 Control Flow        | quinton | | chris | |
 Matching            | quinton | | | |
 Functions           | quinton | | chris | |
