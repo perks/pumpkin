@@ -294,10 +294,9 @@ let rec annotate_expression env = function
     let a_list, env = annotate_expression_list env e_list in
     let ae, env = annotate_expression env e in
     let lexp, env = annotate_expression env (List.hd (List.rev e_list)) in
-    let ae_s_type = type_of ae and
-    le_s_type = type_of lexp in
+    let ae_s_type = type_of ae in
     if ae_s_type = Bool then
-      AIfBlock(ae, a_list, le_s_type), env
+      AIfBlock(ae, a_list, Unit), env
     else raise(Exceptions.IfRequiresBool(a_type_to_string ae_s_type))
   | IfElseBlock(e1, l1, l2) ->
     let le1, tempEnv = annotate_expression env (List.hd (List.rev l1)) in
