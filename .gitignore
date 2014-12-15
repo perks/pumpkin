@@ -11,6 +11,8 @@
 *.orig
 *.output
 
+*.js
+
 scanner.ml
 parser.ml
 parser.mli

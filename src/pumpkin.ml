@@ -34,7 +34,7 @@ let _ =
         | Interpret -> print_string("\nInterpret\n")
         | Compile ->
            let sast_output = Analyzer.annotate_program program in
-            print_string (Codegen.pumpkin_to_js sast_output) 
+            print_string (Codegen.pumpkin_to_js sast_output ^ "\n")
 
     with
         Exceptions.IllegalCharacter(c, ln) ->
@@ -51,10 +51,10 @@ let _ =
           print_string
           (
             (
-              if !Processor.last_token = Parser.INDENT then 
-                "Indentation Error" 
-              else 
+              if !Processor.last_token = Parser.INDENT then
+                "Indentation Error"
+              else
                 "Syntax Error"
-            ) ^ ", line " ^ string_of_int !Processor.line_number ^ 
+            ) ^ ", line " ^ string_of_int !Processor.line_number ^
             ", token " ^ Utils.token_to_string !Processor.last_token ^ "\n"
           )
