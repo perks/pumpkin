@@ -315,9 +315,9 @@ let rec annotate_expression env = function
     if Env.mem id env then
         raise (Exceptions.NameCollision(id))
     else
-    let env = Env.add id (aType_to_sType t) env in
     let s_params = List.map annotate_parameter params in
     let param_types = List.map (fun (i, t) -> t) s_params in
+    let env = Env.add id (Function(param_types, (aType_to_sType t))) env in
     let tempEnv =  List.fold_left (fun cenv p -> (Env.add (fst p) (snd p) cenv)) env s_params in
     let s_code, tempEnv = annotate_expression_list tempEnv code in
     let le, tempEnv = annotate_expression tempEnv (List.hd (List.rev code)) in
@@ -337,7 +337,7 @@ let rec annotate_expression env = function
     let s_code, tempEnv = annotate_expression_list tempEnv code in
     let le, tempEnv = annotate_expression tempEnv (List.hd (List.rev code)) in
     let le_s_type = type_of le in
-    let env = Env.add id le_s_type env in
+    let env = Env.add id (Function(param_types, le_s_type)) env in
     AFuncDecl(id, s_params, s_code, Function(param_types, le_s_type)), env
   | TypedFuncAnon(params, exp, t) ->
     let s_params = List.map annotate_parameter params in
@@ -360,6 +360,7 @@ let rec annotate_expression env = function
   | Call(id, params) -> 
     if Env.mem id env then
       let t = Env.find id env in
+      print_string(a_type_to_string t);
       let o_params = get_func_params t in
       let n_params = List.length o_params in
       let s_params, tempEnv = annotate_expression_list env params in

@@ -20,7 +20,12 @@ def foo =>
 val x = (a : Int, b : Int => a + b : Int)
 (a : Int, b : Int => a + b)
 
-def fst ( a: (x => y => z) ) => ()
+def oneliner(x: Int): Int => (x + 10)
+
+oneliner(20)
+
+val y: Int = oneliner(20)
+
 
 def add (a : Int) =>
     (b : Int => a + b)
