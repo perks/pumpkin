@@ -1,3 +1,7 @@
-b |> (x |> y(a) <| z) <| a
+val x = (a : Int, b : Int => a + b : Int)
+val y = (a : Int => a  : Int)
+val z = (a : Int => a : Int)
+val a = (a : Int => a : Int)
 
-x >> y << z << a
+val p = x >> y << z << a
+val j = p

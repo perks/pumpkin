@@ -23,13 +23,13 @@
 %token EOF
 %token <int> DEDENT_EOF
 
+%right ASSIGN
 %right DEFARROW
 %left LBRACK RBRACK
 %left FPIPE
 %right BPIPE
 %left RCOMPOSE
 %right LCOMPOSE
-%right ASSIGN
 %left OR
 %left AND
 %left EQ NEQ

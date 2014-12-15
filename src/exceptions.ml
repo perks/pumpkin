@@ -17,3 +17,4 @@ exception InvalidIndexing of string
 exception ArrayOutOfBounds
 exception IfRequiresBool of string
 exception WrongParameterType of string
+exception ComposedIntermediateTakesMultipleArguments

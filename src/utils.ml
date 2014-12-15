@@ -312,6 +312,8 @@ let rec aexpression_to_string = function
       "\n" ^ id ^ " (" ^ String.concat ", " (List.map aexpression_to_string params) ^ ")" ^ "_" ^ a_type_to_string(s_type) ^ "\n"
     else
       "\n " ^ id ^ "()" ^ "_" ^ a_type_to_string(s_type)
+  | AFuncComposition(exp1, exp2, t) ->
+      "\n" ^ aexpression_to_string exp1 ^ ">>" ^ aexpression_to_string exp2 ^ "_" ^ a_type_to_string(t) ^ "\n"
 
 let a_program_to_string (a_expressions, algebraic_types) = 
   String.concat "\n" (List.map a_algebraic_to_string algebraic_types) ^ "\n" ^

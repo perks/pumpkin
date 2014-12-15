@@ -14,7 +14,7 @@ let get_func_return_type = function
   | _ -> raise(Exceptions.TypeMismatch)
 
 let get_func_params = function
-  Function(t, _) -> t 
+  Function(t, _) -> (List.rev t) 
   | _ -> raise(Exceptions.TypeMismatch) 
 
 let filter_params (op, num_gp) = 
@@ -189,7 +189,9 @@ let rec annotate_expression env = function
   | IdLiteral(id) ->
       if Env.mem id env then
         let t = Env.find id env in
-        AIdLiteral(id, t), env
+        match t with 
+        Function(p, rt) -> if (List.length p) = 0 then AIdLiteral(id, rt), env else AIdLiteral(id, t), env
+        | _ -> AIdLiteral(id, t), env
       else
         raise (Exceptions.IDNotFound id)
   | TupleLiteral(e_list) ->
@@ -360,7 +362,6 @@ let rec annotate_expression env = function
   | Call(id, params) -> 
     if Env.mem id env then
       let t = Env.find id env in
-      print_string(a_type_to_string t);
       let o_params = get_func_params t in
       let n_params = List.length o_params in
       let s_params, tempEnv = annotate_expression_list env params in
@@ -368,7 +369,8 @@ let rec annotate_expression env = function
       let rec match_types l1 l2 =
       match l1 with
         [] -> true
-      | hd::tl -> if (type_of hd) = (List.hd l2) then match_types tl (List.tl l2) else false 
+      | hd::tl -> if (List.length l2 > 0 ) && (type_of hd) = (List.hd l2) then 
+        match_types tl (List.tl l2) else if (type_of hd = Unit) then true else false
       in 
       let s_type = 
         if not(match_types (List.rev s_params) o_params) then
@@ -377,13 +379,25 @@ let rec annotate_expression env = function
         else get_func_return_type t in
       ACall(id, s_params, s_type), env
     else raise(Exceptions.IDNotFound(id))
-
-  
+  | FuncComposition(exp1, exp2) ->
+    let ae1, env = annotate_expression env exp1 in
+    let ae2, env = annotate_expression env exp2 in
+    let t1 = type_of ae1 in 
+    let t2 = type_of ae2 in
+    let params = get_func_params t2 in
+    if (List.length params) > 1 then raise(Exceptions.ComposedIntermediateTakesMultipleArguments)
+    else
+    let p_type = List.hd(params) in
+    let r_type = get_func_return_type t1 in
+    if(p_type <> r_type) then raise(Exceptions.TypeMismatch)
+    else 
+    let nr_type = get_func_return_type t2 in 
+    let n_params = get_func_params t1 in
+    AFuncComposition(ae1, ae2, Function(n_params, nr_type)), env
 
 (*
   | AlgebricAccess of expression * string
   | MatchBlock of expression * (expression * expression) list
-  | Call of string * (expression list)
   | FuncPipe of expression * expression
   | FuncComposition of expression * expression
   
@@ -391,7 +405,6 @@ let rec annotate_expression env = function
   | AWildcard
   | AAlgebricAccess of aExpression * string * sTypes
   | AMatchBlock of aExpression * (aExpression * aExpression) list * sTypes
-  | ACall of string * (aExpression list) * sTypes
   | AFuncComposition of aExpression * aExpression * sTypes
   | AFuncPiping of aExpression * aExpression * sTypes
 *)
