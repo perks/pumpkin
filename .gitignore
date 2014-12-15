@@ -16,3 +16,4 @@ parser.ml
 parser.mli
 pmkn
 gabi-tests.sh
+results.txt
