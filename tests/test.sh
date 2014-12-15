@@ -1,3 +1,5 @@
+#!/bin/bash
+
 green='\033[0;32m'
 red='\033[0;31m'
 default='\033[0m' # No Color
