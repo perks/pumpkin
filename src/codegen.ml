@@ -28,8 +28,13 @@ let flip_last = fun l ->
 let sanitize str =
   implode ( strip_semicolon ( explode ( str) ) )
 
+let type_list = function
+      List(_) -> true
+    | _ -> false
+
 let reserve_mismatch = function
       AListLiteral(_, _) -> false
+    | AIdLiteral(id, t) when (type_list t) -> false 
     | _ -> true
 
 let operation_to_string = function
@@ -208,7 +213,7 @@ let rec aexpression_to_js lines =
           "\n\treturn " ^ aexpression_to_js exp ^
           "\n};\n"
   | AFuncCall(id, params, s_type) ->
-      if (List.length params) <> 1 || reserve_mismatch (List.hd params) then
+      if (s_type = Reserved && ((List.length params <> 1) || ( reserve_mismatch(List.hd params)))) then
         raise(ReservedFuncTypeMisMatch)
       else if s_type = Print then
         "console.log(" ^ sanitize(aexpression_to_js (List.hd params)) ^ ");"
