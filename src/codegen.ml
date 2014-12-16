@@ -113,11 +113,15 @@ let rec aexpression_to_js lines =
       map_list) ^ "};"
   | AMapAccess(id, param, s_type) ->
       aexpression_to_js id ^ "[" ^ aexpression_to_js param ^ "];"
-
+  | ATupleLiteral(e_list, t) -> 
+      "[" ^ String.concat ", " (List.map aexpression_to_js (List.rev e_list)) ^ "];"
   | AListLiteral(e_list, t) ->
       "[" ^ String.concat ", " (List.map aexpression_to_js (List.rev e_list)) ^ "];"
+  | ATupleAccess(id, indx, t) ->
+      sanitize(aexpression_to_js id) ^ "[" ^ sanitize(aexpression_to_js indx) ^ "];"
   | AListAccess(id, indx, t) ->
       sanitize(aexpression_to_js id) ^ "[" ^ sanitize(aexpression_to_js indx) ^ "];"
+
   | AIfBlock(e, e_list, _) ->
       "\nif(" ^ sanitize(aexpression_to_js e) ^ ") {" ^
       "\n" ^ String.concat "\n\t" (List.map aexpression_to_js e_list) ^
@@ -199,22 +203,19 @@ let rec aexpression_to_js lines =
           "\n};\n"
   | AFuncCall(id, params, s_type) ->
       if s_type = Print then 
-        "console.log(" ^ aexpression_to_js (List.hd params) ^ ");"
+        "console.log(" ^ sanitize(aexpression_to_js (List.hd params)) ^ ");"
       else
         if List.hd params <> AUnitLiteral then
           if is_partial s_type then
             aexpression_to_js id ^ ".bind(this, " ^ 
-            (String.concat ", " (List.map aexpression_to_js params)) ^
+            sanitize(String.concat ", " (List.map aexpression_to_js params)) ^
             ");"
           else
-            aexpression_to_js id ^ "call(this, " ^
-            (String.concat ", " (List.map aexpression_to_js params)) ^
+            aexpression_to_js id ^ ".call(this, " ^
+            sanitize(String.concat ", " (List.map aexpression_to_js params)) ^
             ");"
         else
           aexpression_to_js id ^ "();"
-
-
-
 
 let pumpkin_to_js (a_expressions, algebraic_types) =
   String.concat "\n" (List.map aexpression_to_js a_expressions)
