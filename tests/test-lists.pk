@@ -1,17 +1,17 @@
 val x : List[Int] = [1, 2, 3, 4]
+print(x)
 val i = 2
 [1]
 
-x[1+i]
+print(x[1+i])
+val y = 1::x
+print(y)
 
-1::x
-
-True::[]
-
-val l = [1, 2, 3, 4]
+val z = True::[]
+print(z)
 
 def map (f : (Int => Int), l : List[Int]) : List[Int] =>
     val head = hd(l)
     val tail = tl(l)
-    
+
     f(head)::map(f, tail)

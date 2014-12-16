@@ -1,0 +1,5 @@
+/*
+    This is a multiline comment.
+    print("no")
+*/
+print("yes")

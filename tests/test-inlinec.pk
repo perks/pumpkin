@@ -1,0 +1,3 @@
+//this is an inline comments
+// print("no")
+print("yes")
