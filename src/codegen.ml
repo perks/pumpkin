@@ -223,7 +223,7 @@ let rec aexpression_to_js lines =
       "__compose__(" ^ sanitize(aexpression_to_js exp1) ^ ", " ^
       sanitize(aexpression_to_js exp2) ^ ")"
 
-let pumpkin_to_js a_expressions, =
+let pumpkin_to_js a_expressions =
   " var __compose__ = function() {
      var funcs = arguments;
      return function() {
