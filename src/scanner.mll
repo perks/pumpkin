@@ -40,7 +40,6 @@ rule token = parse
   | ':'  { COLON }
   | ','  { COMMA }
   | '$'  { TUPLEACC }
-  | '.'  { ACCESSOR }
   | '|'  { SELECTION }
   | '_'  { WILDCARD }
   
@@ -48,7 +47,6 @@ rule token = parse
   | "=>"         { DEFARROW }
   | "if"         { IF }
   | "else"       { ELSE }
-  | "type"       { TYPE }
   | "match"      { MATCH }
   
   | "is"  | "==" { EQ }

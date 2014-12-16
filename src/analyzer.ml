@@ -4,8 +4,6 @@ open Utils
 
 module Env = Map.Make(String)
 
-let type_env_ref = ref(Env.empty)
-
 let env_to_string id t =
   print_string(id ^ " -> " ^ a_type_to_string t ^ "\n")
 
@@ -36,12 +34,6 @@ let rec aType_to_sType = function
   | TList(t) -> List(aType_to_sType t)
   | TMap(t1, t2) -> Map(aType_to_sType t1, aType_to_sType t2)
   | TFunction(t1, t2) -> Function(List.map aType_to_sType t1, aType_to_sType t2)
-  | TAlgebraic(id) ->
-      let type_env = !type_env_ref in
-      if Env.mem id type_env then
-        Env.find id type_env
-      else
-        raise (Exceptions.TypeNotFound(id))
 
 let rec type_of = function
     AIntLiteral(_) -> Int
@@ -61,7 +53,6 @@ let rec type_of = function
   | AReassign(_, _, t) -> t
   | ATupleAccess(_, _, t) -> t
   | AListAccess(_, _, t) -> t
-  | AAlgebricAccess(_, _, t) -> t
   | AIfBlock(_, _, t) -> t
   | AIfElseBlock(_, _, _, t) -> t
   | AMatchBlock(_, _, t) -> t
@@ -132,47 +123,7 @@ let valid_unop (op, t) =
 
 let annotate_parameter (id, t) = (id, aType_to_sType t)
 
-let annotate_variant_types base_type variant =
-  let add_record id t =
-    let type_env = !type_env_ref in
-    if Env.mem id type_env then
-      raise (Exceptions.NameCollision(id))
-    else
-      type_env_ref := (Env.add id t type_env)
-  in
-  match variant with
-      VariantEmpty(id) -> 
-        let t = Variant(id, base_type) in
-        add_record id t;
-        AVariantEmpty(t)
-    | VariantProduct(id, p_list) ->
-        let t = Variant(id, base_type) in
-        add_record id t;
-        AVariantProduct(t, List.map annotate_parameter p_list)
-
-let annotate_algebraic_types alg_decl = 
-  let add_record id t =
-    let type_env = !type_env_ref in
-    if Env.mem id type_env then
-      raise (Exceptions.NameCollision(id))
-    else
-      type_env_ref := (Env.add id t type_env);
-  in
-  match alg_decl with
-    AlgebraicEmpty(id) ->
-      let t = Algebraic(id) in
-      add_record id t;
-      AAlgebraicEmpty(t)
-  | AlgebraicProduct(id, p_list) -> 
-      let t = Algebraic(id) in
-      add_record id t;
-      AAlgebraicProduct(t, List.map annotate_parameter p_list)
-  | AlgebraicSum(id, v_list) -> 
-      let t = Algebraic(id) in
-      add_record id t;
-      AAlgebraicSum(t, List.map (annotate_variant_types t) v_list)
-
-let rec match_expression_list_type = function (* does not deal with algebraic properly *)
+let rec match_expression_list_type = function
     fst::snd::tail ->
       if type_of fst <> type_of snd then
         false
@@ -417,11 +368,9 @@ let rec annotate_expression env = function
     AFuncPiping(ae1, ae2, nr_type), env
 
 (*
-  | AlgebricAccess of expression * string
   | MatchBlock of expression * (expression * expression) list
   
   | AWildcard
-  | AAlgebricAccess of aExpression * string * sTypes
   | AMatchBlock of aExpression * (aExpression * aExpression) list * sTypes
 *)
 
@@ -435,9 +384,8 @@ and annotate_expression_list env e_list =
     | [] -> []
   in (helper e_list), !env_ref
 
-let annotate_program (expression_list, alg_decl_list) : Sast.aRoot =
-  let a_alg_structures = List.map annotate_algebraic_types alg_decl_list in
+let annotate_program expression_list : Sast.aRoot =
   let env = Env.empty in
   let env = Env.add "print" (Function([Unit], Print)) env in
   let a_expression_list, env = annotate_expression_list env expression_list in
-  a_expression_list, a_alg_structures
+  a_expression_list

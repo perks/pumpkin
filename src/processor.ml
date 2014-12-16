@@ -56,4 +56,4 @@ let parser token_list =
       | [] -> raise (Exceptions.MissingEOF)
   in
   let program = Parser.root tokenizer (Lexing.from_string "") in
-  List.rev (fst program), List.rev (snd program)
+  List.rev program

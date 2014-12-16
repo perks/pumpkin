@@ -27,7 +27,6 @@ let rec type_to_string = function
   | TString -> "String"
   | TChar -> "Char"
   | TFloat -> "Float"
-  | TAlgebraic(s) -> s
   | TTuple(t)  -> "Tuple[" ^ String.concat ", " (List.map type_to_string t) ^ "]"
   | TList(t)-> "List[" ^ type_to_string t ^ "]"
   | TMap(t1, t2) -> "Map[" ^ type_to_string t1 ^ ", " ^ type_to_string t2 ^ "]"
@@ -45,8 +44,6 @@ let rec expression_to_string indent_length = function
   | CharLiteral(c) -> "'" ^ Char.escaped c ^ "'"
   | UnitLiteral -> "()"
   | IdLiteral(id) -> id
-  | AlgebricAccess(e, prop) -> 
-      expression_to_string indent_length e ^ "." ^ prop
   | Binop(e1, op, e2) ->
       "(" ^
       expression_to_string indent_length e1 ^ " " ^
@@ -140,28 +137,8 @@ let rec expression_to_string indent_length = function
       "(" ^ expression_to_string indent_length e1 ^ " >> " ^ expression_to_string indent_length e2 ^ ")"
   | Wildcard -> "_"
 
-let algebraic_variant_to_string = function
-    VariantEmpty(id) -> id
-  | VariantProduct(id, p_list) ->
-      id ^ "(" ^ String.concat ", " (List.map parameters_to_string p_list) ^ ")"
-
-let algebraic_decls_to_string = function
-    AlgebraicEmpty(id) ->
-      "type " ^ id
-  | AlgebraicProduct(id, p_list) ->
-      "type " ^ id ^ "(" ^ String.concat ", " (List.map parameters_to_string p_list) ^ ")"
-  | AlgebraicSum(id, v_list) ->
-      "type " ^ id ^ "=\n" ^
-      "\t| " ^ String.concat "\n\t| " (List.map algebraic_variant_to_string v_list)
-
-let program_to_string (expressions, algebraic_decls) =
-  String.concat "\n"
-    (
-      List.append 
-        (List.map algebraic_decls_to_string algebraic_decls)
-        (List.map (expression_to_string 0) expressions)
-    )
-  ^ "\n"
+let program_to_string expressions =
+  String.concat "\n" (List.map (expression_to_string 0) expressions) ^ "\n"
 
 (* Tokens to String *)
 
@@ -222,27 +199,12 @@ let rec a_type_to_string = function
   | Char -> "Char"
   | Tuple(t) -> "Tuple[" ^ String.concat ", " (List.map a_type_to_string t) ^ "]"
   | List(t) -> "List[" ^ a_type_to_string t ^ "]"
-  | Algebraic(id) -> "Algebraic[" ^ id ^ "]"
-  | Variant(id, t) -> "Variant[" ^ id ^ "]->" ^ a_type_to_string t
   | Float -> "Float"
   | Function(t1, t2) -> "Function(" ^ String.concat ", " (List.map a_type_to_string t1)^ " => " ^ a_type_to_string t2 ^ ")"
   | Map(t1, t2) -> "Map[" ^ a_type_to_string t1 ^ ", "^ a_type_to_string t1 ^ "]"
   | Print -> "PRINT"
 
 let a_param_list_to_string (id, t) = id ^ ": " ^ a_type_to_string t
-
-let a_algebraic_variant_to_string = function
-    AVariantEmpty(t) -> a_type_to_string t
-  | AVariantProduct(t, p_list) ->
-      a_type_to_string t ^ "(" ^ String.concat ", " (List.map a_param_list_to_string p_list) ^ ")"
-
-let a_algebraic_to_string = function
-    AAlgebraicEmpty(t) -> a_type_to_string t
-  | AAlgebraicProduct(t, p_list) -> 
-      a_type_to_string t ^ "(" ^  String.concat ", " (List.map a_param_list_to_string p_list) ^ ")"
-  | AAlgebraicSum(t, v_list) ->
-      a_type_to_string t  ^ "=\n" ^
-      "\t| " ^ String.concat "\n\t| " (List.map a_algebraic_variant_to_string v_list)
 
 let rec aexpression_to_string = function
     AIntLiteral(i) -> string_of_int(i)
@@ -320,6 +282,5 @@ let rec aexpression_to_string = function
   | AFuncPiping(exp1, exp2, t) ->
       "\n" ^ aexpression_to_string exp1 ^ "|>" ^ aexpression_to_string exp2 ^ "_" ^ a_type_to_string(t) ^ "\n"
 
-let a_program_to_string (a_expressions, algebraic_types) = 
-  String.concat "\n" (List.map a_algebraic_to_string algebraic_types) ^ "\n" ^
+let a_program_to_string a_expressions = 
   String.concat "\n" (List.map aexpression_to_string a_expressions) ^ "\n"

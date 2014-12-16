@@ -25,7 +25,6 @@ Char                | quinton | | chris | :heavy_check_mark:|
 Strings             | quinton | | chris |:heavy_check_mark: |
 Lists               | quinton | | | :heavy_check_mark: |
 Tupals              | quinton | | | waiting on frontend, will use object prototypes |
-Algebraic           | quinton | | | i have become death|
 Map                 | quinton | | | will use standard js dicts|
 Variables           | quinton | | chris | :heavy_check_mark: |
 Control Flow        | quinton | | chris | |
