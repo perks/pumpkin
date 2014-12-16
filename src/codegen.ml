@@ -217,6 +217,11 @@ let rec aexpression_to_js lines =
             ");"
         else
           aexpression_to_js id ^ "();"
+  | AFuncPiping(exp1, exp2, t) ->
+     sanitize(aexpression_to_js exp2) ^ "(" ^ sanitize(aexpression_to_js exp1) ^ ")"
+  | AFuncComposition(exp1, exp2, t) ->
+      "compose(" ^ sanitize(aexpression_to_js exp1) ^ ", " ^
+      sanitize(aexpression_to_js exp2) ^ ")"
 
 let pumpkin_to_js (a_expressions, algebraic_types) =
   String.concat "\n" (List.map aexpression_to_js a_expressions)
