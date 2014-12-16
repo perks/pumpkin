@@ -88,12 +88,11 @@ let check_reserved_functions (id, params, env) =
     AIdLiteral(i, _)->
     if i = "hd" ||i = "tl" then AFuncCall(id, params, t)
     else if i = "len" then AFuncCall(id, params, Int)
-    else if i = "empty" then AFuncCall(id, params, Bool)
+    else if i = "is_empty" then AFuncCall(id, params, Bool)
     else raise(Exceptions.UnimplementedCallType(1))
     | _ -> raise(Exceptions.UnimplementedCallType(2)))
   |_ -> raise(Exceptions.UnimplementedCallType(3))
   else raise(Exceptions.UnimplementedCallType(4)) 
-
 
 let valid_binop (t1, t2, op) =
   if op = Cons then 
