@@ -274,7 +274,7 @@ let pumpkin_to_js a_expressions =
     };
 
     var is_empty = function(lst) {
-      return lst.length > 0 ? true : false
+      return lst.length > 0 ? false : true
 
     };
 
