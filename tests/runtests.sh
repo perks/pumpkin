@@ -54,13 +54,13 @@ Check() {
 
     # Report the status and clean up the generated files
     if [ $error -eq 0 ] ; then
-      rm -f $generatedfiles
       echo -e "${green}OK${default}"
       echo "--------- SUCCESS ---------" 1>&2
     else
       echo "--------- FAILURE ---------" 1>&2
       globalerror=$error
     fi
+    rm -f $generatedfiles
 }
 
 echo -e "${yellow}----------------------"

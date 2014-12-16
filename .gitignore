@@ -12,6 +12,7 @@
 *.output
 
 *.js
+*.out
 
 scanner.ml
 parser.ml
