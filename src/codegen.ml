@@ -115,6 +115,8 @@ let rec aexpression_to_js lines =
         (aexpression_to_js e1) ^ ": " ^ (aexpression_to_js e2)
       in "{" ^ String.concat ", " (List.map map_expression_tupal_to_string
       map_list) ^ "};"
+  | AMapAccess(id, param, s_type) ->
+      id ^ "[\"" ^ aexpression_to_js ^ "\"]"
 
   | AListLiteral(e_list, t) ->
       "[" ^ String.concat ", " (List.map aexpression_to_js (List.rev e_list)) ^ "];"
