@@ -112,8 +112,8 @@ and block_comment = parse
 
 and indent = parse
     whitespace* return { incr lineno; indent lexbuf }
-  | whitespace* "//"   { incr lineno; single_comment lexbuf }
-  | whitespace* "/*"   { incr lineno; block_comment lexbuf }
+  | whitespace* "//"   { single_comment lexbuf }
+  | whitespace* "/*"   { block_comment lexbuf }
   | whitespace* "|>"   { incr lineno; FPIPE }
   | whitespace* "<|"   { incr lineno; BPIPE }
   | whitespace* ">>"   { incr lineno; RCOMPOSE }
