@@ -291,19 +291,19 @@ let rec annotate_expression env = function
         | _ -> raise(Exceptions.InvalidIndexing(a_type_to_string ae_t))
     )
   | IfBlock(e, e_list) -> 
-    let a_list, env = annotate_expression_list env e_list in
-    let ae, env = annotate_expression env e in
-    let lexp, env = annotate_expression env (List.hd (List.rev e_list)) in
+    let a_list, _ = annotate_expression_list env e_list in
+    let ae, _ = annotate_expression env e in
+    let lexp = (List.hd (List.rev a_list)) in
     let ae_s_type = type_of ae in
     if ae_s_type = Bool then
       AIfBlock(ae, a_list, Unit), env
     else raise(Exceptions.IfRequiresBool(a_type_to_string ae_s_type))
   | IfElseBlock(e1, l1, l2) ->
-    let le1, tempEnv = annotate_expression env (List.hd (List.rev l1)) in
-    let le2, tempEnv = annotate_expression env (List.hd (List.rev l2)) in
-    let ae, env = annotate_expression env e1 in
-    let a_list1, env = annotate_expression_list env l1 in
-    let a_list2, env = annotate_expression_list env l2 in
+    let ae, tempEnv = annotate_expression env e1 in
+    let a_list1, _ = annotate_expression_list env l1 in
+    let a_list2, _ = annotate_expression_list env l2 in
+    let le1 = (List.hd (List.rev a_list1)) in
+    let le2 = (List.hd (List.rev a_list2)) in
     let ae_s_type = type_of ae in
     let le1_s_type = type_of le1 and
     le2_s_type = type_of le2 in
@@ -361,22 +361,23 @@ let rec annotate_expression env = function
   | Call(id, params) -> 
     if Env.mem id env then
       let t = Env.find id env in
-      let o_params = get_func_params t in
-      let n_params = List.length o_params in
-      let s_params, tempEnv = annotate_expression_list env params in
-      let sn_params = List.length s_params in
-      let rec match_types l1 l2 =
-      match l1 with
-        [] -> true
-      | hd::tl -> if (List.length l2 > 0 ) && (type_of hd) = (List.hd l2) then 
-        match_types tl (List.tl l2) else if (type_of hd = Unit) then true else false
-      in 
-      let s_type = 
-        if not(match_types (List.rev s_params) o_params) then
-          raise(Exceptions.WrongParameterType(id))
-        else if sn_params <> n_params then Function((filter_params (o_params, sn_params)), get_func_return_type t) 
-        else get_func_return_type t in
-      ACall(id, s_params, s_type), env
+      match t with
+      Function(p, rt) ->
+        let n_params = List.length p in
+        let s_params, tempEnv = annotate_expression_list env params in
+        let sn_params = List.length s_params in
+        let rec match_types l1 l2 =
+        match l1 with
+          [] -> true
+        | hd::tl -> if (List.length l2 > 0 ) && (type_of hd) = (List.hd l2) then 
+          match_types tl (List.tl l2) else if (type_of hd = Unit) then true else false
+        in 
+        let s_type = 
+          if not(match_types (List.rev s_params) p) then
+            raise(Exceptions.WrongParameterType(id))
+          else if sn_params <> n_params then Function((filter_params (p, sn_params)), rt) 
+          else rt in
+        ACall(id, s_params, s_type), env
     else raise(Exceptions.IDNotFound(id))
   | FuncComposition(exp1, exp2) ->
     let ae1, env = annotate_expression env exp1 in
@@ -398,13 +399,10 @@ let rec annotate_expression env = function
   | AlgebricAccess of expression * string
   | MatchBlock of expression * (expression * expression) list
   | FuncPipe of expression * expression
-  | FuncComposition of expression * expression
-  
   
   | AWildcard
   | AAlgebricAccess of aExpression * string * sTypes
   | AMatchBlock of aExpression * (aExpression * aExpression) list * sTypes
-  | AFuncComposition of aExpression * aExpression * sTypes
   | AFuncPiping of aExpression * aExpression * sTypes
 *)
 
