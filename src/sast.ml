@@ -43,11 +43,12 @@ and aExpression =
   | AReassign of string * aExpression * sTypes
   | ATupleAccess of aExpression * aExpression * sTypes
   | AListAccess of aExpression * aExpression * sTypes
+  | AMapAccess of aExpression * aExpression * sTypes
   | AAlgebricAccess of aExpression * string * sTypes
   | AIfBlock of aExpression * aExpression list * sTypes
   | AIfElseBlock of aExpression * aExpression list * aExpression list * sTypes
   | AMatchBlock of aExpression * (aExpression * aExpression) list * sTypes
-  | ACall of string * (aExpression list) * sTypes
+  | ACall of aExpression * (aExpression list) * sTypes
   | AFuncDecl of string * aParameter list * aExpression list * sTypes
   | AFuncAnon of aParameter list * aExpression * sTypes
   | AFuncComposition of aExpression * aExpression * sTypes

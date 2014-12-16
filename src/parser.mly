@@ -24,6 +24,7 @@
 %token <int> DEDENT_EOF
 
 %right ASSIGN
+%nonassoc LPAREN UNIT
 %right DEFARROW
 %left LBRACK RBRACK
 %left FPIPE
@@ -198,8 +199,8 @@ type_list:
   | type_list COMMA types       { $3::$1 }
 
 call:
-    ID UNIT                          { Call($1, [UnitLiteral]) }
-  | ID LPAREN expression_list RPAREN { Call($1, List.rev $3) }
+    expression UNIT                          { Call($1, [UnitLiteral]) }
+  | expression LPAREN expression_list RPAREN { Call($1, List.rev $3) }
 
 funct:
     function_declaration { $1 }

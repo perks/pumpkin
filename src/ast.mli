@@ -48,7 +48,7 @@ type expression =
   | IfBlock of expression * expression list
   | IfElseBlock of expression * expression list * expression list
   | MatchBlock of expression * (expression * expression) list
-  | Call of string * (expression list)
+  | Call of expression * (expression list)
   | TypedFuncDecl of string * parameter list * expression list * tTypes
   | FuncDecl of string * parameter list * expression list
   | TypedFuncAnon of parameter list * expression * tTypes

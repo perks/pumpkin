@@ -18,3 +18,4 @@ exception ArrayOutOfBounds
 exception IfRequiresBool of string
 exception WrongParameterType of string
 exception ComposedIntermediateTakesMultipleArguments
+exception InvalidMapKeyType

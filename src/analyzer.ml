@@ -189,9 +189,7 @@ let rec annotate_expression env = function
   | IdLiteral(id) ->
       if Env.mem id env then
         let t = Env.find id env in
-        match t with 
-        Function(p, rt) -> if (List.length p) = 0 then AIdLiteral(id, rt), env else AIdLiteral(id, t), env
-        | _ -> AIdLiteral(id, t), env
+        AIdLiteral(id, t), env
       else
         raise (Exceptions.IDNotFound id)
   | TupleLiteral(e_list) ->
@@ -220,7 +218,10 @@ let rec annotate_expression env = function
     if not(match_expression_list_type key_list && match_expression_list_type value_list) then
       raise(Exceptions.TypeMismatch)
     else
+    let k_type = type_of (List.hd key_list) in 
+    if(k_type = Int || k_type = String || k_type = Float || k_type = Char) then
       AMapLiteral(s_map, Map((type_of (List.hd key_list)), (type_of (List.hd value_list)))), env
+    else raise(Exceptions.InvalidMapKeyType)
   | TypedAssign(id, e, t) ->
       if Env.mem id env then
         raise (Exceptions.NameCollision(id))
@@ -293,7 +294,6 @@ let rec annotate_expression env = function
   | IfBlock(e, e_list) -> 
     let a_list, _ = annotate_expression_list env e_list in
     let ae, _ = annotate_expression env e in
-    let lexp = (List.hd (List.rev a_list)) in
     let ae_s_type = type_of ae in
     if ae_s_type = Bool then
       AIfBlock(ae, a_list, Unit), env
@@ -358,27 +358,32 @@ let rec annotate_expression env = function
     let s_e, tempEnv = annotate_expression tempEnv exp in
     let s_e_type = type_of s_e in
     AFuncAnon(s_params, s_e, Function(param_types, s_e_type)), env
-  | Call(id, params) -> 
-    if Env.mem id env then
-      let t = Env.find id env in
-      match t with
+  | Call(e1, params) -> 
+    let s_params, tempEnv = annotate_expression_list env params in
+    let id, env = annotate_expression env e1 in
+    let t = type_of id in
+    (match t with
       Function(p, rt) ->
-        let n_params = List.length p in
-        let s_params, tempEnv = annotate_expression_list env params in
-        let sn_params = List.length s_params in
-        let rec match_types l1 l2 =
-        match l1 with
-          [] -> true
-        | hd::tl -> if (List.length l2 > 0 ) && (type_of hd) = (List.hd l2) then 
-          match_types tl (List.tl l2) else if (type_of hd = Unit) then true else false
-        in 
-        let s_type = 
-          if not(match_types (List.rev s_params) p) then
-            raise(Exceptions.WrongParameterType(id))
-          else if sn_params <> n_params then Function((filter_params (p, sn_params)), rt) 
-          else rt in
-        ACall(id, s_params, s_type), env
-    else raise(Exceptions.IDNotFound(id))
+      let n_params = List.length p in
+      let sn_params = List.length s_params in
+      let rec match_types l1 l2 =
+      match l1 with
+        [] -> true
+      | hd::tl -> if (List.length l2 > 0 ) && (type_of hd) = (List.hd l2) then 
+        match_types tl (List.tl l2) else if (type_of hd = Unit) then true else false
+      in 
+      let s_type = 
+        if not(match_types (List.rev s_params) p) then
+          raise(Exceptions.WrongParameterType(aexpression_to_string id))
+        else if sn_params <> n_params then Function((filter_params (p, sn_params)), rt) 
+        else rt in
+      ACall(id, s_params, s_type), env
+    | Map(kt, vt) -> 
+      if (List.length s_params) = 1 then 
+        let key = List.hd s_params in
+        if (kt = (type_of key)) then AMapAccess(id, key, vt), env
+        else raise(Exceptions.TypeMismatch)
+      else raise(Exceptions.InvalidIndexing(aexpression_to_string id)))
   | FuncComposition(exp1, exp2) ->
     let ae1, env = annotate_expression env exp1 in
     let ae2, env = annotate_expression env exp2 in
@@ -419,6 +424,7 @@ and annotate_expression_list env e_list =
 let annotate_program (expression_list, alg_decl_list) : Sast.aRoot =
   let a_alg_structures = List.map annotate_algebraic_types alg_decl_list in
   let env = Env.empty in
+  let env = Env.add "print" Unit env in
   let a_expression_list, env = annotate_expression_list env expression_list in
   Env.iter env_to_string env;
   a_expression_list, a_alg_structures

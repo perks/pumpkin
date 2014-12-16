@@ -111,8 +111,8 @@ let rec expression_to_string indent_length = function
       in
       "match " ^ expression_to_string indent_length e ^ " :\n" ^
       tabs ^ "| " ^ String.concat ("\n" ^ tabs ^ "| ") (List.map match_expression_tupal_to_string match_list)
-  | Call(id, e_list) ->
-      id ^ 
+  | Call(exp, e_list) ->
+      (expression_to_string indent_length exp) ^ 
       ( 
         match e_list with
            UnitLiteral::[] -> "()"
@@ -309,11 +309,13 @@ let rec aexpression_to_string = function
       "\t" ^ aexpression_to_string exp ^ ")\n"
   | ACall(id, params, s_type) ->
     if (List.length params) <> 0 then
-      "\n" ^ id ^ " (" ^ String.concat ", " (List.map aexpression_to_string params) ^ ")" ^ "_" ^ a_type_to_string(s_type) ^ "\n"
+      "\n" ^ aexpression_to_string id ^ " (" ^ String.concat ", " (List.map aexpression_to_string params) ^ ")" ^ "_" ^ a_type_to_string(s_type) ^ "\n"
     else
-      "\n " ^ id ^ "()" ^ "_" ^ a_type_to_string(s_type)
+      "\n " ^ aexpression_to_string id ^ "()" ^ "_" ^ a_type_to_string(s_type)
   | AFuncComposition(exp1, exp2, t) ->
       "\n" ^ aexpression_to_string exp1 ^ ">>" ^ aexpression_to_string exp2 ^ "_" ^ a_type_to_string(t) ^ "\n"
+  | AMapAccess(id, param, s_type) ->
+      "\nMapAccess" ^ aexpression_to_string id ^ " (" ^ aexpression_to_string param ^ ")" ^ "_" ^ a_type_to_string(s_type) ^ "\n"
 
 let a_program_to_string (a_expressions, algebraic_types) = 
   String.concat "\n" (List.map a_algebraic_to_string algebraic_types) ^ "\n" ^
