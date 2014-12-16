@@ -79,6 +79,22 @@ let rec evaluate_index = function
   | AIdLiteral(_, _) -> raise(Exceptions.InvalidIndexing("Cannot use variables for tuple index"))
   | _ -> raise(Exceptions.InvalidIndexing("Invalid expression in index"))
 
+let check_reserved_functions (id, params, env) = 
+  if (List.length params) = 1 then
+  let t_p = type_of (List.hd params) in
+  match t_p with
+  List(t) ->
+    (match id with
+    AIdLiteral(i, _)->
+    if i = "hd" ||i = "tl" then AFuncCall(id, params, t)
+    else if i = "len" then AFuncCall(id, params, Int)
+    else if i = "empty" then AFuncCall(id, params, Bool)
+    else raise(Exceptions.UnimplementedCallType)
+    | _ -> raise(Exceptions.UnimplementedCallType))
+  |_ -> raise(Exceptions.UnimplementedCallType)
+  else raise(Exceptions.UnimplementedCallType) 
+
+
 let valid_binop (t1, t2, op) =
   if op = Cons then 
     match t2 with
@@ -314,7 +330,8 @@ let rec annotate_expression env = function
     let t = type_of id in
     (match t with
       Function(p, rt) ->
-      if rt = Reserved then AFuncCall(id, s_params, Reserved), env else
+      if rt = Reserved then check_reserved_functions(id, s_params, env), env
+      else if rt = Print then AFuncCall(id, s_params, Print), env else
       let n_params = List.length p in
       let sn_params = List.length s_params in
       let rec match_types l1 l2 =
