@@ -1,15 +1,15 @@
 val l = [1, 2, 3, 4]
 
 def map(f : (Int => Int), l : List[Int]) : List[Int] =>
-    val head = hd(l)
-    val tail = tl(l)
-    
-    map(tail, f)
+  if is_empty(l) :
+    l
+  else :
+    hd(l)::map(f, tl(l))
 
+val l2 = map((x : Int => x + 1), l)
 
-l = map((x : Int => x + 1), l)
+print(l2[0])
+print(l2[1])
+print(l2[2])
+print(l2[3])
 
-print(l[0])
-print(l[2])
-print(l[3])
-print(l[4])
