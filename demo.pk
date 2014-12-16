@@ -3,6 +3,7 @@ val l = [1, 2, 3, 4]
 def map (f : (Int => Int), l : List[Int]) : List[Int] =>
     val head = hd(l)
     val tail = tl(l)
+    
     f(head)::map(tail)
 
 
