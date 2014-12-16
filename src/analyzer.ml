@@ -163,7 +163,7 @@ let rec annotate_expression env = function
     let t = List.map type_of a_e_list in
     ATupleLiteral(a_e_list, Tuple(t)), env
   | ListLiteral(e_list) ->
-      let a_e_list, env = annotate_expression_list env e_list in
+      let a_e_list, env = annotate_expression_list env (List.rev e_list) in
       if match_expression_list_type a_e_list then
         if List.length a_e_list = 0 then
           AListLiteral(a_e_list, List(Unit)), env
