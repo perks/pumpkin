@@ -26,8 +26,8 @@ PrintError() {
 # Compare <outfile> <reffile>
 # Compares the outfile with reffile.
 Compare() {
-    echo diff -b $1 $2 1>&2
-    diff -b "$1" "$2" 1>&2 || {
+    echo diff -Bw $1 $2 1>&2
+    diff -Bw "$1" "$2" 1>&2 || {
     PrintError "$1 differs"
     echo -e "FAILED $1 differs from $2" 1>&2
     }
