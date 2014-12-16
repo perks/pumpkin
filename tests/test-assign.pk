@@ -1,0 +1,6 @@
+val x = 1
+print(x)
+val y : Bool = True
+print(y)
+print(x + 2)
+print(y || False)

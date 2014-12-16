@@ -78,15 +78,7 @@ files="test-*.pk"
 
 for file in $files
 do
-    case $file in
-  *test-*)
-      Check $file $@ 2>> $testlog
-      ;;
-  *)
-      echo "unknown file type $file"
-      globalerror=1
-      ;;
-    esac
+  Check $file $@ 2>> $testlog
 done
 
 exit $globalerror
