@@ -89,10 +89,10 @@ let check_reserved_functions (id, params, env) =
     if i = "hd" ||i = "tl" then AFuncCall(id, params, t)
     else if i = "len" then AFuncCall(id, params, Int)
     else if i = "empty" then AFuncCall(id, params, Bool)
-    else raise(Exceptions.UnimplementedCallType)
-    | _ -> raise(Exceptions.UnimplementedCallType))
-  |_ -> raise(Exceptions.UnimplementedCallType)
-  else raise(Exceptions.UnimplementedCallType) 
+    else raise(Exceptions.UnimplementedCallType(1))
+    | _ -> raise(Exceptions.UnimplementedCallType(2)))
+  |_ -> raise(Exceptions.UnimplementedCallType(3))
+  else raise(Exceptions.UnimplementedCallType(4)) 
 
 
 let valid_binop (t1, t2, op) =
@@ -282,7 +282,7 @@ let rec annotate_expression env = function
     if Env.mem id env then
         raise (Exceptions.NameCollision(id))
     else
-    let s_params = List.map annotate_parameter params in
+    let s_params = List.map annotate_parameter (List.rev params) in
     let param_types = List.map (fun (i, t) -> t) s_params in
     let env = Env.add id (Function(param_types, (aType_to_sType t))) env in
     let tempEnv =  List.fold_left (fun cenv p -> (Env.add (fst p) (snd p) cenv)) env s_params in
@@ -298,7 +298,7 @@ let rec annotate_expression env = function
     if Env.mem id env then
         raise (Exceptions.NameCollision(id))
     else
-    let s_params = List.map annotate_parameter params in
+    let s_params = List.map annotate_parameter (List.rev params) in
     let param_types = List.map (fun (i, t) -> t) s_params in
     let tempEnv =  List.fold_left (fun cenv p -> (Env.add (fst p) (snd p) cenv)) env s_params in
     let s_code, tempEnv = annotate_expression_list tempEnv code in
@@ -352,7 +352,7 @@ let rec annotate_expression env = function
         if (kt = (type_of key)) then AMapAccess(id, key, vt), env
         else raise(Exceptions.TypeMismatch)
       else raise(Exceptions.InvalidIndexing(aexpression_to_string id))
-    |  _ -> raise(Exceptions.UnimplementedCallType))
+    |  _ -> raise(Exceptions.UnimplementedCallType(111)))
   | FuncComposition(exp1, exp2) ->
     let ae1, env = annotate_expression env exp1 in
     let ae2, env = annotate_expression env exp2 in

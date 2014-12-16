@@ -182,6 +182,7 @@ let rec a_type_to_string = function
   | Function(t1, t2) -> "Function(" ^ String.concat ", " (List.map a_type_to_string t1)^ " => " ^ a_type_to_string t2 ^ ")"
   | Map(t1, t2) -> "Map[" ^ a_type_to_string t1 ^ ", "^ a_type_to_string t1 ^ "]"
   | Print -> "PRINT"
+  | Reserved -> "RESERVED"
 
 let a_param_list_to_string (id, t) = id ^ ": " ^ a_type_to_string t
 
