@@ -24,11 +24,11 @@
 %token <int> DEDENT_EOF
 
 %right ASSIGN
-%nonassoc LPAREN UNIT
 %right DEFARROW
 %left LBRACK RBRACK
 %left FPIPE
 %right BPIPE
+%nonassoc LPAREN UNIT
 %left RCOMPOSE
 %right LCOMPOSE
 %left OR

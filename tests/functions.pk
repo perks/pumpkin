@@ -30,3 +30,4 @@ val y: Int = oneliner(20)
 def add (a : Int) =>
     (b : Int => a + b)
 
+(a : Int, b : Int => a + b)(1) 

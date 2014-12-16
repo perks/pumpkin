@@ -7,4 +7,5 @@ val p = x >> y << z << a
 x>> ((a >> z)>>y)
 val j = p(20)
 val  q = p(3)
-2 |> j |> q
+x(2)
+2 |> j |> x(2)
