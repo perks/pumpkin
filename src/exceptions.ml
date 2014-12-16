@@ -5,6 +5,7 @@ exception MissingEOF
 exception IllegalCharacter of char * int
 exception IndentationError of int
 exception UnmatchedQuotation of int
+exception IllegalToken of string
 
 (* Analyzer Exception *)
 exception NameCollision of string

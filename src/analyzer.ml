@@ -365,7 +365,7 @@ let rec annotate_expression env = function
     let t = type_of id in
     (match t with
       Function(p, rt) ->
-      if rt = Print then AFuncCall(id, s_params, Print), env else
+      if rt = Reserved then AFuncCall(id, s_params, Reserved), env else
       let n_params = List.length p in
       let sn_params = List.length s_params in
       let rec match_types l1 l2 =
@@ -438,6 +438,10 @@ and annotate_expression_list env e_list =
 let annotate_program (expression_list, alg_decl_list) : Sast.aRoot =
   let a_alg_structures = List.map annotate_algebraic_types alg_decl_list in
   let env = Env.empty in
-  let env = Env.add "print" (Function([Unit], Print)) env in
+  let env = Env.add "print" (Function([Unit], Reserved)) env in
+  let env = Env.add "hd" (Function([Unit], Reserved)) env in
+  let env = Env.add "tl" (Function([Unit], Reserved)) env in
+  let env = Env.add "len" (Function([Unit], Reserved)) env in
+  let env = Env.add "empty" (Function([Unit], Reserved)) env in
   let a_expression_list, env = annotate_expression_list env expression_list in
   a_expression_list, a_alg_structures

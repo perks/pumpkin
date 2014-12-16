@@ -13,7 +13,7 @@ type sTypes =
   | Float 
   | Function of sTypes list * sTypes
   | Map of sTypes * sTypes
-  | Print
+  | Reserved
   
 and aParameter = string * sTypes
 

@@ -11,7 +11,7 @@
 
 let alpha = ['a'-'z' 'A'-'Z']
 let digit = ['0'-'9']
-let id  = alpha (alpha | digit | '_')*
+let id = alpha (alpha | digit | '_')*
 let string = '"' [^ '"' '\\' '\n' '\r' '\t']* ('\\' [^ '\n' '\r' '\t'] [^ '"' '\\']*)* '"'
 let char = ''' ( alpha | digit ) '''
 let float = digit+ ['.'] digit+
