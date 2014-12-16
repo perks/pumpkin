@@ -113,11 +113,15 @@ let rec aexpression_to_js lines =
       map_list) ^ "};"
   | AMapAccess(id, param, s_type) ->
       aexpression_to_js id ^ "[" ^ aexpression_to_js param ^ "];"
-
+  | ATupleLiteral(e_list, t) -> 
+      "[" ^ String.concat ", " (List.map aexpression_to_js (List.rev e_list)) ^ "];"
   | AListLiteral(e_list, t) ->
       "[" ^ String.concat ", " (List.map aexpression_to_js (List.rev e_list)) ^ "];"
+  | ATupleAccess(id, indx, t) ->
+      sanitize(aexpression_to_js id) ^ "[" ^ sanitize(aexpression_to_js indx) ^ "];"
   | AListAccess(id, indx, t) ->
       sanitize(aexpression_to_js id) ^ "[" ^ sanitize(aexpression_to_js indx) ^ "];"
+
   | AIfBlock(e, e_list, _) ->
       "\nif(" ^ sanitize(aexpression_to_js e) ^ ") {" ^
       "\n" ^ String.concat "\n\t" (List.map aexpression_to_js e_list) ^
