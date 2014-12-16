@@ -227,6 +227,7 @@ let rec a_type_to_string = function
   | Float -> "Float"
   | Function(t1, t2) -> "Function(" ^ String.concat ", " (List.map a_type_to_string t1)^ " => " ^ a_type_to_string t2 ^ ")"
   | Map(t1, t2) -> "Map[" ^ a_type_to_string t1 ^ ", "^ a_type_to_string t1 ^ "]"
+  | Print -> "PRINT"
 
 let a_param_list_to_string (id, t) = id ^ ": " ^ a_type_to_string t
 
@@ -307,7 +308,7 @@ let rec aexpression_to_string = function
     else
       "\n ( =>\n" ^
       "\t" ^ aexpression_to_string exp ^ ")\n"
-  | ACall(id, params, s_type) ->
+  | AFuncCall(id, params, s_type) ->
     if (List.length params) <> 0 then
       "\n" ^ aexpression_to_string id ^ " (" ^ String.concat ", " (List.map aexpression_to_string params) ^ ")" ^ "_" ^ a_type_to_string(s_type) ^ "\n"
     else

@@ -13,6 +13,7 @@ type sTypes =
   | Float 
   | Function of sTypes list * sTypes
   | Map of sTypes * sTypes
+  | Print
   
 and aParameter = string * sTypes
 
@@ -48,7 +49,7 @@ and aExpression =
   | AIfBlock of aExpression * aExpression list * sTypes
   | AIfElseBlock of aExpression * aExpression list * aExpression list * sTypes
   | AMatchBlock of aExpression * (aExpression * aExpression) list * sTypes
-  | ACall of aExpression * (aExpression list) * sTypes
+  | AFuncCall of aExpression * (aExpression list) * sTypes
   | AFuncDecl of string * aParameter list * aExpression list * sTypes
   | AFuncAnon of aParameter list * aExpression * sTypes
   | AFuncComposition of aExpression * aExpression * sTypes

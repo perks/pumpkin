@@ -65,11 +65,12 @@ let rec type_of = function
   | AIfBlock(_, _, t) -> t
   | AIfElseBlock(_, _, _, t) -> t
   | AMatchBlock(_, _, t) -> t
-  | ACall(_, _, t) -> t
+  | AFuncCall(_, _, t) -> t
   | AFuncDecl(_, _, _, t) -> t
   | AFuncAnon(_, _, t) -> t
   | AFuncComposition (_, _, t) -> t
   | AFuncPiping(_, _, t) -> t
+  | AMapAccess(_, _, t) -> t
 
 (* Auxiliary functions for type checks *)
 let rec evaluate_index = function
@@ -364,6 +365,7 @@ let rec annotate_expression env = function
     let t = type_of id in
     (match t with
       Function(p, rt) ->
+      if rt = Print then AFuncCall(id, s_params, Print), env else
       let n_params = List.length p in
       let sn_params = List.length s_params in
       let rec match_types l1 l2 =
@@ -377,7 +379,7 @@ let rec annotate_expression env = function
           raise(Exceptions.WrongParameterType(aexpression_to_string id))
         else if sn_params <> n_params then Function((filter_params (p, sn_params)), rt) 
         else rt in
-      ACall(id, s_params, s_type), env
+      AFuncCall(id, s_params, s_type), env
     | Map(kt, vt) -> 
       if (List.length s_params) = 1 then 
         let key = List.hd s_params in
@@ -424,7 +426,7 @@ and annotate_expression_list env e_list =
 let annotate_program (expression_list, alg_decl_list) : Sast.aRoot =
   let a_alg_structures = List.map annotate_algebraic_types alg_decl_list in
   let env = Env.empty in
-  let env = Env.add "print" Unit env in
+  let env = Env.add "print" (Function([Unit], Print)) env in
   let a_expression_list, env = annotate_expression_list env expression_list in
   Env.iter env_to_string env;
   a_expression_list, a_alg_structures
