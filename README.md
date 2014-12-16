@@ -32,3 +32,10 @@ Functions           | quinton | | chris | |
 Piping              | quinton | | | |
 Composition         | quinton | | | |
 Scoping/Indentation | quinton | | chris | |
+
+Testing
+======
+In the tests folder:
+1) Run 'js.sh' to compile pumpkin files to javascript.
+2) Run 'node.sh' to run javascript tests.
+3) Run 'runtests.sh' to automate testing and output to log.

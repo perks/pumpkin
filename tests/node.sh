@@ -1,10 +1,13 @@
 #!/bin/bash
 
+blue='\033[0;33m'
 green='\033[0;32m'
 red='\033[0;31m'
 default='\033[0m' # No Color
 
-echo -e "---------------------------\nTesting all javscript files\n---------------------------\n"
+echo -e "${blue}-----------------------------"
+echo -e " Testing all javscript files"
+echo -e "-----------------------------${default}"
 
 echo -e "Test Results\n------------\n" > jsresults.txt
 

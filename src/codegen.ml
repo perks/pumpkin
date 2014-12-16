@@ -274,8 +274,7 @@ let pumpkin_to_js a_expressions =
     };
 
     var is_empty = function(lst) {
-      return lst.length > 0 ? 1 : 0
-      };
+      return lst.length > 0 ? true : false
 
       \n" ^
   String.concat "\n" (List.map aexpression_to_js a_expressions)
