@@ -82,7 +82,7 @@ let rec aexpression_to_js lines =
   | AFloatLiteral(f) -> string_of_float(f)
   | ABinop(e1, op, e2, t) ->
       if op = Cons then
-        "cons(" ^ 
+        "__cons__(" ^ 
         sanitize(aexpression_to_js e1) ^ "," ^
         sanitize(aexpression_to_js e2) ^ ");"
       else
@@ -220,39 +220,25 @@ let rec aexpression_to_js lines =
   | AFuncPiping(exp1, exp2, t) ->
      sanitize(aexpression_to_js exp2) ^ "(" ^ sanitize(aexpression_to_js exp1) ^ ")"
   | AFuncComposition(exp1, exp2, t) ->
-      "compose(" ^ sanitize(aexpression_to_js exp1) ^ ", " ^
+      "__compose__(" ^ sanitize(aexpression_to_js exp1) ^ ", " ^
       sanitize(aexpression_to_js exp2) ^ ")"
 
 let pumpkin_to_js (a_expressions, algebraic_types) =
+  " var __compose__ = function() {
+     var funcs = arguments;
+     return function() {
+         var args = arguments;
+         for (var i = funcs.length; i --> 0;) {
+             args = [funcs[i].apply(this, args)];
+         }
+         return args[0];
+     };
+    };
+    
+    var __cons__ = function(elem, lst) {
+      var temp = lst.slice(0);
+      temp.unshift(elem);
+      return temp
+    };\n" ^
   String.concat "\n" (List.map aexpression_to_js a_expressions)
 
-(*let rec expression_to_string = function*)
-    (*AIntLiteral(i, _) -> string_of_int(i)*)
-  (*| AFloatLiteral(f, _) -> string_of_float(f)*)
-  (*| ABoolLiteral(b, _) -> if b then "true" else "false"*)
-  (*| AStringLiteral(s, _) -> s*)
-  (*| ACharLiteral(c, _) -> Char.escaped c*)
-  (*| AIdLiteral(id, _) -> id*)
-  (*| ABinop(e1, op, e2, _) ->*)
-      (*expression_to_string e1 ^ " " ^*)
-      (*operation_to_string op ^ " " ^*)
-      (*expression_to_string e2 ^ ";"*)
-  (*| ATypeAssign(id, e, t) ->*)
-      (*"var " ^ id ^*)
-      (*" = " ^*)
-      (*expression_to_string e ^ ";"*)
-  (*| AParameter(id, t) -> id*)
-  (*| ATypeFuncDecl(id, p_list, e_list, t) ->*)
-
-  (*| AFuncCall(id, p_list, _) ->*)
-      (*if (List.length p_list) <> 0 then*)
-        (*id ^ "(" ^ *)
-        (*implode(strip_semicolon (explode(String.concat ", " (List.map expression_to_string (List.rev p_list))))) ^ *)
-        (*");"*)
-      (*else*)
-        (*id ^ "();"*)
-
-
-
-(*let gen_program (root : Sast.aExpression list) = *)
-  (*String.concat "\n" (List.map expression_to_string root)*)
