@@ -26,6 +26,7 @@
 %left LBRACK RBRACK
 %left FPIPE
 %right BPIPE
+%right CONS
 %nonassoc LPAREN UNIT
 %left RCOMPOSE
 %right LCOMPOSE
@@ -35,7 +36,6 @@
 %left LT GT LTE GTE
 %left PLUS MINUS
 %left TIMES DIVIDE MODULO
-%right CONS
 %right UMINUS UPLUS
 %right NOT
 %left TUPLEACC ACCESSOR

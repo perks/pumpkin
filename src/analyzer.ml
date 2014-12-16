@@ -86,7 +86,8 @@ let check_reserved_functions (id, params, env) =
   List(t) ->
     (match id with
     AIdLiteral(i, _)->
-    if i = "hd" ||i = "tl" then AFuncCall(id, params, t)
+    if i = "hd" then AFuncCall(id, params, t)
+    else if i = "tl" then AFuncCall(id, params, t_p)
     else if i = "len" then AFuncCall(id, params, Int)
     else if i = "is_empty" then AFuncCall(id, params, Bool)
     else raise(Exceptions.UnimplementedCallType(1))
@@ -100,7 +101,7 @@ let valid_binop (t1, t2, op) =
     List(t) -> 
     if t = Unit then List(t1) 
     else if t<>t1 then raise(Exceptions.InvalidOperation(operation_to_string op))
-    else t    
+    else t2    
     | _ -> raise(Exceptions.InvalidOperation(operation_to_string op))
   else
   match t1 with
@@ -324,7 +325,7 @@ let rec annotate_expression env = function
     let s_e_type = type_of s_e in
     AFuncAnon(s_params, s_e, Function(param_types, s_e_type)), env
   | Call(e1, params) -> 
-    let s_params, tempEnv = annotate_expression_list env params in
+    let s_params, tempEnv = annotate_expression_list env (List.rev params) in
     let id, env = annotate_expression env e1 in
     let t = type_of id in
     (match t with
