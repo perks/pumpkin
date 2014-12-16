@@ -221,11 +221,11 @@ let rec aexpression_to_js lines =
         if List.hd params <> AUnitLiteral then
           if is_partial s_type then
             aexpression_to_js id ^ ".bind(this, " ^ 
-            sanitize(String.concat ", " (List.map aexpression_to_js params)) ^
+            sanitize(String.concat ", " (List.map aexpression_to_js (List.rev params))) ^
             ");"
           else
             aexpression_to_js id ^ ".call(this, " ^
-            sanitize(String.concat ", " (List.map aexpression_to_js params)) ^
+            sanitize(String.concat ", " (List.map aexpression_to_js (List.rev params))) ^
             ");"
         else
           aexpression_to_js id ^ "();"
