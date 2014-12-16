@@ -88,7 +88,7 @@ let check_reserved_functions (id, params, env) =
     AIdLiteral(i, _)->
     if i = "hd" ||i = "tl" then AFuncCall(id, params, t)
     else if i = "len" then AFuncCall(id, params, Int)
-    else if i = "empty" then AFuncCall(id, params, Bool)
+    else if i = "is_empty" then AFuncCall(id, params, Bool)
     else raise(Exceptions.UnimplementedCallType)
     | _ -> raise(Exceptions.UnimplementedCallType))
   |_ -> raise(Exceptions.UnimplementedCallType)
