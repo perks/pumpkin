@@ -48,12 +48,18 @@ Check() {
 
     generatedfiles="$generatedfiles ${basename}.out" &&
     generatedfiles="$generatedfiles ${basename}.js" &&
-    ./../pmkn -c ./$@ 2>&1 > ${basename}.js &&
+    stdout="$(./../pmkn -c ./${basename}.pk 2>&1 > ${basename}.js)" &&
     node ./${basename}.js > ${basename}.out &&
     Compare ${basename}.out ${basename}.txt
 
     # Report the status and clean up the generated files
-    if [ $error -eq 0 ] ; then
+    if [[ $stdout == *"Fatal error"* ]]
+    then
+      echo -e "${red}$stdout ${default}"
+      echo -e "$stdout" 1>&2
+      echo "--------- FAILURE ---------" 1>&2
+      globalerror=$error
+    elif [ $error -eq 0 ] ; then
       echo -e "${green}OK${default}"
       echo "--------- SUCCESS ---------" 1>&2
     else
@@ -75,7 +81,7 @@ shift `expr $OPTIND - 1`
 files="test-*.pk"
 for file in $files
 do
-  Check $file $@ 2>> $testlog
+  Check $file 2>> $testlog
 done
 
 exit $globalerror
