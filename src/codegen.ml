@@ -125,9 +125,9 @@ let rec aexpression_to_js lines =
   | AMapAccess(id, param, s_type) ->
       aexpression_to_js id ^ "[" ^ aexpression_to_js param ^ "];"
   | ATupleLiteral(e_list, t) -> 
-      "[" ^ String.concat ", " (List.map aexpression_to_js (List.rev e_list)) ^ "];"
+      "[" ^ String.concat ", " (List.map aexpression_to_js e_list) ^ "];"
   | AListLiteral(e_list, t) ->
-      "[" ^ String.concat ", " (List.map aexpression_to_js (List.rev e_list)) ^ "];"
+      "[" ^ String.concat ", " (List.map aexpression_to_js e_list) ^ "];"
   | ATupleAccess(id, indx, t) ->
       sanitize(aexpression_to_js id) ^ "[" ^ sanitize(aexpression_to_js indx) ^ "];"
   | AListAccess(id, indx, t) ->

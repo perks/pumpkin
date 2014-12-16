@@ -1,0 +1,9 @@
+print("absdla\\")
+val s : String = "ab\ncd"
+print(s)
+val z : String = 'c' + 'c'
+print(z)
+val w = "ab" + "cd"
+print(w)
+val x = 'c' + "abcde"
+print(x)

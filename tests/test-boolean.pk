@@ -3,5 +3,7 @@ print(1 == 1 && !True)
 print(not False or !True)
 print(1 < 2 || 1 > 2)
 print(1 <= 2 || 1 >= 2)
-print(val x : Bool = True)
-print(val y = False)
+val x : Bool = True
+print(x)
+val y = False
+print(y)

@@ -1,3 +1,0 @@
-val m : Map[String, String] = ("123" -> "abc", "456" -> "def")
-m("123")
-print("hello")

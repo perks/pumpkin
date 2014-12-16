@@ -1,0 +1,15 @@
+val x : Tuple[Int] = (1,)
+val y = (1, 2, 3)
+val z = (1, 2, 3,)
+val p = ("hello", 2, 3,)
+<<<<<<< HEAD:tests/tuple.pk
+
+p$0
+=======
+val a = x$0
+val b = z$1 + 1
+val c = p$1 + y$2
+print(a)
+print(b)
+print(c)
+>>>>>>> 3d15943d4e7bfea241410e76485477d346a62416:tests/test-tuple.pk

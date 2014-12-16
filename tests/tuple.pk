@@ -1,6 +1,0 @@
-val x : Tuple[Int] = (1,)
-val y = (1, 2, 3)
-val z = (1, 2, 3,)
-val p = ("hello", 2, 3,)
-
-p$0

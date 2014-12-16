@@ -1,8 +1,0 @@
-1 is 2 and 3 != 4
-1 == 1 && !True
-not False or !True
-1 < 2 || 1 > 2
-1 <= 2 || 1 >= 2
-
-val x : Bool = True
-val y = False
