@@ -1,3 +1,8 @@
 val l = [1, 2, 3, 4]
 
-print(len(l))
+def map (f : (Int => Int), l : List[Int]) : List[Int] =>
+    val head = hd(l)
+    val tail = tl(l)
+    f(head)::map(tail)
+
+
