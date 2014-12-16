@@ -8,8 +8,6 @@
 %token CONS
 %token VAL ASSIGN DEF
 %token IF ELSE
-%token TYPE
-%token MATCH SELECTION WILDCARD
 %token TINT TUNIT TBOOL TSTRING TCHAR TTUPLE TLIST TFLOAT TMAP
 %token <string> ID
 %token <int> INT
@@ -18,7 +16,7 @@
 %token <string> STRING
 %token <char> CHAR
 %token <float> FLOAT
-%token TUPLEACC ACCESSOR
+%token TUPLEACC
 %token UNIT
 %token EOF
 %token <int> DEDENT_EOF
@@ -47,21 +45,18 @@
 
 %%
 root:
-    /* nothing */                  { [], [] }
-  | root expression TERMINATOR     { $2::(fst $1), snd $1 }
-  | root algebraic_decl TERMINATOR { fst $1, $2::(snd $1) }
+    /* nothing */                  { [] }
+  | root expression TERMINATOR     { $2::$1 }
 
 expression:
     LPAREN expression RPAREN             { $2 }
   | controlflow                          { $1 }
-  | match_statement                      { $1 }
   | assignment                           { $1 }
   | binop                                { $1 }
   | unop                                 { $1 }
   | literal                              { $1 }
   | call                                 { $1 }
   | funct                                { $1 }
-  | WILDCARD                             { Wildcard }
 
 indent_block:
     INDENT expression_block DEDENT { List.rev $2 }
@@ -81,20 +76,6 @@ if_statement:
 else_statement:
     ELSE COLON TERMINATOR { }
 
-match_statement:
-    MATCH expression COLON TERMINATOR match_block { MatchBlock($2, $5) }
-
-match_block:
-    INDENT matches DEDENT { List.rev $2 }
-
-matches:
-    match_item         { $1::[] }
-  | matches match_item { $2::$1 }
-
-match_item:
-    SELECTION expression DEFARROW expression TERMINATOR { ($2, $4) }
-  | SELECTION expression DEFARROW TERMINATOR INDENT expression TERMINATOR DEDENT TERMINATOR { ($2, $6) }
-
 assignment:
     VAL ID COLON types ASSIGN expression { TypedAssign($2, $6, $4) }
   | VAL ID ASSIGN expression             { Assign($2, $4) }
@@ -111,7 +92,6 @@ types:
   | TLIST LBRACK types RBRACK            { TList($3) }
   | TMAP LBRACK types COMMA types RBRACK { TMap($3, $5) }
   | LPAREN funct_type RPAREN             { $2 }
-  | ID                                   { TAlgebraic($1) }
 
 funct_type:
     type_list DEFARROW types      { TFunction($1, $3) }
@@ -151,7 +131,6 @@ literal:
   | LBRACK RBRACK                        { ListLiteral([]) }
   | expression LBRACK expression RBRACK  { ListAccess($1, $3) }
   | LPAREN map_list RPAREN               { MapLiteral($2) }
-  | expression ACCESSOR ID               { AlgebricAccess($1, $3)}
   | ID                                   { IdLiteral($1) }
 
 map_list:
@@ -173,19 +152,6 @@ tupal_elements:
 tupal_elements_head:
     expression COMMA                     { [$1] }
   | tupal_elements_head expression COMMA { $2::$1 }
-
-algebraic_decl:
-    TYPE ID                                              { AlgebraicEmpty($2) }
-  | TYPE ID LPAREN parameter_list RPAREN                 { AlgebraicProduct($2, List.rev $4) }
-  | TYPE ID ASSIGN TERMINATOR INDENT variant_list DEDENT { AlgebraicSum($2, List.rev $6) }
-
-variant_list:
-    SELECTION variant TERMINATOR              { [$2] }
-  | variant_list SELECTION variant TERMINATOR { $3::$1}
-
-variant:
-    ID                               { VariantEmpty($1) }
-  | ID LPAREN parameter_list RPAREN  { VariantProduct($1, List.rev $3) }
 
 parameter_list:
     parameter                       { [$1] }
