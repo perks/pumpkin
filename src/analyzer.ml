@@ -15,7 +15,7 @@ let get_func_return_type = function
 
 let get_func_params = function
   Function(t, _) -> (List.rev t) 
-  | _ -> raise(Exceptions.TypeMismatch) 
+  | _ -> raise(Exceptions.PipingIntoNonFunc) 
 
 let filter_params (op, num_gp) = 
   let rec sublist i l = 
@@ -385,7 +385,8 @@ let rec annotate_expression env = function
         let key = List.hd s_params in
         if (kt = (type_of key)) then AMapAccess(id, key, vt), env
         else raise(Exceptions.TypeMismatch)
-      else raise(Exceptions.InvalidIndexing(aexpression_to_string id)))
+      else raise(Exceptions.InvalidIndexing(aexpression_to_string id))
+    |  _ -> raise(Exceptions.UnimplementedCallType))
   | FuncComposition(exp1, exp2) ->
     let ae1, env = annotate_expression env exp1 in
     let ae2, env = annotate_expression env exp2 in
@@ -401,6 +402,19 @@ let rec annotate_expression env = function
     let nr_type = get_func_return_type t2 in 
     let n_params = get_func_params t1 in
     AFuncComposition(ae1, ae2, Function(n_params, nr_type)), env
+  | FuncPipe(exp1, exp2) ->
+    let ae1, env = annotate_expression env exp1 in
+    let ae2, env = annotate_expression env exp2 in
+    let t1 = type_of ae1 in 
+    let t2 = type_of ae2 in
+    let params = get_func_params t2 in
+    if (List.length params) > 1 then raise(Exceptions.ComposedIntermediateTakesMultipleArguments)
+    else
+    let p_type = List.hd(params) in
+    if(p_type <> t1) then raise(Exceptions.TypeMismatch)
+    else 
+    let nr_type = get_func_return_type t2 in 
+    AFuncCall(ae2, [ae1], nr_type), env
 
 (*
   | AlgebricAccess of expression * string
