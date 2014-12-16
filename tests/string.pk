@@ -1,7 +1,0 @@
-"absdla\\"
-
-val s : String = "ab\n"
-
-val z : String = 'c' + 'c'
-val w = "ab" + "cd"
-val x = 'c' + "abcde"
