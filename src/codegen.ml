@@ -52,14 +52,10 @@ let rec returns_unit = function
   | Function(_, ret) -> returns_unit ret
   | _ -> false 
 
-  let is_partial func = 
-    let rec helper = function
-        Function(_, _) -> true
-      | _ -> false
-    in
-    match func with
-        Function(_, ret) -> helper ret
-      | _ -> false
+
+let is_partial = function
+    Function(_, _) -> true
+  | _ -> false
 
 let is_IfElseBlock = function
     AIfElseBlock(_,_,_,_) -> true
@@ -116,7 +112,7 @@ let rec aexpression_to_js lines =
       in "{" ^ String.concat ", " (List.map map_expression_tupal_to_string
       map_list) ^ "};"
   | AMapAccess(id, param, s_type) ->
-      id ^ "[\"" ^ aexpression_to_js ^ "\"]"
+      aexpression_to_js id ^ "[" ^ aexpression_to_js param ^ "];"
 
   | AListLiteral(e_list, t) ->
       "[" ^ String.concat ", " (List.map aexpression_to_js (List.rev e_list)) ^ "];"
@@ -201,6 +197,23 @@ let rec aexpression_to_js lines =
           "function() {" ^
           "\n\treturn " ^ aexpression_to_js exp ^
           "\n};\n"
+  | AFuncCall(id, params, s_type) ->
+      if s_type = Print then 
+        "console.log(" ^ aexpression_to_js (List.hd params) ^ ");"
+      else
+        if List.hd params <> AUnitLiteral then
+          if is_partial s_type then
+            aexpression_to_js id ^ ".bind(this, " ^ 
+            (String.concat ", " (List.map aexpression_to_js params)) ^
+            ");"
+          else
+            aexpression_to_js id ^ "call(this, " ^
+            (String.concat ", " (List.map aexpression_to_js params)) ^
+            ");"
+        else
+          aexpression_to_js id ^ "();"
+
+
 
 
 let pumpkin_to_js (a_expressions, algebraic_types) =
