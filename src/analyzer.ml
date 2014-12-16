@@ -377,10 +377,10 @@ and annotate_expression_list env e_list =
 
 let annotate_program expression_list : Sast.aRoot =
   let env = Env.empty in
-  let env = Env.add "print" (Function([Unit], Reserved)) env in
+  let env = Env.add "print" (Function([Unit], Print)) env in
   let env = Env.add "hd" (Function([Unit], Reserved)) env in
   let env = Env.add "tl" (Function([Unit], Reserved)) env in
   let env = Env.add "len" (Function([Unit], Reserved)) env in
-  let env = Env.add "empty" (Function([Unit], Reserved)) env in
+  let env = Env.add "is_empty" (Function([Unit], Reserved)) env in
   let a_expression_list, env = annotate_expression_list env expression_list in
   a_expression_list

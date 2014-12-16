@@ -1,5 +1,6 @@
 open Ast
 open Sast
+open Exceptions
 
 let rec strip_semicolon l =
   match l with 
@@ -26,6 +27,10 @@ let flip_last = fun l ->
 
 let sanitize str =
   implode ( strip_semicolon ( explode ( str) ) )
+
+let reserve_mismatch = function
+      AListLiteral(_, _) -> false
+    | _ -> true
 
 let operation_to_string = function
     Plus -> "+"
@@ -203,7 +208,9 @@ let rec aexpression_to_js lines =
           "\n\treturn " ^ aexpression_to_js exp ^
           "\n};\n"
   | AFuncCall(id, params, s_type) ->
-      if s_type = Print then 
+      if (List.length params) <> 1 || reserve_mismatch (List.hd params) then
+        raise(ReservedFuncTypeMisMatch)
+      else if s_type = Print then
         "console.log(" ^ sanitize(aexpression_to_js (List.hd params)) ^ ");"
       else
         if List.hd params <> AUnitLiteral then
@@ -239,7 +246,33 @@ let pumpkin_to_js a_expressions =
       var temp = lst.slice(0);
       temp.unshift(elem);
       return temp
-    };\n" ^
+    };
+    var hd = function(lst) {
+      var temp = lst.slice(0)
+      if (temp.length > 0) {
+        return temp[0];
+      } else {return [];}
+    };
+    
+    var tl = function(lst) {
+      var temp = lst.slice(0);
+      if (temp.length > 0) {
+        temp.shift();
+        return temp;
+      } else {
+        return []
+      }
+      };
+
+    var len = function(lst) {
+        return lst.length
+    };
+
+    var is_empty = function(lst) {
+      return lst.length > 0 ? 1 : 0
+      };
+
+      \n" ^
   String.concat "\n" (List.map aexpression_to_js a_expressions)
 
 

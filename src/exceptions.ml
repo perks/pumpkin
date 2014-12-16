@@ -23,3 +23,6 @@ exception InvalidMapKeyType
 exception UnimplementedCallType
 exception PipingIntoNonFunc
 exception InvalidWildcard
+
+(* Compiler exception!! *)
+exception ReservedFuncTypeMisMatch

@@ -12,6 +12,7 @@ type sTypes =
   | Function of sTypes list * sTypes
   | Map of sTypes * sTypes
   | Reserved
+  | Print
   
 and aParameter = string * sTypes
 
