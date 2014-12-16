@@ -83,13 +83,20 @@ let check_reserved_functions (id, params, env) =
   if (List.length params) = 1 then
   let t_p = type_of (List.hd params) in
   match t_p with
-  List(t) ->
+    List(t) ->
+      (match id with
+      AIdLiteral(i, _)->
+      if i = "hd" then AFuncCall(id, params, t)
+      else if i = "tl" then AFuncCall(id, params, t_p)
+      else if i = "len" then AFuncCall(id, params, Int)
+      else if i = "is_empty" then AFuncCall(id, params, Bool)
+      else raise(Exceptions.UnimplementedCallType(1))
+      | _ -> raise(Exceptions.UnimplementedCallType(2)))
+  | Unit -> 
     (match id with
     AIdLiteral(i, _)->
-    if i = "hd" then AFuncCall(id, params, t)
-    else if i = "tl" then AFuncCall(id, params, t_p)
-    else if i = "len" then AFuncCall(id, params, Int)
-    else if i = "is_empty" then AFuncCall(id, params, Bool)
+    if i = "len" then AFuncCall(id, params, Function([List(Int)], Int))
+    else if i = "is_empty" then AFuncCall(id, params, Function([List(Int)], Bool))
     else raise(Exceptions.UnimplementedCallType(1))
     | _ -> raise(Exceptions.UnimplementedCallType(2)))
   |_ -> raise(Exceptions.UnimplementedCallType(3))

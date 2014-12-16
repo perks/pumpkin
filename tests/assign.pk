@@ -2,3 +2,7 @@ val x = 1
 val y : Bool = True
 x + 2
 y || False
+
+val l = [1, 2, 3]
+val b = is_empty([])
+l |> is_empty()
