@@ -249,7 +249,7 @@ let rec annotate_expression env = function
       match ae_t with
         Sast.Tuple(t) -> 
           let ind_n = evaluate_index(ind) in 
-          if ind_n > 0 then 
+          if ind_n >= 0 then 
             if ind_n > (List.length t) then raise(Exceptions.ArrayOutOfBounds)
             else 
             let param_type = List.nth t ind_n in
