@@ -5,3 +5,4 @@ def map(f: (Int => Int), l: List[Int]): List[Int]=>
 		f(hd(l))::(tl(l))
 
 val x = [1, 2, 3, 4] |> map((x:Int => (x + 3) / 2 : Int))
+print(x)
