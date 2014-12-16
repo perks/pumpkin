@@ -43,9 +43,45 @@ let operation_to_string = function
   | Or -> "||"
   | Not -> "!"
 
-let param_list_to_js (id, t) = id
+let param_to_js (id, t) = id
 
-let rec aexpression_to_js = function
+let param_to_type (id, t) = t
+
+let rec returns_unit = function
+    Unit -> true
+  | Function(_, ret) -> returns_unit ret
+  | _ -> false 
+
+  let is_partial func = 
+    let rec helper = function
+        Function(_, _) -> true
+      | _ -> false
+    in
+    match func with
+        Function(_, ret) -> helper ret
+      | _ -> false
+
+let is_IfElseBlock = function
+    AIfElseBlock(_,_,_,_) -> true
+  | _ -> false
+
+let get_IfElseExprList(n, expr) = 
+  match expr with
+      AIfElseBlock(_,if_expr, else_expr, _) -> 
+        if n = 0 then if_expr else else_expr
+    | _ -> []
+
+let get_IfElseE = function
+      AIfElseBlock(e, _, _, _) -> e
+    | _ -> AUnitLiteral
+
+let rec aexpression_to_js lines =
+  let rec build_return = function
+     [] -> "\n\t"
+  |  [single] -> "\n\treturn " ^ (aexpression_to_js single)
+  |  hd::tl -> "\n\t" ^ (aexpression_to_js hd) ^ (build_return tl)
+  in
+  match lines with
     AIntLiteral(i) -> string_of_int(i)
   | AFloatLiteral(f) -> string_of_float(f)
   | ABinop(e1, op, e2, t) ->
@@ -81,7 +117,7 @@ let rec aexpression_to_js = function
       map_list) ^ "};"
 
   | AListLiteral(e_list, t) ->
-      "[" ^ String.concat ", " (List.map aexpression_to_js e_list) ^ "];"
+      "[" ^ String.concat ", " (List.map aexpression_to_js (List.rev e_list)) ^ "];"
   | AListAccess(id, indx, t) ->
       sanitize(aexpression_to_js id) ^ "[" ^ sanitize(aexpression_to_js indx) ^ "];"
   | AIfBlock(e, e_list, _) ->
@@ -96,10 +132,10 @@ let rec aexpression_to_js = function
       "\n\t" ^ String.concat "\n\t" (List.map aexpression_to_js e_list2) ^
       "\n}\n"
   | AFuncDecl(id, p_list, e_list, t) ->
-      if t = Unit then
-        if (List.length p_list) <> 0 then
+      if returns_unit t then
+        if param_to_type(List.hd p_list) <> Unit then
           "function " ^ id ^ "(" ^  
-          String.concat ", " (List.map param_list_to_js (List.rev p_list)) ^ ")" ^
+          String.concat ", " (List.map param_to_js (List.rev p_list)) ^ ")" ^
           " \n{\n" ^ String.concat "\n\t" (List.map aexpression_to_js e_list) ^
           "\n};\n"
         else 
@@ -107,33 +143,56 @@ let rec aexpression_to_js = function
          "\n" ^ String.concat "\n\t" (List.map aexpression_to_js e_list) ^
          "\n};\n"
       else 
-        if (List.length p_list) <> 0 then
-          "function " ^ id ^ "(" ^
-          String.concat ", " (List.map param_list_to_js (List.rev p_list)) ^ ")" ^
-          "\n{\n\t" ^ String.concat "\n\t" (List.map aexpression_to_js
-          (List.tl (flip_last e_list))) ^
-          "\n\treturn " ^ aexpression_to_js (List.hd (flip_last e_list)) ^
-          "\n};\n"
+        if param_to_type(List.hd p_list) <> Unit then
+          let flipped_list = flip_last e_list in
+            "function " ^ id ^ "(" ^  
+            (String.concat ", " (List.map param_to_js (List.rev p_list))) ^ 
+            ") {" ^
+            (String.concat "\n\t" (List.map aexpression_to_js (List.tl flipped_list))) ^
+            (if is_IfElseBlock(List.hd flipped_list) then 
+              "\nif(" ^ 
+              sanitize(aexpression_to_js(get_IfElseE (List.hd flipped_list))) ^
+              ") {" ^
+              (build_return (get_IfElseExprList(0, (List.hd flipped_list)))) ^
+              "\n} else {" ^
+              (build_return (get_IfElseExprList(1, (List.hd flipped_list)))) ^
+              "}\n"
+             else 
+               "\n\treturn " ^ 
+              (aexpression_to_js (List.hd flipped_list))) ^ 
+            "\n};\n"
         else
-          "function " ^ id ^ "() {" ^
-          "\n\t" ^ String.concat "\n\t" (List.map aexpression_to_js (List.tl (flip_last e_list))) ^
-          "\n\t\treturn " ^ aexpression_to_js (List.hd (flip_last e_list)) ^
-          "\n};\n"
+          let flipped_list = flip_last e_list in
+            "function () {" ^  
+            (String.concat "\n\t" (List.map aexpression_to_js (List.tl flipped_list))) ^
+            (if is_IfElseBlock(List.hd flipped_list) then 
+              "\nif(" ^ 
+              sanitize(aexpression_to_js(get_IfElseE (List.hd flipped_list))) ^
+              ") {" ^
+              (build_return (get_IfElseExprList(0, (List.hd flipped_list)))) ^
+              "\n} else {" ^
+              (build_return (get_IfElseExprList(1, (List.hd flipped_list)))) ^
+              "}\n"
+             else 
+               "\n\treturn " ^ 
+              (aexpression_to_js (List.hd flipped_list))) ^ 
+            "\n};\n"
+
   | AFuncAnon(p_list, exp, t) ->
-      if t = Unit then 
-        if (List.length p_list) <> 0 then
+      if returns_unit t then 
+        if param_to_type(List.hd p_list) <> Unit then
           "function(" ^  
-          String.concat ", " (List.map param_list_to_js (List.rev p_list)) ^ ")" ^
+          String.concat ", " (List.map param_to_js (List.rev p_list)) ^ ")" ^
           " \n{\n\t" ^ aexpression_to_js exp ^
           "\n};\n"
         else 
-         "\nfunction() {" ^
+         "function() {" ^
          "\n\t" ^ aexpression_to_js exp ^
          "\n};\n"
       else
-        if (List.length p_list) <> 0 then
-          "\nfunction(" ^
-          String.concat ", " (List.map param_list_to_js (List.rev p_list)) ^ ")" ^
+        if param_to_type(List.hd p_list) <> Unit then
+          "function(" ^
+          String.concat ", " (List.map param_to_js (List.rev p_list)) ^ ")" ^
           "\n{\n\treturn " ^ aexpression_to_js exp ^
           "\n};\n"
         else
@@ -141,11 +200,12 @@ let rec aexpression_to_js = function
           "\n\treturn " ^ aexpression_to_js exp ^
           "\n};\n"
   | ACall(id, params, s_type) ->
-      if (List.length params) <> 0 then
+      if List.hd params <> AUnitLiteral then
         " " ^ id ^ "(" ^ String.concat ", " (List.map aexpression_to_js params) ^
-        ")"
+        ");"
         else
-          " " ^ id ^ "()"
+          " " ^ id ^ "();"
+
 
 let pumpkin_to_js (a_expressions, algebraic_types) =
   String.concat "\n" (List.map aexpression_to_js a_expressions)
