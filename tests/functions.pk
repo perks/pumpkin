@@ -30,4 +30,10 @@ val y: Int = oneliner(20)
 def add (a : Int) =>
     (b : Int => a + b)
 
+def functionReturn(x: Int): (Int => Int) =>
+    def plusTen(y: Int, z: Int) =>
+        y + 10 + z
+    plusTen(x)
+
+
 (a : Int, b : Int => a + b)(1) 

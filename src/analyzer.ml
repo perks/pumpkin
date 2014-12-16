@@ -11,7 +11,7 @@ let env_to_string id t =
 
 let get_func_return_type = function
   Function(_, t) -> t 
-  | _ -> raise(Exceptions.TypeMismatch)
+  | _ -> raise(Exceptions.PipingIntoNonFunc)
 
 let get_func_params = function
   Function(t, _) -> (List.rev t) 
@@ -322,7 +322,7 @@ let rec annotate_expression env = function
     let env = Env.add id (Function(param_types, (aType_to_sType t))) env in
     let tempEnv =  List.fold_left (fun cenv p -> (Env.add (fst p) (snd p) cenv)) env s_params in
     let s_code, tempEnv = annotate_expression_list tempEnv code in
-    let le, tempEnv = annotate_expression tempEnv (List.hd (List.rev code)) in
+    let le = (List.hd (List.rev s_code)) in
     let le_s_type = type_of le in
     let s_type = aType_to_sType t in 
     if le_s_type <> s_type && s_type <> Unit then
@@ -337,7 +337,7 @@ let rec annotate_expression env = function
     let param_types = List.map (fun (i, t) -> t) s_params in
     let tempEnv =  List.fold_left (fun cenv p -> (Env.add (fst p) (snd p) cenv)) env s_params in
     let s_code, tempEnv = annotate_expression_list tempEnv code in
-    let le, tempEnv = annotate_expression tempEnv (List.hd (List.rev code)) in
+    let le = (List.hd (List.rev s_code)) in
     let le_s_type = type_of le in
     let env = Env.add id (Function(param_types, le_s_type)) env in
     AFuncDecl(id, s_params, s_code, Function(param_types, le_s_type)), env
