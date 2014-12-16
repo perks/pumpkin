@@ -18,6 +18,25 @@ def even(n: Int): Bool =>
 
 val x = [1,2,3,4] |> map((x:Int => x + 5 :Int)) |> reduce((x: Int, y: Int => x + y : Int), 0) |> even 
 
+print("Example 2:")
 print(x)
 
+print("\nExample 1:")
+def gcd(a : Int, b : Int) : Int =>
+  if(b is 0):
+    a
+  else:
+    gcd(b, a % b)
 
+def relativePrimes(a: Int) =>
+  if (a is 1):
+    True
+  else:
+    False
+
+val p = relativePrimes <<  gcd
+
+if(p(25, 15)):
+  print("You have relative primes")
+else:
+  print("Not relative primes")

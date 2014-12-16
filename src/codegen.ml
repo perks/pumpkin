@@ -232,8 +232,8 @@ let rec aexpression_to_js lines =
   | AFuncPiping(exp1, exp2, t) ->
      sanitize(aexpression_to_js exp2) ^ "(" ^ sanitize(aexpression_to_js exp1) ^ ")"
   | AFuncComposition(exp1, exp2, t) ->
-      "__compose__(" ^ sanitize(aexpression_to_js exp1) ^ ", " ^
-      sanitize(aexpression_to_js exp2) ^ ")"
+      "__compose__(" ^ sanitize(aexpression_to_js exp2) ^ ", " ^
+      sanitize(aexpression_to_js exp1) ^ ")"
 
 let pumpkin_to_js a_expressions =
   " var __compose__ = function() {

@@ -1,15 +1,21 @@
 def gcd(a : Int, b : Int) : Int =>
-	if a == 0:
-		b
-	else:
-		if b == 0:
-			a
-		else:
-			gcd(a, a%b)
+  if(b is 0):
+    a
+  else:
+    gcd(b, a % b)
 
-val y = (a : Int => a : Int)
-val z = (a : Int => a : Int)
-val a = (a : Int => a : Int)
+def relativePrimes(a: Int) =>
+  if (a is 1):
+    True
+  else:
+    False
 
-val p = gcd >> y << z << a
-val n = gcd>> ((a >> z)>>y)
+val p = relativePrimes <<  gcd
+
+if(p(25, 15)):
+  print("You have relative primes")
+else:
+  print("Not relative primes")
+
+
+
