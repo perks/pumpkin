@@ -109,8 +109,9 @@ let rec aexpression_to_js lines =
   | AMapLiteral(map_list, t) ->
       let map_expression_tupal_to_string (e1, e2) =
         (aexpression_to_js e1) ^ ": " ^ (aexpression_to_js e2)
-      in "{" ^ String.concat ", " (List.map map_expression_tupal_to_string
-      map_list) ^ "};"
+      in "{" ^ 
+      sanitize(String.concat ", " (List.map map_expression_tupal_to_string
+      map_list)) ^ "};"
   | AMapAccess(id, param, s_type) ->
       aexpression_to_js id ^ "[" ^ aexpression_to_js param ^ "];"
   | ATupleLiteral(e_list, t) -> 
