@@ -40,14 +40,11 @@ rule token = parse
   | ':'  { COLON }
   | ','  { COMMA }
   | '$'  { TUPLEACC }
-  | '|'  { SELECTION }
-  | '_'  { WILDCARD }
   
   | "->"         { TYPEARROW }
   | "=>"         { DEFARROW }
   | "if"         { IF }
   | "else"       { ELSE }
-  | "match"      { MATCH }
   
   | "is"  | "==" { EQ }
   | "and" | "&&" { AND }

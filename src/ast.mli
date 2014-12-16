@@ -26,7 +26,6 @@ type expression =
   | TupleLiteral of expression list
   | ListLiteral of expression list
   | MapLiteral of (expression * expression) list
-  | Wildcard
   | Binop of expression * operator * expression
   | Unop of operator * expression
   | TypedAssign of string * expression * tTypes
@@ -36,7 +35,6 @@ type expression =
   | ListAccess of expression * expression
   | IfBlock of expression * expression list
   | IfElseBlock of expression * expression list * expression list
-  | MatchBlock of expression * (expression * expression) list
   | Call of expression * (expression list)
   | TypedFuncDecl of string * parameter list * expression list * tTypes
   | FuncDecl of string * parameter list * expression list

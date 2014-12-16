@@ -28,7 +28,6 @@ Tupals              | quinton | | | waiting on frontend, will use object prototy
 Map                 | quinton | | | will use standard js dicts|
 Variables           | quinton | | chris | :heavy_check_mark: |
 Control Flow        | quinton | | chris | |
-Matching            | quinton | | | |
 Functions           | quinton | | chris | |
 Piping              | quinton | | | |
 Composition         | quinton | | | |

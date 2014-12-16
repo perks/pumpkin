@@ -25,7 +25,6 @@ and aExpression =
   | ATupleLiteral of aExpression list * sTypes
   | AListLiteral of aExpression list * sTypes
   | AMapLiteral of (aExpression * aExpression) list * sTypes
-  | AWildcard of sTypes
   | AIdLiteral of string * sTypes
   | ABinop of aExpression * operator * aExpression * sTypes
   | AUnop of operator * aExpression * sTypes
@@ -36,7 +35,6 @@ and aExpression =
   | AMapAccess of aExpression * aExpression * sTypes
   | AIfBlock of aExpression * aExpression list * sTypes
   | AIfElseBlock of aExpression * aExpression list * aExpression list * sTypes
-  | AMatchBlock of aExpression * (aExpression * aExpression) list * sTypes
   | AFuncCall of aExpression * (aExpression list) * sTypes
   | AFuncDecl of string * aParameter list * aExpression list * sTypes
   | AFuncAnon of aParameter list * aExpression * sTypes

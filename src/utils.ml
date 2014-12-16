@@ -90,24 +90,6 @@ let rec expression_to_string indent_length = function
       tabs ^ String.concat ("\n" ^ tabs) (List.map (expression_to_string indent_length) e_list1) ^ "\n" ^
       else_tabs ^"else :\n" ^
       tabs ^ String.concat ("\n" ^ tabs) (List.map (expression_to_string indent_length) e_list2)
-  | MatchBlock(e, match_list) ->
-      let indent_length = indent_length + 1 in
-      let tabs = String.make indent_length '\t' in
-      let match_expression_tupal_to_string (e1, e2) =
-        expression_to_string indent_length e1 ^ " => " ^ 
-        (
-          match e2 with
-              IfBlock(_, _)
-            | IfElseBlock(_,_,_)
-            | MatchBlock(_,_) ->
-                let indent_length = indent_length + 1 in
-                let tabs = String.make indent_length '\t' in
-                "\n" ^ tabs ^ expression_to_string indent_length e2
-            | _ -> expression_to_string indent_length e2
-        )
-      in
-      "match " ^ expression_to_string indent_length e ^ " :\n" ^
-      tabs ^ "| " ^ String.concat ("\n" ^ tabs ^ "| ") (List.map match_expression_tupal_to_string match_list)
   | Call(exp, e_list) ->
       (expression_to_string indent_length exp) ^ 
       ( 
@@ -135,7 +117,6 @@ let rec expression_to_string indent_length = function
       "(" ^ expression_to_string indent_length e1 ^ " |> " ^ expression_to_string indent_length e2 ^ ")"
   | FuncComposition    (e1, e2) ->
       "(" ^ expression_to_string indent_length e1 ^ " >> " ^ expression_to_string indent_length e2 ^ ")"
-  | Wildcard -> "_"
 
 let program_to_string expressions =
   String.concat "\n" (List.map (expression_to_string 0) expressions) ^ "\n"
@@ -163,10 +144,7 @@ let token_to_string = function
   | TBOOL -> "TBOOL" | TSTRING -> "TSTRING"
   | TCHAR -> "TCHAR" | TTUPLE -> "TTUPLE"
   | TLIST -> "TLIST"| TFLOAT -> "TFLOAT"
-  | TYPE -> "TYPE"
-  | TMAP -> "TMAP"
   | UNIT -> "UNIT"
-  | MATCH -> "MATCH" | SELECTION -> "SELECTION" | WILDCARD -> "WILDCARD"
   | CONS -> "CONS"
   | EOF -> "EOF" 
   | ID(s) -> "ID(" ^ s ^ ")"
@@ -175,7 +153,7 @@ let token_to_string = function
   | DEDENT_COUNT(i) -> "DEDENT_COUNT(" ^ string_of_int i ^ ")"
   | BOOL(b) -> "BOOL(" ^ (if b then "true" else "false") ^ ")"
   | STRING(s) -> "STRING(" ^ s ^ ")"
-  | TUPLEACC -> "TUPLEACC" | ACCESSOR -> "ACCESSOR"
+  | TUPLEACC -> "TUPLEACC"
   | CHAR(c) -> "CHAR(" ^ Char.escaped c ^ ")"
   | DEDENT_EOF(i) -> "DEDENT_EOF(" ^ string_of_int i ^ ")"
 

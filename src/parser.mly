@@ -8,8 +8,6 @@
 %token CONS
 %token VAL ASSIGN DEF
 %token IF ELSE
-%token TYPE
-%token MATCH SELECTION WILDCARD
 %token TINT TUNIT TBOOL TSTRING TCHAR TTUPLE TLIST TFLOAT TMAP
 %token <string> ID
 %token <int> INT
@@ -18,7 +16,7 @@
 %token <string> STRING
 %token <char> CHAR
 %token <float> FLOAT
-%token TUPLEACC ACCESSOR
+%token TUPLEACC
 %token UNIT
 %token EOF
 %token <int> DEDENT_EOF
@@ -53,14 +51,12 @@ root:
 expression:
     LPAREN expression RPAREN             { $2 }
   | controlflow                          { $1 }
-  | match_statement                      { $1 }
   | assignment                           { $1 }
   | binop                                { $1 }
   | unop                                 { $1 }
   | literal                              { $1 }
   | call                                 { $1 }
   | funct                                { $1 }
-  | WILDCARD                             { Wildcard }
 
 indent_block:
     INDENT expression_block DEDENT { List.rev $2 }
@@ -79,20 +75,6 @@ if_statement:
 
 else_statement:
     ELSE COLON TERMINATOR { }
-
-match_statement:
-    MATCH expression COLON TERMINATOR match_block { MatchBlock($2, $5) }
-
-match_block:
-    INDENT matches DEDENT { List.rev $2 }
-
-matches:
-    match_item         { $1::[] }
-  | matches match_item { $2::$1 }
-
-match_item:
-    SELECTION expression DEFARROW expression TERMINATOR { ($2, $4) }
-  | SELECTION expression DEFARROW TERMINATOR INDENT expression TERMINATOR DEDENT TERMINATOR { ($2, $6) }
 
 assignment:
     VAL ID COLON types ASSIGN expression { TypedAssign($2, $6, $4) }

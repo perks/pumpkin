@@ -45,7 +45,6 @@ let rec type_of = function
   | ATupleLiteral(_, t) -> t
   | AListLiteral(_, t) -> t
   | AMapLiteral(_, t) -> t
-  | AWildcard(t) -> t
   | AIdLiteral(_, t) -> t
   | ABinop(_, _, _, t) -> t
   | AUnop(_, _, t) -> t
@@ -55,7 +54,6 @@ let rec type_of = function
   | AListAccess(_, _, t) -> t
   | AIfBlock(_, _, t) -> t
   | AIfElseBlock(_, _, _, t) -> t
-  | AMatchBlock(_, _, t) -> t
   | AFuncCall(_, _, t) -> t
   | AFuncDecl(_, _, _, t) -> t
   | AFuncAnon(_, _, t) -> t
@@ -366,13 +364,6 @@ let rec annotate_expression env = function
     else 
     let nr_type = get_func_return_type t2 in 
     AFuncPiping(ae1, ae2, nr_type), env
-
-(*
-  | MatchBlock of expression * (expression * expression) list
-  
-  | AWildcard
-  | AMatchBlock of aExpression * (aExpression * aExpression) list * sTypes
-*)
 
 and annotate_expression_list env e_list =
   let env_ref = ref(env) in

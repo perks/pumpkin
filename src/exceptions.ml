@@ -21,3 +21,4 @@ exception ComposedIntermediateTakesMultipleArguments
 exception InvalidMapKeyType
 exception UnimplementedCallType
 exception PipingIntoNonFunc
+exception InvalidWildcard
