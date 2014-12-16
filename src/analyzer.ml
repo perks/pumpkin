@@ -20,7 +20,7 @@ let filter_params (op, num_gp) =
     match l with
       [] -> []
     | h :: t -> if (i = 0) then h::t else sublist (i - 1) t     
-  in let new_params = sublist num_gp (List.rev op) in
+  in let new_params = sublist num_gp op in
   List.rev new_params
 
 let rec aType_to_sType = function
