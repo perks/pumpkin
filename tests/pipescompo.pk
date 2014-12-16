@@ -4,8 +4,10 @@ val z = (a : Int => a : Int)
 val a = (a : Int => a : Int)
 
 val p = x >> y << z << a
-x>> ((a >> z)>>y)
+val n = x>> ((a >> z)>>y)
 val j = p(20)
-val  q = p(3)
+print(j)
+val  q = n(3)
+print(q)
 x(2)
-2 |> j |> x(2)
+print(2 |> j |> x(2))
