@@ -414,17 +414,15 @@ let rec annotate_expression env = function
     if(p_type <> t1) then raise(Exceptions.TypeMismatch)
     else 
     let nr_type = get_func_return_type t2 in 
-    AFuncCall(ae2, [ae1], nr_type), env
+    AFuncPiping(ae1, ae2, nr_type), env
 
 (*
   | AlgebricAccess of expression * string
   | MatchBlock of expression * (expression * expression) list
-  | FuncPipe of expression * expression
   
   | AWildcard
   | AAlgebricAccess of aExpression * string * sTypes
   | AMatchBlock of aExpression * (aExpression * aExpression) list * sTypes
-  | AFuncPiping of aExpression * aExpression * sTypes
 *)
 
 and annotate_expression_list env e_list =
@@ -442,5 +440,4 @@ let annotate_program (expression_list, alg_decl_list) : Sast.aRoot =
   let env = Env.empty in
   let env = Env.add "print" (Function([Unit], Print)) env in
   let a_expression_list, env = annotate_expression_list env expression_list in
-  Env.iter env_to_string env;
   a_expression_list, a_alg_structures

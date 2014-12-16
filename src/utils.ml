@@ -317,24 +317,9 @@ let rec aexpression_to_string = function
       "\n" ^ aexpression_to_string exp1 ^ ">>" ^ aexpression_to_string exp2 ^ "_" ^ a_type_to_string(t) ^ "\n"
   | AMapAccess(id, param, s_type) ->
       "\nMapAccess" ^ aexpression_to_string id ^ " (" ^ aexpression_to_string param ^ ")" ^ "_" ^ a_type_to_string(s_type) ^ "\n"
+  | AFuncPiping(exp1, exp2, t) ->
+      "\n" ^ aexpression_to_string exp1 ^ "|>" ^ aexpression_to_string exp2 ^ "_" ^ a_type_to_string(t) ^ "\n"
 
 let a_program_to_string (a_expressions, algebraic_types) = 
   String.concat "\n" (List.map a_algebraic_to_string algebraic_types) ^ "\n" ^
   String.concat "\n" (List.map aexpression_to_string a_expressions) ^ "\n"
-
-
-(* 
-
-let rec aexpression_to_string = function
-  | AStringChars(s, t) -> s ^ "_" ^ s_type_to_string(t)
-  
-  | AFuncCall(id, p_list, t) ->
-    if (List.length p_list) <> 0 then
-      "\n" ^ id ^ " (" ^ String.concat ", " (List.map aexpression_to_string p_list) ^ ")" ^ "_" ^ s_type_to_string(t) ^ "\n"
-    else
-      "\n " ^ id ^ "()" ^ "_" ^ s_type_to_string(t)
-  | AFuncComposition(p_list, e_list, rt, t) ->
-      "\n" ^ String.concat ">> " (List.map aexpression_to_string e_list) ^ "_" ^ s_type_to_string(rt) ^ "\n"
-  | AFuncPiping(e_list, p_list, t) ->
-      "\n" ^ String.concat "|> " (List.map aexpression_to_string e_list) ^ "_" ^ s_type_to_string(t) ^ "\n"
-*)
