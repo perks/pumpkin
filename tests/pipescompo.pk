@@ -1,13 +1,15 @@
-val x = (a : Int, b : Int => a + b : Int)
-val y = (a : Int => a  : Int)
+def gcd(a : Int, b : Int) : Int =>
+	if a == 0:
+		b
+	else:
+		if b == 0:
+			a
+		else:
+			gcd(a, a%b)
+
+val y = (a : Int => a : Int)
 val z = (a : Int => a : Int)
 val a = (a : Int => a : Int)
 
-val p = x >> y << z << a
-val n = x>> ((a >> z)>>y)
-val j = p(20)
-print(j)
-val  q = n(3)
-print(q)
-x(2)
-print(2 |> j |> x(2))
+val p = gcd >> y << z << a
+val n = gcd>> ((a >> z)>>y)
