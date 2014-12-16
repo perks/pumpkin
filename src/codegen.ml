@@ -199,12 +199,6 @@ let rec aexpression_to_js lines =
           "function() {" ^
           "\n\treturn " ^ aexpression_to_js exp ^
           "\n};\n"
-  | ACall(id, params, s_type) ->
-      if List.hd params <> AUnitLiteral then
-        " " ^ id ^ "(" ^ String.concat ", " (List.map aexpression_to_js params) ^
-        ");"
-        else
-          " " ^ id ^ "();"
 
 
 let pumpkin_to_js (a_expressions, algebraic_types) =
