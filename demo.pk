@@ -1,16 +1,23 @@
-val l = [1, 2, 3, 4]
+def reduce(func: (Int, Int => Int), acc: Int, l: List[Int]): Int =>
+  if(is_empty(l)):
+    acc
+  else:
+    reduce(func, func(hd(l), acc), tl(l))
 
-def map(f : (Int => Int), l : List[Int]) : List[Int] =>
-  if is_empty(l) :
+def map(f: (Int => Int), l: List[Int]): List[Int] =>
+  if(is_empty(l)):
     l
-  else :
-    f(hd(l))::map(f, tl(l))
+  else:
+    f(hd(l))::(map(f, tl(l)))
 
-l = map((x : Int => x + 1), l)
+def even(n: Int): Bool =>
+  if(n % 2 is 0):
+    True
+  else:
+    False
 
-print(l[0])
-print(l[1])
-print(l[2])
-print(l[3])
+val x = [1,2,3,4] |> map((x:Int => x + 5 :Int)) |> reduce((x: Int, y: Int => x + y : Int), 0) |> even 
+
+print(x)
 
 
