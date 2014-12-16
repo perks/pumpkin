@@ -4,3 +4,6 @@ val z = (1, 2, 3,)
 val p = ("hello", 2, 3,)
 
 x$0 + p$1
+val a = y$2
+val b = z$1 + 1
+val c = x$1 + p$2
