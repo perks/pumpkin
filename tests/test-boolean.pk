@@ -1,0 +1,7 @@
+print(1 is 2 and 3 != 4)
+print(1 == 1 && !True)
+print(not False or !True)
+print(1 < 2 || 1 > 2)
+print(1 <= 2 || 1 >= 2)
+print(val x : Bool = True)
+print(val y = False)

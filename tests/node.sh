@@ -9,15 +9,15 @@ echo -e "${blue}-----------------------------"
 echo -e " Testing all javscript files"
 echo -e "-----------------------------${default}"
 
-echo -e "Test Results\n------------\n" > jsresults.txt
+echo -e "Test Results\n------------\n" > node.log
 
 for f in *.js;
 do echo -en "Testing $f..."
 out="$(node ./$f 2>&1)"
 if [[ $out == *"Error"* ]]
 then
-  echo -e $out >> jsresults.txt
-  echo >> jsresults.txt
+  echo -e $out >> node.log
+  echo >> node.log
   echo -e "${red}$out ${default} in $f"
 else
   echo -en " ${green}complete.${default}\n"
