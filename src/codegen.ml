@@ -148,7 +148,7 @@ let rec aexpression_to_js lines =
       if returns_unit t then
         if param_to_type(List.hd p_list) <> Unit then
           "function " ^ id ^ "(" ^  
-          String.concat ", " (List.map param_to_js (List.rev p_list)) ^ ")" ^
+          String.concat ", " (List.map param_to_js p_list) ^ ")" ^
           " \n{\n" ^ String.concat "\n\t" (List.map aexpression_to_js e_list) ^
           "\n};\n"
         else 
@@ -159,7 +159,7 @@ let rec aexpression_to_js lines =
         if param_to_type(List.hd p_list) <> Unit then
           let flipped_list = flip_last e_list in
             "function " ^ id ^ "(" ^  
-            (String.concat ", " (List.map param_to_js (List.rev p_list))) ^ 
+            (String.concat ", " (List.map param_to_js p_list)) ^ 
             ") {" ^
             (String.concat "\n\t" (List.map aexpression_to_js (List.tl flipped_list))) ^
             (if is_IfElseBlock(List.hd flipped_list) then 
@@ -195,7 +195,7 @@ let rec aexpression_to_js lines =
       if returns_unit t then 
         if param_to_type(List.hd p_list) <> Unit then
           "function(" ^  
-          String.concat ", " (List.map param_to_js (List.rev p_list)) ^ ")" ^
+          String.concat ", " (List.map param_to_js p_list) ^ ")" ^
           " \n{\n\t" ^ aexpression_to_js exp ^
           "\n};\n"
         else 
@@ -205,7 +205,7 @@ let rec aexpression_to_js lines =
       else
         if param_to_type(List.hd p_list) <> Unit then
           "function(" ^
-          String.concat ", " (List.map param_to_js (List.rev p_list)) ^ ")" ^
+          String.concat ", " (List.map param_to_js p_list) ^ ")" ^
           "\n{\n\treturn " ^ aexpression_to_js exp ^
           "\n};\n"
         else
