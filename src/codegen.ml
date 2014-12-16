@@ -96,9 +96,9 @@ let rec aexpression_to_js lines =
         sanitize(aexpression_to_js e1) ^ "," ^
         sanitize(aexpression_to_js e2) ^ ");"
       else
-        sanitize(aexpression_to_js e1) ^ " " ^
+        "(" ^ sanitize(aexpression_to_js e1) ^ " " ^
         operation_to_string op ^ " " ^
-        sanitize(aexpression_to_js e2) ^ ";"
+        sanitize(aexpression_to_js e2) ^ ");"
   | AUnop(op, e1, t) ->
      "(" ^  operation_to_string(op) ^ " " ^
       aexpression_to_js(e1) ^ ")"
