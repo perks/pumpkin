@@ -36,6 +36,12 @@ Scoping/Indentation | quinton | | chris | |
 Testing
 ======
 In the tests folder:
-1) Run 'js.sh' to compile pumpkin files to javascript.
-2) Run 'node.sh' to run javascript tests.
-3) Run 'runtests.sh' to automate testing and output to log.
+1) Run 'runtests.sh' to automate testing and output to log. This script compiles all files to javascript, runs them with node, and compares the output with an expected output.
+
+2) Compile tests to javascript with 'js.sh'
+
+3) Run Node on all js files with 'node.sh'
+
+Dependencies
+======
+You need Node to run tests.
