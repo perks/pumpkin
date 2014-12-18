@@ -1,0 +1,5 @@
+val x = [1,2,3] |> (a: List[Int] => len(a)%2)
+if x is 0:
+  print("Even")
+else:
+  print("Odd")
