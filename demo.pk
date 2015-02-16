@@ -18,10 +18,10 @@ def even(n: Int): Bool =>
 
 val x = [1,2,3,4] |> map((x:Int => x + 5 :Int)) |> reduce((x: Int, y: Int => x + y : Int), 0) |> even 
 
-print("Example 2:")
+print("Example 1: Functional Programming Styles [see source]")
 print(x)
 
-print("\nExample 1:")
+print("\nExample 2: Functional Composition [see source]")
 def gcd(a : Int, b : Int) : Int =>
   if(b is 0):
     a
@@ -40,3 +40,4 @@ if(p(25, 15)):
   print("You have relative primes")
 else:
   print("Not relative primes")
+

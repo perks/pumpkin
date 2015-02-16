@@ -1,4 +1,4 @@
-type action = Tokens | Ast | Sast | Interpret | Compile
+type action = Tokens | Ast | Sast | Compile
 
 let _ =
   if Array.length Sys.argv < 2 then
@@ -8,14 +8,12 @@ let _ =
         "\t-t: Prints token stream\n" ^
         "\t-a: Pretty prints Ast as a program\n" ^
         "\t-s: Prints Sast\n" ^
-        "\t-i: Runs interpreter\n" ^
         "\t-c: Compiles to Java\n"
     )
   else
     let action = List.assoc Sys.argv.(1) [ ("-t", Tokens);
                                            ("-a", Ast);
                                            ("-s", Sast);
-                                           ("-i", Interpret);
                                            ("-c", Compile) ] and
     filename = Sys.argv.(2) in
     let file_in = open_in filename in
@@ -31,7 +29,6 @@ let _ =
             print_string (Utils.program_to_string program)
         | Sast ->
             print_string (Utils.a_program_to_string sast_output)
-        | Interpret -> print_string("\nInterpret\n")
         | Compile ->
             print_string (Codegen.pumpkin_to_js sast_output ^ "\n")
 
