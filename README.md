@@ -1,5 +1,49 @@
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 Pumpkin
 =====
+
+##Table of Contents
+
+- [Introduction](#introduction)
+- [Installation](#installation)
+  - [Usage](#usage)
+- [Features](#features)
+  - [Functional](#functional)
+  - [Function Piping and Composition](#function-piping-and-composition)
+  - [Concise](#concise)
+- [Quickstart Tutorial](#quickstart-tutorial)
+    - [Variables](#variables)
+    - [Functions](#functions)
+    - [Comments](#comments)
+    - [Piping](#piping)
+    - [Function Composition](#function-composition)
+    - [Type Inference](#type-inference)
+    - [Control Flow](#control-flow)
+    - [Printing](#printing)
+    - [Running Programs](#running-programs)
+- [Language Manual](#language-manual)
+  - [Types and Variables](#types-and-variables)
+    - [Naming](#naming)
+    - [Variables](#variables-1)
+    - [Native Types](#native-types)
+    - [Boolean Operators](#boolean-operators)
+    - [Derived Types (Tuples, Lists, & Maps)](#derived-types-tuples-lists-&-maps)
+    - [Arithmetic Operators](#arithmetic-operators)
+  - [Program Structure](#program-structure)
+    - [Comments](#comments-1)
+    - [Indentation](#indentation)
+  - [Functions](#functions-1)
+    - [Function Chains](#function-chains)
+    - [Multi-line Piping](#multi-line-piping)
+    - [Composing Functions](#composing-functions)
+    - [Partially Applied Functions](#partially-applied-functions)
+    - [Native Functions](#native-functions)
+    - [List Functions](#list-functions)
+- [Demos](#demos)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 
 #Introduction
 Pumpkin is patchwork functional programming language. The Pumpkin programming language is a light-functional scripting language, which allows for coding flexibility and concise syntax. Pumpkin supports many syntactic optimizations for function nesting and chaining, such as pipes and partially applied functions. This language focuses on easily modeling a complex system of function calls.
