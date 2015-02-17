@@ -8,7 +8,7 @@ let _ =
         "\t-t: Prints token stream\n" ^
         "\t-a: Pretty prints Ast as a program\n" ^
         "\t-s: Prints Sast\n" ^
-        "\t-c: Compiles to Java\n"
+        "\t-c: Compiles to JavaScript\n"
     )
   else
     let action = List.assoc Sys.argv.(1) [ ("-t", Tokens);

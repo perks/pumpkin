@@ -60,7 +60,7 @@ required-option:
   -t: Prints token stream
   -a: Pretty prints Ast as a program
   -s: Prints Sast
-  -c: Compiles to Java
+  -c: Compiles to JavaScript
 ```
 
 #Features
