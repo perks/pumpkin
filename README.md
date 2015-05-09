@@ -330,6 +330,7 @@ def x: Bool =>
   even(2)
 
 val x = even(2) // value is determined at compile time
+```
 
 Anonymous functions are also allowed for flow control. They must be declared on a single line.
 
