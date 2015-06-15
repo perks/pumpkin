@@ -237,13 +237,14 @@ val t = (1,) //Type Tuple[Int,] val i = (1) //Type Int
 Pumpkin Lists also support basic head and List features, called as hd and tl respectively. Pumpkin also supports is empty and len
 Pumpkin supports the typical cons operator for new list creation.
 
-``scala
+```scala
 //Normal construction
 val myList: List[Int] = [1, 2, 3, 4]
 // ’:: ’ is an operation that creates a new list by appending the element to the head
 val newList = 10 :: myList // => [10, 1, 2, 3, 4)]
 val head = hd(myList) //hd = 1
 val tail = tl(myList) //tl = [2, 3, 4]
+```
 
 **Maps:** Maps act as a basic immutable Key:Value data structure that is
 staticly typed on both Key and Value. Maps are unordered and no guarantee can be made on the ordering of contents. Keys can be only primative types.
