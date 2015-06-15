@@ -337,6 +337,7 @@ Anonymous functions are also allowed for flow control. They must be declared on 
 
 ```scala
 ( variableName : dataType => code ) : returnType
+```
 
 To pass a function as a parameter use the syntax **name:(params − > return type)**.
 
@@ -443,7 +444,7 @@ Escape characters include ’\t’ for tab, ’\n’ for newline, and ’\\’ f
 A few built in functions are created specifically to operate on lists: 
 **hd** returns the first element of a list.
 **tl** returns a new list with the first element removed.
-**is empty** returns boolean indicating if the list is empty or not. 
+**is_empty** returns boolean indicating if the list is empty or not. 
 **len** returns an integer indicating the length of the list
 
 
