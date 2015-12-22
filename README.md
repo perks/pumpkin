@@ -168,8 +168,8 @@ Variable declarations and assignments, much like in C, are treated as expression
 // Legal declarations
 val aNumber: Int = 5 aNumber = 10
 aNumber = aNumber + 5
-v a l anotherNumber = aNumber = 6
-// I l l e g a l
+val anotherNumber = aNumber = 6
+// Illegal
 val aNumber = 10 // Error thrown on redeclaration of an already used variable
 val emptyVar // Error thrown on empty variable
 ```
