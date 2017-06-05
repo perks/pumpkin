@@ -150,11 +150,11 @@ $ ./pkmn -c targetProgram.pk > targetProgram.js
 $ node targetProgram.js
 ```
 
-#Language Manual
+# Language Manual
 
-##Types and Variables
+## Types and Variables
 
-###Naming
+### Naming
 
 Variable and function names must be a sequence of letters, digits and underscores. The first character must be a letter. By convention we will use CamelCase for names with multiple words.
 
