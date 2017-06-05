@@ -3,7 +3,7 @@
 Pumpkin
 =====
 
-##Table of Contents
+## Table of Contents
 
 - [Introduction](#introduction)
 - [Installation](#installation)
@@ -45,15 +45,15 @@ Pumpkin
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 
-#Introduction
+# Introduction
 Pumpkin is patchwork functional programming language. The Pumpkin programming language is a light-functional scripting language, which allows for coding flexibility and concise syntax. Pumpkin supports many syntactic optimizations for function nesting and chaining, such as pipes and partially applied functions. This language focuses on easily modeling a complex system of function calls.
 
 _Developed with :heart: at Columbia University_
 
-#Installation
+# Installation
 Build the compiler binary (pmkin) by typing ```make``` in the top level directory
 
-##Usage
+## Usage
 ```bash
 Usage: pmkn [required-option] <source file>
 required-option:
@@ -63,35 +63,35 @@ required-option:
   -c: Compiles to JavaScript
 ```
 
-#Features
+# Features
 
-##Functional
+## Functional
 Pumpkin follows functional programming principles: Functions are first class, they can be passed, returned and partially applied. We have both typed and untyped syntax, and allow for recursive functions. Anonymous functions are also allowed to compose functions on the fly, that capture a needed one time behavior but which doesn’t need to be generalized.
 
-##Function Piping and Composition
+## Function Piping and Composition
 Pumping allows one argument function calls to be piped together, this way resolving a long system of calls on one, easy to read, line.
 Composition takes this idea one step further by nesting calls. Composed functions create new functions out of nested ones, pipe arguments in: pumpkin made complicated calls easy to use and manipulate.
 
-##Concise
+## Concise
 With type inference, piping and function composition we allow the programmer to write minimal code that accomplishes great functionality.
 
-#Quickstart Tutorial
+# Quickstart Tutorial
 
 Here we present the fundamental building blocks of our language necessary to begin writing simple programs.
 
-###Variables
+### Variables
 Declare variables with the keyword ’val’:
 ```scala
 val y: Bool = True
 ```
 
-###Functions
+### Functions
 Declare functions with theyword 'def':
 ```scala
 def add(a: Int, b: Int) => a + b
 ```
 
-###Comments
+### Comments
 
 Create comments with ```\\``` or ```\* *\```
 
@@ -102,7 +102,7 @@ Create comments with ```\\``` or ```\* *\```
     multi-line comment *\
 ```
 
-###Piping
+### Piping
 Pipe function arguments with ```|>```
 
 ```scala
@@ -112,7 +112,7 @@ if x is 0:
 else:
   print("Odd")
 ```
-###Function Composition
+### Function Composition
 
 Create function compositions with ```<<``` or ```>>```
 
@@ -121,7 +121,7 @@ val plusTwoTimesThree = (x: Int => x * 3) << (x: Int => x + 2)
 plusTwoTimesThree(4) // => 18
 ```
 
-###Type Inference
+### Type Inference
 Our language includes type inference for variables and functions. The above declarations could be written concisely as such:
 
 ```scala
@@ -129,11 +129,11 @@ val y = True
 def add(a, b) => a + b
 ```
 
-###Control Flow
+### Control Flow
 
 Control flow is handled through if...else loops:
 
-###Printing
+### Printing
 Printing is handled with the ’print’ keyword.
 
 ```scala
@@ -141,7 +141,7 @@ print("somestring")
 print(variable)
 ```
 
-###Running Programs
+### Running Programs
 Programs must be saved as ’.pk’ files. We include a makefile to compile our language, which must be done with ’make’. Then, our language can be compiled to Javascript by running the pumpking executable with the ’-c’ flag. Finally, you may use the platform of your choice to execute Javascript programs. We recommened Node, which is a popular and easy to install platform. A sample workflow is provided:
 
 ```bash
@@ -158,7 +158,7 @@ $ node targetProgram.js
 
 Variable and function names must be a sequence of letters, digits and underscores. The first character must be a letter. By convention we will use CamelCase for names with multiple words.
 
-###Variables
+### Variables
 
 A variable is a storage location paired with an associated name and type, which contains some value. All variables are statically typed and may be reassigned with a new primative or structure of a corresponding type. Variables can not be redeclared in any context.
 Variable declarations and assignments, much like in C, are treated as expression. A variable, unlike C, cannot be declared as empty.
@@ -174,7 +174,7 @@ val aNumber = 10 // Error thrown on redeclaration of an already used variable
 val emptyVar // Error thrown on empty variable
 ```
 
-###Native Types
+### Native Types
 * Int: a signed two’s complement integer which has a minimum value of −2^31 and a maximum value of 2^31-1.
 * Float: a floating point value that can represent either very small fractions or numbers of great magnitude.
 * Char: a single character.
@@ -182,7 +182,7 @@ val emptyVar // Error thrown on empty variable
 * Bool:: a boolean type whose only two possible values are True and False.
 * Unit: represents an output of nothing, similar to unit in most functional languages.
 
-###Boolean Operators
+### Boolean Operators
 Boolean variables are either True or False. They can be manipulated with logical expressions and operators.
 Relational Expressions:
 Boolean variable can be compared and combined with logic symbols to form expressions. Equality tests can be written with the keyword ’is’ or with the symbol ’==.’ Other comparisons use the standard symbols used in Java:
@@ -211,7 +211,7 @@ True || False // => True
 False == True // => False
 ```
 
-###Derived Types (Tuples, Lists, & Maps)
+### Derived Types (Tuples, Lists, & Maps)
 **N-tuples:** Tuples are a basic immutable data structure that holds an ordered set of elements.
 Unlike Lists or Maps, the elements with a tuple can be of any type and do not need to follow a consistent type declaration.
 Tuples are most useful when a function may wish to return more than a single piece of information, or more commonly used as part of function nesting with ’pipe ins’ and ’pipe outs’.
@@ -271,11 +271,11 @@ Pumpkin supports the following basic arithmetic operators:
 6−−2 //=>8
 ```
 
-##Program Structure
+## Program Structure
 
 Pumpkin is a compiled functional scripting language. Thus, the entry point of the code is the first line of a file, and the return type/value is whatever the last line of the file returns.
 
-###Comments
+### Comments
 Single line comments are symbolized by two forward slash characters.
 
 ```java
@@ -290,7 +290,7 @@ The slash and asterisk mark the beginning and end of a multi−line comment.
 ∗/
 ```
 
-###Indentation
+### Indentation
 Pumpkin does not use curly brackets to delimit scope, so correct white spacing is essential for programs written in the language. The indentation must be either a certain amount of spaces or a tab character, but it must be consistent throughout a program, as in the following example:
 
 ```python
@@ -347,7 +347,7 @@ def x(y: Int, z:(Int, Int −> String)): Bool => True
 
 The function x takes two parameters; y, which is an int, and z, which is a function. z takes two int parameters and returns a string. x returns a boolean. (Here the code for function x is trivial, but one could imagine more complexity involving invocation of z)
 
-###Function Chains
+### Function Chains
 The symbols ’| >’ and ’< |’ can be used to chain nested function calls. The expression on the bar side is evaluated first. All arithmetic operators are applied before evaluating left to right, and parentheses are respected as in the traditional order of operations. All expressions on the call-side of the flow must be functions.
 
 For example:
@@ -381,7 +381,7 @@ The above expression gets executed as follows:
 3. Evaluate expression even: (x: Int => Bool) with the return of the anonymous call. 
 4. After evaluating there are no more pipes or operations, return boolean.
 
-###Multi-line Piping
+### Multi-line Piping
 
 Pipes will ignore whitespace. Thus if a line begins with a pipe it will push the return of the line above in. Once a line does not begin with a | > or < | sign it is outside the piped block
 
@@ -392,7 +392,7 @@ Pipes will ignore whitespace. Thus if a line begins with a pipe it will push the
 even (2) // outside pipe
 ```
 
-###Composing Functions
+### Composing Functions
 
 The << and >> operators can be used to call a fuction with the return type of another. For example:
 
@@ -416,7 +416,7 @@ plusOneTimesTwo ( 9 ) // => 20
 timesTwoPlusOne ( 9 ) // => 19
 ```
 
-###Partially Applied Functions
+### Partially Applied Functions
 
 
 Pumpkin supports partially applied functions. When a function is called without all of the necessary arguments, it returns another function that has the previously passed arguments already set. Arguments must be passed in order:
@@ -435,12 +435,12 @@ Another example:
 [1, 2, 3, 4] |> filter(even) |> map(timesTwo) |> fold(add, 0) // Returns 12
 ```
 
-###Native Functions
+### Native Functions
 
 **Print**: Printing to the standard output stream is akin to Java, and begins with the word print followed by the items to be printed in parentheses.
 Escape characters include ’\t’ for tab, ’\n’ for newline, and ’\\’ for backslash
 
-###List Functions
+### List Functions
 A few built in functions are created specifically to operate on lists: 
 **hd** returns the first element of a list.
 **tl** returns a new list with the first element removed.
@@ -448,7 +448,7 @@ A few built in functions are created specifically to operate on lists:
 **len** returns an integer indicating the length of the list
 
 
-#Demos
+# Demos
 
 Download and compile the demo to see some capabilities of Pumpkin!
 
